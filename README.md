@@ -4,6 +4,16 @@ Work in progress :)
 
 You can find the actual code in the branches, e.g. `rails-4.2`
 
+### Installation
+
+Add the following to your Gemfile:
+
+```
+gem 'citus-rails'
+```
+
+Note that this currently assumes you are using Rails 4.2.
+
 ### Usage
 
 Annotate your models like this:
