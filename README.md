@@ -8,7 +8,7 @@ You can find the actual code in the branches, e.g. `rails-4.2`
 
 Add the following to your Gemfile:
 
-```
+```ruby
 gem 'citus-rails'
 ```
 
