@@ -10,5 +10,5 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/citusdata/citus-rails'
   s.license     = 'MIT'
 
-  s.add_runtime_dependency 'citus-rails-4.2'
+  s.add_runtime_dependency 'acts_as_tenant'
 end
