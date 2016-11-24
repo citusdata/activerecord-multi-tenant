@@ -1,0 +1,5 @@
+require 'activerecord-multi-tenant/copy_from_client'
+require 'activerecord-multi-tenant/default_scope'
+require 'activerecord-multi-tenant/migrations'
+require 'activerecord-multi-tenant/multi_tenant'
+require 'activerecord-multi-tenant/version'
