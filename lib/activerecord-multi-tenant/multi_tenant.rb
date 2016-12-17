@@ -7,6 +7,10 @@ module MultiTenant
     ActsAsTenant.current_tenant
   end
 
+  def self.current_tenant=(tenant)
+    ActsAsTenant.current_tenant = tenant
+  end
+
   def self.current_tenant_id
     ActsAsTenant.current_tenant.try(:id)
   end

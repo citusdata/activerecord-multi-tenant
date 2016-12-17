@@ -16,4 +16,9 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.add_runtime_dependency 'acts_as_tenant'
+
+  s.add_development_dependency 'rspec', '>= 3.0'
+  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'database_cleaner', '~> 1.3.0'
+  s.add_development_dependency 'pg'
 end

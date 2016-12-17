@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  master:
+    image: 'citusdata/citus:6.0.1'
+    ports: ['5432:5432']
+    labels: ['com.citusdata.role=Master']
+    volumes: ['/var/run/postgresql']
+  worker:
+    image: 'citusdata/citus:6.0.1'
+    labels: ['com.citusdata.role=Worker']
+  config:
+    image: 'citusdata/workerlist-gen:2.0.0'
+    volumes: ['/var/run/docker.sock:/tmp/docker.sock']
+    volumes_from: ['master']
