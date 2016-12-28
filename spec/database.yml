@@ -1,6 +1,9 @@
 test:
   adapter: postgresql
-  url: postgres://postgres@localhost/postgres
+  username: postgres
+  database: postgres
+  host: localhost
+  port: 5600
   pool: 5
   timeout: 5000
   prepared_statements: false

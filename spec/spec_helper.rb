@@ -36,3 +36,5 @@ end
 module MultiTenantTest
   class Application < Rails::Application; end
 end
+
+require 'schema'

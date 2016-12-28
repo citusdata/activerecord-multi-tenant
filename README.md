@@ -12,7 +12,7 @@ gem 'activerecord-multi-tenant'
 
 ### Supported Rails versions
 
-All Ruby on Rails versions starting with 3.1 or newer are supported.
+All Ruby on Rails versions starting with 3.2 or newer are supported.
 
 This gem only supports ActiveRecord (the Rails default ORM), and not alternative ORMs like Sequel.
 

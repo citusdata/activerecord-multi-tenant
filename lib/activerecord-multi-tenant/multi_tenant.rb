@@ -53,9 +53,9 @@ module MultiTenant
           belongs_to(tenant)
           acts_as_tenant(tenant, options)
 
-          around_save -> (record, block) { persisted? ? MultiTenant.with_id(record.public_send(tenant + '_id')) { block.call } : block.call }
-          around_update -> (record, block) { MultiTenant.with_id(record.public_send(tenant + '_id')) { block.call } }
-          around_destroy -> (record, block) { MultiTenant.with_id(record.public_send(tenant + '_id')) { block.call } }
+          around_save -> (record, block) { persisted? ? MultiTenant.with_id(record.public_send(tenant.to_s + '_id')) { block.call } : block.call }
+          around_update -> (record, block) { MultiTenant.with_id(record.public_send(tenant.to_s + '_id')) { block.call } }
+          around_destroy -> (record, block) { MultiTenant.with_id(record.public_send(tenant.to_s + '_id')) { block.call } }
         end
 
         # Workaround for https://github.com/citusdata/citus/issues/687

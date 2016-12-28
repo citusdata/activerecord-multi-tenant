@@ -3,10 +3,13 @@ version: '2'
 services:
   master:
     image: 'citusdata/citus:6.0.1'
-    ports: ['5432:5432']
+    ports: ['5600:5432']
     labels: ['com.citusdata.role=Master']
     volumes: ['/var/run/postgresql']
-  worker:
+  worker1:
+    image: 'citusdata/citus:6.0.1'
+    labels: ['com.citusdata.role=Worker']
+  worker2:
     image: 'citusdata/citus:6.0.1'
     labels: ['com.citusdata.role=Worker']
   config:

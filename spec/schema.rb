@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 ActiveRecord::Schema.define(version: 1) do
   create_table :tenants, force: true do |t|
     t.column :name, :string
@@ -15,17 +13,10 @@ ActiveRecord::Schema.define(version: 1) do
 end
 
 class Tenant < ActiveRecord::Base
+  multi_tenant :tenant
   has_many :tenant_objects
 end
 
 class TenantObject < ActiveRecord::Base
   multi_tenant :tenant
-end
-
-describe MultiTenant, 'Record update' do
-  it 'includes the tenant_id in UPDATEs' do
-    tenant = Tenant.create! name: 'test'
-    tenant.tenant_objects.create! title: 'something'
-    puts tenant.inspect
-  end
 end

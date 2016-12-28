@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
                    'lib/activerecord-multi-tenant/default_scope.rb',
                    'lib/activerecord-multi-tenant/migrations.rb',
                    'lib/activerecord-multi-tenant/multi_tenant.rb',
+                   'lib/activerecord-multi-tenant/referential_integrity.rb',
                    'lib/activerecord-multi-tenant/version.rb']
   s.homepage    = 'https://github.com/citusdata/activerecord-multi-tenant'
   s.license     = 'MIT'
