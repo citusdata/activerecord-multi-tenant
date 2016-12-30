@@ -16,7 +16,7 @@ module MultiTenant
   end
 
   module CopyFromClient
-    def self.copy_from_client(columns, &block)
+    def copy_from_client(columns, &block)
       conn         = connection.raw_connection
       column_types = columns.map { |c| columns_hash[c.to_s] }
       helper = MultiTenant::CopyFromClientHelper.new(conn, column_types)
@@ -29,5 +29,5 @@ module MultiTenant
 end
 
 if defined?(ActiveRecord::Base)
-  ActiveRecord::Base.send(:include, MultiTenant::CopyFromClient)
+  ActiveRecord::Base.extend(MultiTenant::CopyFromClient)
 end
