@@ -67,6 +67,19 @@ end
 
 This gem is based on [acts_as_tenant](https://github.com/ErwinM/acts_as_tenant) and extends it to implement full support for mulit-tenant databases like Citus.
 
+### Considerations when using Ruby on Rails with Citus
+
+In case you use Ruby on Rails together with Citus, please also note the following.
+
+You'll need to disable prepared_statements in your database.yml like this:
+
+```
+default: &default
+  adapter: postgresql
+  url: <%= ENV['DATABASE_URL'] %>
+  prepared_statements: false
+```
+
 ### License
 
 Licensed under the MIT license<br>
