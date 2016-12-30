@@ -1,8 +1,8 @@
-## activerecord-multi-tenant
+# activerecord-multi-tenant [ ![](https://img.shields.io/gem/v/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant) [ ![](https://img.shields.io/gem/dt/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant)
 
 ActiveRecord/Rails integration for multi-tenant databases, in particular the Citus extension for PostgreSQL.
 
-### Installation
+## Installation
 
 Add the following to your Gemfile:
 
@@ -10,13 +10,13 @@ Add the following to your Gemfile:
 gem 'activerecord-multi-tenant'
 ```
 
-### Supported Rails versions
+## Supported Rails versions
 
 All Ruby on Rails versions starting with 3.2 or newer are supported.
 
 This gem only supports ActiveRecord (the Rails default ORM), and not alternative ORMs like Sequel.
 
-### Usage
+## Usage
 
 It is required that you add `multi_tenant` definitions to your model in order to have full support for Citus, in particular when updating records.
 
@@ -67,7 +67,7 @@ end
 
 This gem is based on [acts_as_tenant](https://github.com/ErwinM/acts_as_tenant) and extends it to implement full support for mulit-tenant databases like Citus.
 
-### Considerations when using Ruby on Rails with Citus
+## Considerations when using Ruby on Rails with Citus
 
 In case you use Ruby on Rails together with Citus, please also note the following.
 
@@ -80,7 +80,7 @@ default: &default
   prepared_statements: false
 ```
 
-### License
+## License
 
 Licensed under the MIT license<br>
 Copyright (c) 2016, Citus Data Inc.
