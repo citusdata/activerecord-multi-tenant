@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'activerecord-multi-tenant'
-  s.version     = '0.2.0'
+  s.version     = '0.2.1'
   s.date        = Date.today
   s.summary     = "ActiveRecord/Rails integration for multi-tenant databases, in particular the Citus extension for PostgreSQL"
   s.description = ""
