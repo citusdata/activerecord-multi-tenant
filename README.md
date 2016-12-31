@@ -51,12 +51,12 @@ MultiTenant.with(customer) do
 end
 ```
 
-Inside controllers you can use a before_filter together with set_current_tenant, to set the tenant for the current request:
+Inside controllers you can use a before_action together with set_current_tenant, to set the tenant for the current request:
 
 ```ruby
 class ApplicationController < ActionController::Base
-  set_current_tenant_through_filter
-  before_filter :set_customer_as_tenant
+  set_current_tenant_through_filter # Required to opt into this behavior
+  before_action :set_customer_as_tenant
 
   def set_customer_as_tenant
     customer = Customer.find(session[:current_customer_id])
@@ -64,8 +64,6 @@ class ApplicationController < ActionController::Base
   end
 end
 ```
-
-This gem is based on [acts_as_tenant](https://github.com/ErwinM/acts_as_tenant) and extends it to implement full support for mulit-tenant databases like Citus.
 
 ## Considerations when using Ruby on Rails with Citus
 
@@ -79,6 +77,10 @@ default: &default
   url: <%= ENV['DATABASE_URL'] %>
   prepared_statements: false
 ```
+
+## Credits
+
+This gem was initially based on [acts_as_tenant](https://github.com/ErwinM/acts_as_tenant), and still shares some code. We thank the authors for their efforts.
 
 ## License
 

@@ -37,4 +37,7 @@ module MultiTenantTest
   class Application < Rails::Application; end
 end
 
+MultiTenantTest::Application.config.secret_token = 'x' * 40
+MultiTenantTest::Application.config.secret_key_base = 'y' * 40
+
 require 'schema'
