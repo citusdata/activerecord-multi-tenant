@@ -82,7 +82,7 @@ default: &default
 
 * **What if I have a table that doesn't relate to my tenant?** (e.g. templates that are the same in every account)
 
-  We recommend not using activerecord-multi-tenant these tables. In case only some records in a table are not associated to a tenant (i.e. your templates are in the same table as actual objects), we recommend setting the tenant_id to 0, and then using MultiTenant.with_id(0) to access these objects.
+  We recommend not using activerecord-multi-tenant on these tables. In case only some records in a table are not associated to a tenant (i.e. your templates are in the same table as actual objects), we recommend setting the tenant_id to 0, and then using MultiTenant.with_id(0) to access these objects.
 
 ## Credits
 
