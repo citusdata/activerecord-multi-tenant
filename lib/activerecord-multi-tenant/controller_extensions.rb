@@ -2,7 +2,9 @@ module MultiTenant
   module ControllerExtensions
     def set_current_tenant_through_filter
       self.class_eval do
-        helper_method :current_tenant
+        if respond_to?(:helper_method)
+          helper_method :current_tenant
+        end
 
         private
           def set_current_tenant(current_tenant_object)
@@ -19,4 +21,8 @@ end
 
 if defined?(ActionController::Base)
   ActionController::Base.extend MultiTenant::ControllerExtensions
+end
+
+if defined?(ActionController::API)
+  ActionController::API.extend MultiTenant::ControllerExtensions
 end
