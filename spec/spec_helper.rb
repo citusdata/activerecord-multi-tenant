@@ -13,6 +13,9 @@ ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "debug.
 ActiveRecord::Base.establish_connection(dbconfig['test'])
 
 RSpec.configure do |config|
+  config.infer_base_class_for_anonymous_controllers = true
+  config.use_transactional_fixtures = false
+
   config.after(:each) do
     MultiTenant.current_tenant = nil
   end
@@ -29,8 +32,6 @@ RSpec.configure do |config|
   config.after(:each) do
     DatabaseCleaner[:active_record].clean
   end
-
-  config.infer_base_class_for_anonymous_controllers = true
 end
 
 module MultiTenantTest

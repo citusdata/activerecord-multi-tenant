@@ -7,13 +7,14 @@ module MultiTenant
         end
 
         private
-          def set_current_tenant(current_tenant_object)
-            MultiTenant.current_tenant = current_tenant_object
-          end
 
-          def current_tenant
-            MultiTenant.current_tenant
-          end
+        def set_current_tenant(current_tenant_object)
+          MultiTenant.current_tenant = current_tenant_object
+        end
+
+        def current_tenant
+          MultiTenant.current_tenant
+        end
       end
     end
   end
