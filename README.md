@@ -65,19 +65,6 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-## Considerations when using Ruby on Rails with Citus
-
-In case you use Ruby on Rails together with Citus, please also note the following.
-
-You'll need to disable prepared_statements in your database.yml like this:
-
-```
-default: &default
-  adapter: postgresql
-  url: <%= ENV['DATABASE_URL'] %>
-  prepared_statements: false
-```
-
 ## Frequently Asked Questions
 
 * **What if I have a table that doesn't relate to my tenant?** (e.g. templates that are the same in every account)
