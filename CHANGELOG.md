@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2       2017-02-16
+
+* Support blocks passed into the unscoped method (this fixes reload, amongst other issues)
+
+
 ## 0.3.1       2017-02-13
 
 * Rails 5 API controller support [@mstahl](https://github.com/mstahl) [#4](https://github.com/citusdata/activerecord-multi-tenant/pull/4)

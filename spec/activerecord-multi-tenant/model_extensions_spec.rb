@@ -149,5 +149,15 @@ describe MultiTenant do
 
       expect(value).to eq "something"
     end
+
+    it 'supports reload inside the block' do
+      @account = Account.create!(name: 'foo')
+
+      MultiTenant.with @account do
+        project = @account.projects.create!(name: 'project')
+        project.reload
+        expect(project.name).to eq 'project'
+      end
+    end
   end
 end
