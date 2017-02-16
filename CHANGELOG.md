@@ -3,6 +3,7 @@
 ## 0.3.2       2017-02-16
 
 * Support blocks passed into the unscoped method (this fixes reload, amongst other issues)
+* Make with_lock work by adding workaround for Citus #1236 (SELECT ... FOR UPDATE is not router-plannable)
 
 
 ## 0.3.1       2017-02-13

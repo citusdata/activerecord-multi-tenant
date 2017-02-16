@@ -1,5 +1,5 @@
-# Disable Rails trigger enable/disable mechanism used for test cases, since
-# DISABLE TRIGGER is not supported on distributed tables.
+# Workaround for https://github.com/citusdata/citus/issues/1080
+# "Support DISABLE/ENABLE TRIGGER ALL on distributed tables"
 
 module ActiveRecord
   module ConnectionAdapters

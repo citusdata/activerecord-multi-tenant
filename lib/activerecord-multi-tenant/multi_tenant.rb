@@ -15,6 +15,11 @@ module MultiTenant
     "#{@@tenant_klass.to_s}_id"
   end
 
+  # Workaroud to make "with_lock" work until https://github.com/citusdata/citus/issues/1236 is fixed
+  @@enable_with_lock_workaround = false
+  def self.enable_with_lock_workaround; @@enable_with_lock_workaround = true; end
+  def self.with_lock_workaround_enabled?; @@enable_with_lock_workaround; end
+
   def self.current_tenant=(tenant)
     RequestStore.store[:current_tenant] = tenant
   end

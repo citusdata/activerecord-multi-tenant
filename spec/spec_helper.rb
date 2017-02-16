@@ -23,6 +23,9 @@ RSpec.configure do |config|
   config.before(:suite) do
     DatabaseCleaner[:active_record].strategy = :transaction
     DatabaseCleaner[:active_record].clean_with(:truncation)
+
+    # Keep this here until https://github.com/citusdata/citus/issues/1236 is fixed in a patch release we can run tests with
+    MultiTenant.enable_with_lock_workaround
   end
 
   config.before(:each) do
