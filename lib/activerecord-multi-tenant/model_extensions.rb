@@ -32,7 +32,7 @@ module MultiTenant
         # Ensure all queries include the partition key
         default_scope lambda {
           if MultiTenant.current_tenant_id
-            where(partition_key.to_sym => MultiTenant.current_tenant_id)
+            where(arel_table[partition_key].eq(MultiTenant.current_tenant_id))
           else
             Rails::VERSION::MAJOR < 4 ? scoped : all
           end
