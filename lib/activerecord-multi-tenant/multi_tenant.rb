@@ -28,6 +28,10 @@ module MultiTenant
     RequestStore.store[:current_tenant]
   end
 
+  def self.current_tenant_id=(tenant_id)
+    self.current_tenant = TenantIdWrapper.new(id: tenant_id)
+  end
+
   def self.current_tenant_id
     current_tenant.try(:id)
   end
