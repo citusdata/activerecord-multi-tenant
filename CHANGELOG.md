@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3       2017-02-21
+
+* Avoid warning about multi-column primary keys with Rails 5 [#2](https://github.com/citusdata/activerecord-multi-tenant/issues/2)
+* Fix odd bind errors for has_one/has_many through
+* Add MultiTenant.current_tenant_id= helper method
+
+
 ## 0.3.2       2017-02-16
 
 * Support blocks passed into the unscoped method (this fixes reload, amongst other issues)
