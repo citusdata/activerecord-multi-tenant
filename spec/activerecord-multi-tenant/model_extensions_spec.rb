@@ -159,7 +159,7 @@ describe MultiTenant do
       expect(MultiTenant.current_tenant).to eq(@account1)
     end
 
-    it "should return the value of the block", pending: 'There is currently an ordering issue that causes this test to fail without good reason' do
+    it "should return the value of the block" do
       @account1 = Account.create!(:name => 'foo')
       @account2 = Account.create!(:name => 'bar')
 
