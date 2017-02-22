@@ -7,7 +7,8 @@ class ProjectWithCallbacks < ActiveRecord::Base
 
   after_update do |record|
     # Ensure that we don't have TenantIdWrapper here
-    record.account.update! name: 'callback'
+    record.account.name = 'callback'
+    record.account.save!
   end
 end
 
@@ -16,7 +17,8 @@ describe MultiTenant, 'Callbacks' do
   let(:project) { ProjectWithCallbacks.create! account: account, name: 'something' }
 
   it 'takes callbacks into account' do
-    project.update! name: 'something else'
+    project.name = 'something else'
+    project.save!
     expect(account.reload.name).to eq 'callback'
   end
 end

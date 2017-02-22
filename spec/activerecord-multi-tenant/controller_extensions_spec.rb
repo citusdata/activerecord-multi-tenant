@@ -7,7 +7,12 @@ end
 class ApplicationController < ActionController::Base
   include Rails.application.routes.url_helpers
   set_current_tenant_through_filter
-  before_action :your_method_that_finds_the_current_tenant
+
+  if Rails::VERSION::MAJOR < 4
+    before_filter :your_method_that_finds_the_current_tenant
+  else
+    before_action :your_method_that_finds_the_current_tenant
+  end
 
   def your_method_that_finds_the_current_tenant
     current_account = Account.new
@@ -19,7 +24,11 @@ end
 describe ApplicationController, type: :controller do
   controller do
     def index
-      render body: 'custom called'
+      if Rails::VERSION::MAJOR >= 5
+        render body: 'custom called'
+      else
+        render text: 'custom called'
+      end
     end
   end
 
