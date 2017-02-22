@@ -8,9 +8,6 @@ module MultiTenant
 
       # Typically we don't need to run on the tenant model itself
       if to_s.underscore.to_sym != tenant
-        # Provide fallback primary key setting to ease integration with the typical Rails app
-        self.primary_key = 'id' if primary_key.nil?
-
         MultiTenant.set_tenant_klass(tenant)
 
         class << self
@@ -25,6 +22,14 @@ module MultiTenant
 
         @partition_key = options[:partition_key] || MultiTenant.partition_key
         partition_key = @partition_key
+
+        # Avoid primary_key erroring out with the typical multi-column primary keys that include the partition key
+        if Rails::VERSION::MAJOR >= 5
+          primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
+          self.primary_key = primary_object_keys.first if primary_object_keys.size == 1
+        else
+          self.primary_key = 'id' if primary_key.nil?
+        end
 
         # Create the association
         belongs_to tenant, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
