@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.4       2017-02-22
+
+* Expand with_lock workaround to cover lock! as well
+* Enable trigger workaround on Rails 5 as well, otherwise it fails silently
+* Tests: Switch to database cleaner truncation strategy to avoid multi-shard transactions
+
+
 ## 0.3.3       2017-02-21
 
 * Avoid warning about multi-column primary keys with Rails 5 [#2](https://github.com/citusdata/activerecord-multi-tenant/issues/2)
