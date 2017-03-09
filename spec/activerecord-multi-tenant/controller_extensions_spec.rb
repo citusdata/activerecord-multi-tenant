@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   include Rails.application.routes.url_helpers
   set_current_tenant_through_filter
 
-  if Rails::VERSION::MAJOR < 4
+  if ActionController::VERSION::MAJOR < 4
     before_filter :your_method_that_finds_the_current_tenant
   else
     before_action :your_method_that_finds_the_current_tenant
@@ -24,7 +24,7 @@ end
 describe ApplicationController, type: :controller do
   controller do
     def index
-      if Rails::VERSION::MAJOR >= 5
+      if ActionController::VERSION::MAJOR >= 5
         render body: 'custom called'
       else
         render text: 'custom called'
@@ -38,7 +38,7 @@ describe ApplicationController, type: :controller do
   end
 end
 
-if Rails::VERSION::MAJOR >= 5
+if ActionController::VERSION::MAJOR >= 5
   class APIApplicationController < ActionController::API
     include Rails.application.routes.url_helpers
     set_current_tenant_through_filter

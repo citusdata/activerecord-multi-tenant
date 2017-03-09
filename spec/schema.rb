@@ -83,7 +83,7 @@ class Project < ActiveRecord::Base
   has_many :tasks
   has_many :sub_tasks, through: :tasks
 
-  if Rails::VERSION::MAJOR < 4
+  if ActiveRecord::VERSION::MAJOR < 4
     validates_uniqueness_of :name, scope: [:account_id]
   else
     validates_uniqueness_of :name, scope: [:account]
@@ -126,7 +126,7 @@ end
 class CustomPartitionKeyTask < ActiveRecord::Base
   multi_tenant :account, partition_key: 'accountID'
 
-  if Rails::VERSION::MAJOR < 4
+  if ActiveRecord::VERSION::MAJOR < 4
     validates_uniqueness_of :name, scope: [:accountID]
   else
     validates_uniqueness_of :name, scope: [:account]
@@ -141,7 +141,7 @@ class Comment < ActiveRecord::Base
   multi_tenant :account
   belongs_to :commentable, polymorphic: true
 
-  if Rails::VERSION::MAJOR >= 4
+  if ActiveRecord::VERSION::MAJOR >= 4
     belongs_to :task, -> { where(comments: { commentable_type: 'Task'  }) }, foreign_key: 'commentable_id'
   end
 end
