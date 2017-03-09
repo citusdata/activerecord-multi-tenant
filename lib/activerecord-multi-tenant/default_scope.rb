@@ -1,3 +1,5 @@
+require 'active_record'
+
 class ActiveRecord::Base
   class << self
     alias :unscoped_orig :unscoped
