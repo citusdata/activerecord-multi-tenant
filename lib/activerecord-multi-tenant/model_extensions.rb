@@ -17,22 +17,22 @@ module MultiTenant
             true
           end
 
+          # Allow partition_key to be set from a superclass if not already set in this class
           def partition_key
             @partition_key ||= ancestors.detect{ |k| k.instance_variable_get(:@partition_key) }
                                  .try(:instance_variable_get, :@partition_key)
           end
 
+          # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
             return @primary_key if @primary_key
-            if Rails::VERSION::MAJOR >= 5
-              primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
-              if primary_object_keys.size == 1
-                @primary_key = primary_object_keys.first
-              else
-                @primary_key = DEFAULT_ID_FIELD
-              end
+            return @primary_key = super || DEFAULT_ID_FIELD if Rails::VERSION::MAJOR < 5
+
+            primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
+            if primary_object_keys.size == 1
+              @primary_key = primary_object_keys.first
             else
-              @primary_key = super || DEFAULT_ID_FIELD
+              @primary_key = DEFAULT_ID_FIELD
             end
           end
         end
@@ -40,8 +40,8 @@ module MultiTenant
         @partition_key = options[:partition_key] || MultiTenant.partition_key
         partition_key = @partition_key
 
+        # Create an implicit belongs_to association only if tenant class exists
         if MultiTenant.tenant_klass_defined?
-          # Create the association if tenant klass is a model
           belongs_to tenant, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
         end
 
