@@ -160,6 +160,24 @@ describe MultiTenant do
     it 'has primary key' do
       expect(StiSubTask.primary_key).to eq 'id'
     end
+
+    it 'handles belongs_to through' do
+      MultiTenant.with(account) do
+        expect(sti_task.project).to eq project
+      end
+    end
+
+    it 'handles has_many through' do
+      MultiTenant.with(account) do
+        expect(project.sub_tasks).to eq [sti_task]
+      end
+    end
+
+    it 'handles unscoped' do
+      MultiTenant.with(account) do
+        expect(StiSubTask.unscoped.find(sti_task.id)).to eq sti_task
+      end
+    end
   end
 
   # ::with
