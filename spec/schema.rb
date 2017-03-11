@@ -28,6 +28,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :account_id, :integer
     t.column :name, :string
     t.column :task_id, :integer
+    t.column :type, :string
   end
 
   create_table :countries, force: true do |t|
@@ -102,6 +103,9 @@ class SubTask < ActiveRecord::Base
   multi_tenant :account
   belongs_to :task
   has_one :project, through: :task
+end
+
+class StiSubTask < SubTask
 end
 
 class UnscopedModel < ActiveRecord::Base

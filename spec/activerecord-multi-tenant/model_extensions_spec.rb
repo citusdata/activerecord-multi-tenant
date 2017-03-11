@@ -137,6 +137,22 @@ describe MultiTenant do
     end
   end
 
+  describe 'Subclass of Multi Tenant Model' do
+    let(:account) { Account.create!(name: 'foo') }
+    let(:project) { Project.create!(name: 'project', account: account) }
+    let(:task) { project.tasks.create!(name: 'task') }
+    let(:sti_task) { StiSubTask.create!(task: task, name: 'sub task') }
+
+    it 'has partition key' do
+      expect(StiSubTask.partition_key).to eq 'account_id'
+      expect(StiSubTask.instance_variable_get(:@partition_key)).to eq 'account_id'
+    end
+
+    it 'has primary key' do
+      expect(StiSubTask.primary_key).to eq 'id'
+    end
+  end
+
   # ::with
   describe "::with" do
     it "should set current_tenant to the specified tenant inside the block" do

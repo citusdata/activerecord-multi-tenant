@@ -18,23 +18,27 @@ module MultiTenant
           end
 
           def partition_key
-            @@partition_key
+            @partition_key ||= ancestors.detect{ |k| k.instance_variable_get(:@partition_key) }
+                                 .try(:instance_variable_get, :@partition_key)
           end
 
-          if Rails::VERSION::MAJOR >= 5
-            def primary_key
+          def primary_key
+            return @primary_key if @primary_key
+            if Rails::VERSION::MAJOR >= 5
               primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
               if primary_object_keys.size == 1
-                primary_object_keys.first
+                @primary_key = primary_object_keys.first
               else
-                DEFAULT_ID_FIELD
+                @primary_key = DEFAULT_ID_FIELD
               end
+            else
+              @primary_key = super || DEFAULT_ID_FIELD
             end
           end
         end
 
-        @@partition_key = options[:partition_key] || MultiTenant.partition_key
-        partition_key = @@partition_key
+        @partition_key = options[:partition_key] || MultiTenant.partition_key
+        partition_key = @partition_key
 
         if MultiTenant.tenant_klass_defined?
           # Create the association if tenant klass is a model
