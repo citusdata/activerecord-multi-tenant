@@ -56,6 +56,11 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :commentable_type, :string
   end
 
+  create_table :partition_key_not_model_tasks, force: true, partition_key: :non_model_id do |t|
+    t.column :non_model_id, :integer
+    t.column :name, :string
+  end
+
   create_distributed_table :accounts, :id
   create_distributed_table :projects, :account_id
   create_distributed_table :managers, :account_id
@@ -64,6 +69,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :aliased_tasks, :account_id
   create_distributed_table :custom_partition_key_tasks, :accountID
   create_distributed_table :comments, :account_id
+  create_distributed_table :partition_key_not_model_tasks, :non_model_id
 end
 
 class Account < ActiveRecord::Base
@@ -125,6 +131,10 @@ class CustomPartitionKeyTask < ActiveRecord::Base
   else
     validates_uniqueness_of :name, scope: [:account]
   end
+end
+
+class PartitionKeyNotModelTask < ActiveRecord::Base
+  multi_tenant :non_model
 end
 
 class Comment < ActiveRecord::Base

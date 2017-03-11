@@ -56,6 +56,15 @@ describe MultiTenant do
     it { expect(@custom_partition_key_task.account).to eq(@account) }
   end
 
+  describe 'Tenant model not defined' do
+    before do
+      MultiTenant.current_tenant = 77
+      @partition_key_not_model_task = PartitionKeyNotModelTask.create! name: 'foo'
+    end
+
+    it { expect(@partition_key_not_model_task.non_model_id).to be 77 }
+  end
+
   # Scoping models
   describe 'Project.all should be scoped to the current tenant if set' do
     before do
@@ -77,7 +86,7 @@ describe MultiTenant do
     before do
       @account = Account.create! name: 'foo'
       @project = @account.projects.create! name: 'foobar'
-      MultiTenant.current_tenant= @account1
+      MultiTenant.current_tenant = @account1
     end
 
     it { @project.account }

@@ -69,7 +69,11 @@ end
 
 * **What if I have a table that doesn't relate to my tenant?** (e.g. templates that are the same in every account)
 
-  We recommend not using activerecord-multi-tenant on these tables. In case only some records in a table are not associated to a tenant (i.e. your templates are in the same table as actual objects), we recommend setting the tenant_id to 0, and then using MultiTenant.with_id(0) to access these objects.
+  We recommend not using activerecord-multi-tenant on these tables. In case only some records in a table are not associated to a tenant (i.e. your templates are in the same table as actual objects), we recommend setting the tenant_id to 0, and then using MultiTenant.with(0) to access these objects.
+
+* **What if my tenant model is not defined in my application?**
+
+  The tenant model does not have to be defined. Use the gem as if the model was present. `MultiTenant.with` accepts either a tenant id or model instance.
 
 ## Credits
 
