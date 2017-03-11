@@ -11,6 +11,10 @@ module MultiTenant
     @@tenant_klass
   end
 
+  def self.tenant_klass_defined?
+    tenant_klass.to_s.classify.safe_constantize.present?
+  end
+
   def self.partition_key
     "#{@@tenant_klass.to_s}_id"
   end

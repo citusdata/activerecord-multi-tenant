@@ -1,5 +1,7 @@
 module MultiTenant
   module ModelExtensionsClassMethods
+    DEFAULT_ID_FIELD = 'id'.freeze
+
     def multi_tenant(tenant, options = {})
       # Workaround for https://github.com/citusdata/citus/issues/687
       if to_s.underscore.to_sym == tenant
@@ -16,23 +18,28 @@ module MultiTenant
           end
 
           def partition_key
-            @partition_key
+            @@partition_key
+          end
+
+          if Rails::VERSION::MAJOR >= 5
+            def primary_key
+              primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
+              if primary_object_keys.size == 1
+                primary_object_keys.first
+              else
+                DEFAULT_ID_FIELD
+              end
+            end
           end
         end
 
-        @partition_key = options[:partition_key] || MultiTenant.partition_key
-        partition_key = @partition_key
+        @@partition_key = options[:partition_key] || MultiTenant.partition_key
+        partition_key = @@partition_key
 
-        # Avoid primary_key erroring out with the typical multi-column primary keys that include the partition key
-        if Rails::VERSION::MAJOR >= 5
-          primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
-          self.primary_key = primary_object_keys.first if primary_object_keys.size == 1
-        else
-          self.primary_key = 'id' if primary_key.nil?
+        if MultiTenant.tenant_klass_defined?
+          # Create the association if tenant klass is a model
+          belongs_to tenant, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
         end
-
-        # Create the association
-        belongs_to tenant, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
 
         # Ensure all queries include the partition key
         default_scope lambda {
