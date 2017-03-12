@@ -32,8 +32,8 @@ module MultiTenant
 
   def self.with(tenant, &block)
     return block.call if self.current_tenant == tenant
+    old_tenant = self.current_tenant
     begin
-      old_tenant = self.current_tenant
       self.current_tenant = tenant
       return block.call
     ensure
