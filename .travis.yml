@@ -1,12 +1,11 @@
+sudo: required
+cache: bundler
+
 language: ruby
 
 rvm:
   - 2.1
-  - 2.2.6
   - 2.3.3
-  - 2.4
-
-script: "bundle exec rake spec"
 
 gemfile:
   - gemfiles/rails_3.2.gemfile
@@ -21,5 +20,12 @@ matrix:
     - gemfile: gemfiles/rails_5.0.gemfile
       rvm: 2.1
 
-sudo: false
-cache: bundler
+services:
+  - docker
+
+before_install:
+  - docker-compose up -d
+  - sleep 5 # wait for postgres to become available
+
+script:
+  - bundle exec rake spec
