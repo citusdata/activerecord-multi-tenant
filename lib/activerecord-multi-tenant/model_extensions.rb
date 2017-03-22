@@ -56,25 +56,6 @@ module MultiTenant
           end
         }, on: :create
 
-        # Validate that associations belong to the tenant, currently only for belongs_to
-        polymorphic_foreign_keys = reflect_on_all_associations(:belongs_to).select do |a|
-          a.options[:polymorphic]
-        end.map { |a| a.foreign_key }
-
-        reflect_on_all_associations(:belongs_to).each do |a|
-          unless a == reflect_on_association(tenant_name) || polymorphic_foreign_keys.include?(a.foreign_key)
-            association_class = a.options[:class_name].nil? ? a.name.to_s.classify.constantize : a.options[:class_name].constantize
-            validates_each a.foreign_key.to_sym do |record, attr, value|
-              primary_key = if association_class.respond_to?(:primary_key)
-                              association_class.primary_key
-                            else
-                              a.primary_key
-                            end.to_sym
-              record.errors.add attr, 'association is invalid [MultiTenant]' unless value.nil? || association_class.where(primary_key => value).any?
-            end
-          end
-        end
-
         to_include = Module.new do
           define_method "#{partition_key}=" do |tenant_id|
             write_attribute("#{partition_key}", tenant_id)
