@@ -1,38 +1,44 @@
 module MultiTenant
   module ModelExtensionsClassMethods
-    def multi_tenant(tenant, options = {})
-      # Workaround for https://github.com/citusdata/citus/issues/687
-      if to_s.underscore.to_sym == tenant
+    DEFAULT_ID_FIELD = 'id'.freeze
+
+    def multi_tenant(tenant_name, options = {})
+      if to_s.underscore.to_sym == tenant_name
+        # This is the tenant model itself. Workaround for https://github.com/citusdata/citus/issues/687
         before_create -> { self.id ||= self.class.connection.select_value("SELECT nextval('" + [self.class.table_name, self.class.primary_key, 'seq'].join('_') + "'::regclass)") }
-      end
-
-      # Typically we don't need to run on the tenant model itself
-      if to_s.underscore.to_sym != tenant
-        MultiTenant.set_tenant_klass(tenant)
-
+      else
         class << self
           def scoped_by_tenant?
             true
           end
 
+          # Allow partition_key to be set from a superclass if not already set in this class
           def partition_key
-            @partition_key
+            @partition_key ||= ancestors.detect{ |k| k.instance_variable_get(:@partition_key) }
+                                 .try(:instance_variable_get, :@partition_key)
+          end
+
+          # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
+          def primary_key
+            return @primary_key if @primary_key
+            return @primary_key = super || DEFAULT_ID_FIELD if Rails::VERSION::MAJOR < 5
+
+            primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
+            if primary_object_keys.size == 1
+              @primary_key = primary_object_keys.first
+            else
+              @primary_key = DEFAULT_ID_FIELD
+            end
           end
         end
 
-        @partition_key = options[:partition_key] || MultiTenant.partition_key
+        @partition_key = options[:partition_key] || MultiTenant.partition_key(tenant_name)
         partition_key = @partition_key
 
-        # Avoid primary_key erroring out with the typical multi-column primary keys that include the partition key
-        if Rails::VERSION::MAJOR >= 5
-          primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
-          self.primary_key = primary_object_keys.first if primary_object_keys.size == 1
-        else
-          self.primary_key = 'id' if primary_key.nil?
+        # Create an implicit belongs_to association only if tenant class exists
+        if MultiTenant.tenant_klass_defined?(tenant_name)
+          belongs_to tenant_name, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
         end
-
-        # Create the association
-        belongs_to tenant, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
 
         # Ensure all queries include the partition key
         default_scope lambda {
@@ -56,7 +62,7 @@ module MultiTenant
         end.map { |a| a.foreign_key }
 
         reflect_on_all_associations(:belongs_to).each do |a|
-          unless a == reflect_on_association(tenant) || polymorphic_foreign_keys.include?(a.foreign_key)
+          unless a == reflect_on_association(tenant_name) || polymorphic_foreign_keys.include?(a.foreign_key)
             association_class = a.options[:class_name].nil? ? a.name.to_s.classify.constantize : a.options[:class_name].constantize
             validates_each a.foreign_key.to_sym do |record, attr, value|
               primary_key = if association_class.respond_to?(:primary_key)
@@ -70,23 +76,25 @@ module MultiTenant
         end
 
         to_include = Module.new do
-          define_method "#{partition_key}=" do |integer|
-            write_attribute("#{partition_key}", integer)
+          define_method "#{partition_key}=" do |tenant_id|
+            write_attribute("#{partition_key}", tenant_id)
             raise MultiTenant::TenantIsImmutable if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
-            integer
+            tenant_id
           end
 
-          define_method "#{MultiTenant.tenant_klass.to_s}=" do |model|
-            super(model)
-            raise MultiTenant::TenantIsImmutable if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
-            model
-          end
+          if MultiTenant.tenant_klass_defined?(tenant_name)
+            define_method "#{tenant_name}=" do |model|
+              super(model)
+              raise MultiTenant::TenantIsImmutable if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
+              model
+            end
 
-          define_method "#{MultiTenant.tenant_klass.to_s}" do
-            if !MultiTenant.current_tenant.nil? && !MultiTenant.current_tenant.is_a?(MultiTenant::TenantIdWrapper) && public_send(partition_key) == MultiTenant.current_tenant.id
-              return MultiTenant.current_tenant
-            else
-              super()
+            define_method "#{tenant_name}" do
+              if !MultiTenant.current_tenant_is_id? && MultiTenant.current_tenant_id && public_send(partition_key) == MultiTenant.current_tenant_id
+                return MultiTenant.current_tenant
+              else
+                super()
+              end
             end
           end
         end
@@ -94,7 +102,7 @@ module MultiTenant
 
         around_save -> (record, block) {
           if persisted? && MultiTenant.current_tenant_id.nil?
-            MultiTenant.with_id(record.public_send(partition_key)) { block.call }
+            MultiTenant.with(record.public_send(partition_key)) { block.call }
           else
             block.call
           end
@@ -102,7 +110,7 @@ module MultiTenant
 
         around_update -> (record, block) {
           if MultiTenant.current_tenant_id.nil?
-            MultiTenant.with_id(record.public_send(partition_key)) { block.call }
+            MultiTenant.with(record.public_send(partition_key)) { block.call }
           else
             block.call
           end
@@ -110,7 +118,7 @@ module MultiTenant
 
         around_destroy -> (record, block) {
           if MultiTenant.current_tenant_id.nil?
-            MultiTenant.with_id(record.public_send(partition_key)) { block.call }
+            MultiTenant.with(record.public_send(partition_key)) { block.call }
           else
             block.call
           end

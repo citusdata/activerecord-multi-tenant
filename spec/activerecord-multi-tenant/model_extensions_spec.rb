@@ -56,6 +56,15 @@ describe MultiTenant do
     it { expect(@custom_partition_key_task.account).to eq(@account) }
   end
 
+  describe 'Tenant model not defined' do
+    before do
+      MultiTenant.current_tenant = 77
+      @partition_key_not_model_task = PartitionKeyNotModelTask.create! name: 'foo'
+    end
+
+    it { expect(@partition_key_not_model_task.non_model_id).to be 77 }
+  end
+
   # Scoping models
   describe 'Project.all should be scoped to the current tenant if set' do
     before do
@@ -77,7 +86,7 @@ describe MultiTenant do
     before do
       @account = Account.create! name: 'foo'
       @project = @account.projects.create! name: 'foobar'
-      MultiTenant.current_tenant= @account1
+      MultiTenant.current_tenant = @account1
     end
 
     it { @project.account }
@@ -133,6 +142,40 @@ describe MultiTenant do
     it 'handles has_many through' do
       MultiTenant.with(account) do
         expect(project.sub_tasks).to eq [sub_task]
+      end
+    end
+  end
+
+  describe 'Subclass of Multi Tenant Model' do
+    let(:account) { Account.create!(name: 'foo') }
+    let(:project) { Project.create!(name: 'project', account: account) }
+    let(:task) { project.tasks.create!(name: 'task') }
+    let(:sti_task) { StiSubTask.create!(task: task, name: 'sub task') }
+
+    it 'has partition key' do
+      expect(StiSubTask.partition_key).to eq 'account_id'
+      expect(StiSubTask.instance_variable_get(:@partition_key)).to eq 'account_id'
+    end
+
+    it 'has primary key' do
+      expect(StiSubTask.primary_key).to eq 'id'
+    end
+
+    it 'handles belongs_to through' do
+      MultiTenant.with(account) do
+        expect(sti_task.project).to eq project
+      end
+    end
+
+    it 'handles has_many through' do
+      MultiTenant.with(account) do
+        expect(project.sub_tasks).to eq [sti_task]
+      end
+    end
+
+    it 'handles unscoped' do
+      MultiTenant.with(account) do
+        expect(StiSubTask.unscoped.find(sti_task.id)).to eq sti_task
       end
     end
   end

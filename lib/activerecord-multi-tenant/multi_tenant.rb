@@ -1,18 +1,12 @@
 require 'request_store'
 
 module MultiTenant
-  @@tenant_klass = nil
-
-  def self.set_tenant_klass(klass)
-    @@tenant_klass = klass
+  def self.tenant_klass_defined?(tenant_name)
+    !!tenant_name.to_s.classify.safe_constantize
   end
 
-  def self.tenant_klass
-    @@tenant_klass
-  end
-
-  def self.partition_key
-    "#{@@tenant_klass.to_s}_id"
+  def self.partition_key(tenant_name)
+    "#{tenant_name.to_s}_id"
   end
 
   # Workaroud to make "with_lock" work until https://github.com/citusdata/citus/issues/1236 is fixed
@@ -28,43 +22,28 @@ module MultiTenant
     RequestStore.store[:current_tenant]
   end
 
-  def self.current_tenant_id=(tenant_id)
-    self.current_tenant = TenantIdWrapper.new(id: tenant_id)
+  def self.current_tenant_id
+    current_tenant_is_id? ? current_tenant : current_tenant.try(:id)
   end
 
-  def self.current_tenant_id
-    current_tenant.try(:id)
+  def self.current_tenant_is_id?
+    current_tenant.is_a?(String) || current_tenant.is_a?(Integer)
   end
 
   def self.with(tenant, &block)
+    return block.call if self.current_tenant == tenant
     old_tenant = self.current_tenant
-    self.current_tenant = tenant
-    value = block.call
-    return value
-
-  ensure
-    self.current_tenant = old_tenant
-  end
-
-  def self.with_id(tenant_id, &block)
-    if MultiTenant.current_tenant_id == tenant_id
-      block.call
-    else
-      MultiTenant.with(TenantIdWrapper.new(id: tenant_id), &block)
+    begin
+      self.current_tenant = tenant
+      return block.call
+    ensure
+      self.current_tenant = old_tenant
     end
   end
+
+  # Preserve backward compatibility for people using .with_id
+  singleton_class.send(:alias_method, :with_id, :with)
 
   class TenantIsImmutable < StandardError
-  end
-
-  class TenantIdWrapper
-    attr_reader :id
-
-    def initialize(id:)
-      @id = id
-    end
-
-    def new_record?; true; end
-    def touch; nil; end
   end
 end
