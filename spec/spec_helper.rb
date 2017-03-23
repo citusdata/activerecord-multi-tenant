@@ -15,6 +15,7 @@ ActiveRecord::Base.establish_connection(dbconfig['test'])
 RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = true
   config.use_transactional_fixtures = false
+  config.filter_run_excluding type: :controller unless Object.const_defined?(:ActionController)
 
   config.after(:each) do
     MultiTenant.current_tenant = nil
