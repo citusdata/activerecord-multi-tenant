@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0       2017-03-22
+
+* Infer multi_tenant setting from parent classes [@webandtech](https://github.com/webandtech) [#6](https://github.com/citusdata/activerecord-multi-tenant/pull/6)
+* Remove use of global tenant klass variable [@webandtech](https://github.com/webandtech) [#6](https://github.com/citusdata/activerecord-multi-tenant/pull/6)
+* Support passing ID values to MultiTenant.with directly [@webandtech](https://github.com/webandtech) [#6](https://github.com/citusdata/activerecord-multi-tenant/pull/6)
+  * This effectively deprecates with_id, but we'll keep it around for now
+* Remove unnecessary validation for invalid belongs_to association
+
+
 ## 0.3.4       2017-02-22
 
 * Expand with_lock workaround to cover lock! as well
