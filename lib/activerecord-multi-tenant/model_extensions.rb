@@ -21,7 +21,7 @@ module MultiTenant
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
             return @primary_key if @primary_key
-            return @primary_key = super || DEFAULT_ID_FIELD if Rails::VERSION::MAJOR < 5
+            return @primary_key = super || DEFAULT_ID_FIELD if ActiveRecord::VERSION::MAJOR < 5
 
             primary_object_keys = (connection.schema_cache.primary_keys(table_name) || []) - [partition_key]
             if primary_object_keys.size == 1
@@ -45,7 +45,7 @@ module MultiTenant
           if MultiTenant.current_tenant_id
             where(arel_table[partition_key].eq(MultiTenant.current_tenant_id))
           else
-            Rails::VERSION::MAJOR < 4 ? scoped : all
+            ActiveRecord::VERSION::MAJOR < 4 ? scoped : all
           end
         }
 
