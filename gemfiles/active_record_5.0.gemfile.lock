@@ -1,7 +1,7 @@
 PATH
-  remote: ..
+  remote: ../
   specs:
-    activerecord-multi-tenant (0.4.0)
+    activerecord-multi-tenant (0.4.1)
       rails (>= 3.1)
       request_store (>= 1.0.5)
 
@@ -69,9 +69,9 @@ GEM
     mini_portile2 (2.1.0)
     minitest (5.10.1)
     nio4r (2.0.0)
-    nokogiri (1.7.0.1)
+    nokogiri (1.7.1)
       mini_portile2 (~> 2.1.0)
-    pg (0.19.0)
+    pg (0.20.0)
     rack (2.0.1)
     rack-test (0.6.3)
       rack (>= 1.0)

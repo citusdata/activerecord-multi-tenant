@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    activerecord-multi-tenant (0.4.0)
+    activerecord-multi-tenant (0.4.1)
       rails (>= 3.1)
       request_store (>= 1.0.5)
 
@@ -115,7 +115,7 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    tzinfo (0.3.52)
+    tzinfo (0.3.53)
 
 PLATFORMS
   ruby

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1       2017-03-23
+
+* Allow use outside of Rails, e.g. when using Sinatra with ActiveRecord [@nathanstitt](https://github.com/nathanstitt) [#5](https://github.com/citusdata/activerecord-multi-tenant/pull/5)
+
+
 ## 0.4.0       2017-03-22
 
 * Infer multi_tenant setting from parent classes [@webandtech](https://github.com/webandtech) [#6](https://github.com/citusdata/activerecord-multi-tenant/pull/6)

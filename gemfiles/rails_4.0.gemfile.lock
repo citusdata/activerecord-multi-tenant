@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    activerecord-multi-tenant (0.4.0)
+    activerecord-multi-tenant (0.4.1)
       rails (>= 3.1)
       request_store (>= 1.0.5)
 
@@ -99,7 +99,7 @@ GEM
       sprockets (>= 2.8, < 4.0)
     thor (0.19.4)
     thread_safe (0.3.6)
-    tzinfo (0.3.52)
+    tzinfo (0.3.53)
 
 PLATFORMS
   ruby
