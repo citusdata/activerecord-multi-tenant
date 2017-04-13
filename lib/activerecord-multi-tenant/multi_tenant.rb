@@ -9,6 +9,10 @@ module MultiTenant
     "#{tenant_name.to_s}_id"
   end
 
+  # In some cases we only have an ID - if defined we'll return the default tenant class in such cases
+  def self.default_tenant_class=(tenant_class); @@default_tenant_class = tenant_class; end
+  def self.default_tenant_class; @@default_tenant_class; end
+
   # Workaroud to make "with_lock" work until https://github.com/citusdata/citus/issues/1236 is fixed
   @@enable_with_lock_workaround = false
   def self.enable_with_lock_workaround; @@enable_with_lock_workaround = true; end
@@ -28,6 +32,14 @@ module MultiTenant
 
   def self.current_tenant_is_id?
     current_tenant.is_a?(String) || current_tenant.is_a?(Integer)
+  end
+
+  def self.current_tenant_class
+    if current_tenant_is_id?
+      MultiTenant.default_tenant_class || fail('Only have tenant id, and no default tenant class set')
+    elsif current_tenant
+      MultiTenant.current_tenant.class.name
+    end
   end
 
   def self.with(tenant, &block)
