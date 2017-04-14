@@ -1,0 +1,32 @@
+# Truncates only the tables that have been modified, according to sequence
+# values
+module MultiTenant
+  module FastTruncate
+    def self.run(exclude: ['schema_migrations'])
+      # This is a slightly faster version of DatabaseCleaner.clean_with(:truncation, pre_count: true)
+      ActiveRecord::Base.connection.execute format(%(
+      DO LANGUAGE plpgsql $$
+      DECLARE
+        t record;
+        tables text[];
+        seq_exists boolean;
+        needs_truncate boolean;
+      BEGIN
+        FOR t IN SELECT schemaname, tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN (%s) LOOP
+          EXECUTE 'SELECT EXISTS (SELECT * from pg_class c WHERE c.relkind = ''S'' AND c.relname=''' || t.tablename || '_id_seq'')' into seq_exists;
+          IF seq_exists THEN
+            EXECUTE 'SELECT last_value != start_value FROM ' || t.tablename || '_id_seq' INTO needs_truncate;
+          ELSE
+            needs_truncate := true;
+          END IF;
+
+          IF needs_truncate THEN
+            tables := array_append(tables, quote_ident(t.schemaname) || '.' || quote_ident(t.tablename));
+          END IF;
+        END LOOP;
+
+        EXECUTE 'TRUNCATE TABLE ' || array_to_string(tables, ', ') || ' RESTART IDENTITY CASCADE';
+      END$$;), exclude.map { |t| "'" + t + "'" }.join('\n'))
+    end
+  end
+end
