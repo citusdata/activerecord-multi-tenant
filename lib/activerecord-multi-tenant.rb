@@ -3,6 +3,7 @@ if Object.const_defined?(:ActionController)
 end
 require_relative 'activerecord-multi-tenant/copy_from_client'
 require_relative 'activerecord-multi-tenant/default_scope'
+require_relative 'activerecord-multi-tenant/fast_truncate'
 require_relative 'activerecord-multi-tenant/migrations'
 require_relative 'activerecord-multi-tenant/model_extensions'
 require_relative 'activerecord-multi-tenant/multi_tenant'
