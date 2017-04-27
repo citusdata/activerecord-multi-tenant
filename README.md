@@ -1,6 +1,10 @@
 # activerecord-multi-tenant [ ![](https://img.shields.io/gem/v/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant) [ ![](https://img.shields.io/gem/dt/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant)
 
+Introduction Post: https://www.citusdata.com/blog/2017/01/05/easily-scale-out-multi-tenant-apps/?1
+
 ActiveRecord/Rails integration for multi-tenant databases, in particular the Citus extension for PostgreSQL.
+
+Enables easy scale-out by adding the tenant context to your queries, enabling the database (e.g. Citus) to efficiently route queries to the right node. See also the [Citus](https://github.com/citusdata/citus) open-source extension for Postgres for more details.
 
 ## Installation
 
