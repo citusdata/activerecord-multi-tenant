@@ -32,7 +32,7 @@ module ActiveRecord
     def build_arel
       arel = build_arel_orig
 
-      if MultiTenant.current_tenant_id
+      if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         relations_needing_tenant_id = TTTenantVisitor.new(arel).tenant_relations
         arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
           arel.where(relation[self.partition_key].eq(MultiTenant.current_tenant_id))

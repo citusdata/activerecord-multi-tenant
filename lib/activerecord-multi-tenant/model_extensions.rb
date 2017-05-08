@@ -4,8 +4,10 @@ module MultiTenant
 
     def multi_tenant(tenant_name, options = {})
       if to_s.underscore.to_sym == tenant_name
-        # This is the tenant model itself. Workaround for https://github.com/citusdata/citus/issues/687
-        before_create -> { self.id ||= self.class.connection.select_value("SELECT nextval('" + [self.class.table_name, self.class.primary_key, 'seq'].join('_') + "'::regclass)") }
+        unless MultiTenant.with_write_only_mode_enabled?
+          # This is the tenant model itself. Workaround for https://github.com/citusdata/citus/issues/687
+          before_create -> { self.id ||= self.class.connection.select_value("SELECT nextval('" + [self.class.table_name, self.class.primary_key, 'seq'].join('_') + "'::regclass)") }
+        end
       else
         class << self
           def scoped_by_tenant?
