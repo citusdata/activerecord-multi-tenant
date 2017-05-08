@@ -40,21 +40,12 @@ module MultiTenant
           belongs_to tenant_name, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
         end
 
-        # Ensure all queries include the partition key
-        default_scope lambda {
-          if MultiTenant.current_tenant_id
-            where(arel_table[partition_key].eq(MultiTenant.current_tenant_id))
-          else
-            ActiveRecord::VERSION::MAJOR < 4 ? scoped : all
-          end
-        }
-
         # New instances should have the tenant set
-        before_validation Proc.new { |record|
+        after_initialize Proc.new { |record|
           if MultiTenant.current_tenant_id && record.public_send(partition_key.to_sym).nil?
             record.public_send("#{partition_key}=".to_sym, MultiTenant.current_tenant_id)
           end
-        }, on: :create
+        }
 
         to_include = Module.new do
           define_method "#{partition_key}=" do |tenant_id|
