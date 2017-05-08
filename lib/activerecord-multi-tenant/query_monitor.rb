@@ -15,4 +15,4 @@ module MultiTenant
   end
 end
 
-ActiveSupport::Notifications.subscribe('sql.active_record', MultiTenant::QueryMonitor.new)
+ActiveSupport::Notifications.subscribe('sql.active_record', MultiTenant::QueryMonitor.new) if ActiveRecord::VERSION::MAJOR >= 4
