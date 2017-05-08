@@ -69,6 +69,21 @@ class ApplicationController < ActionController::Base
 end
 ```
 
+## Rolling out activerecord-multi-tenant for your application (write-only mode)
+
+The library relies on tenant_id to be present and NOT NULL for all rows. However,
+its often useful to have the library set the tenant_id for new records, and then backfilling
+tenant_id for existing records as a background task.
+
+To support this, there is a write-only mode, in which tenant_id is not included in queries,
+but only set for new records. Include the following in an initializer to enable it:
+
+```ruby
+MultiTenant.enable_write_only_mode
+```
+
+Once you are ready to enforce tenancy, make your tenant_id column NOT NULL and simply remove that line.
+
 ## Frequently Asked Questions
 
 * **What if I have a table that doesn't relate to my tenant?** (e.g. templates that are the same in every account)
