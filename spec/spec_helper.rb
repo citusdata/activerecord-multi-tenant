@@ -4,7 +4,6 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'
-require 'database_cleaner'
 
 require 'activerecord-multi-tenant'
 
@@ -22,19 +21,14 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    DatabaseCleaner[:active_record].strategy = :truncation
-    DatabaseCleaner[:active_record].clean
+    MultiTenant::FastTruncate.run
 
     # Keep this here until https://github.com/citusdata/citus/issues/1236 is fixed
     MultiTenant.enable_with_lock_workaround
   end
 
-  config.before(:each) do
-    DatabaseCleaner[:active_record].start
-  end
-
   config.after(:each) do
-    DatabaseCleaner[:active_record].clean
+    MultiTenant::FastTruncate.run
   end
 end
 
