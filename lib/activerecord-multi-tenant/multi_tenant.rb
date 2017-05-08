@@ -23,6 +23,15 @@ module MultiTenant
   def self.enable_with_lock_workaround; @@enable_with_lock_workaround = true; end
   def self.with_lock_workaround_enabled?; @@enable_with_lock_workaround; end
 
+  # Registry that maps table names to models (used by the query rewriter)
+  def self.register_multi_tenant_model(table_name, model_klass)
+    @@multi_tenant_models ||= {}
+    @@multi_tenant_models[table_name.to_s] = model_klass
+  end
+  def self.multi_tenant_model_for_table(table_name)
+    @@multi_tenant_models[table_name.to_s]
+  end
+
   def self.current_tenant=(tenant)
     RequestStore.store[:current_tenant] = tenant
   end

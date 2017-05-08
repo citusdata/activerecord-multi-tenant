@@ -24,8 +24,7 @@ module MultiTenant
     private
 
     def tenant_relation?(table)
-      model = table.name.classify.constantize
-      model && model.respond_to?(:scoped_by_tenant?) && model.scoped_by_tenant?
+      MultiTenant.multi_tenant_model_for_table(table.name).present?
     end
   end
 end
