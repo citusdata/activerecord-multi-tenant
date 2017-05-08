@@ -13,6 +13,11 @@ module MultiTenant
   def self.default_tenant_class=(tenant_class); @@default_tenant_class = tenant_class; end
   def self.default_tenant_class; @@default_tenant_class; end
 
+  # Write-only Mode - this only adds the tenant_id to new records, but doesn't
+  # require its presence for SELECTs/UPDATEs/DELETEs
+  def self.enable_write_only_mode; @@enable_write_only_mode = true; end
+  def self.with_write_only_mode_enabled?; @@enable_write_only_mode ||= false; end
+
   # Workaroud to make "with_lock" work until https://github.com/citusdata/citus/issues/1236 is fixed
   @@enable_with_lock_workaround = false
   def self.enable_with_lock_workaround; @@enable_with_lock_workaround = true; end
