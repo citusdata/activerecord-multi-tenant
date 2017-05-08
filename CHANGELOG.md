@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0       2017-05-08
+
+* Write-only mode that enables step-by-step migrations
+* Add tenant_id to queries using rewrite instead of default_scope/unscoped [Ben Olive](https://github.com/sionide21)
+* Query monitor that warns you about missing tenant_id
+* Helper for fast truncation
+* Sidekiq middleware
+
+
 ## 0.4.1       2017-03-23
 
 * Allow use outside of Rails, e.g. when using Sinatra with ActiveRecord [@nathanstitt](https://github.com/nathanstitt) [#5](https://github.com/citusdata/activerecord-multi-tenant/pull/5)
