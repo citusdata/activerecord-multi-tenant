@@ -12,13 +12,15 @@ class TTTenantVisitor < Arel::Visitors::DepthFirst
     @tenant_relations.uniq
   end
 
-  def visit_Arel_Table(table)
+  def visit_Arel_Table(table, _collector = nil)
     @tenant_relations << table if tenant_relation?(table)
   end
 
-  def visit_Arel_Nodes_TableAlias(table_alias)
+  def visit_Arel_Nodes_TableAlias(table_alias, _collector = nil)
     @tenant_relations << table_alias if tenant_relation?(table_alias.left)
   end
+
+  private
 
   def tenant_relation?(table)
     model = table.name.classify.constantize
