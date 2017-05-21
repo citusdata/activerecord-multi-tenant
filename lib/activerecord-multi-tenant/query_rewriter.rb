@@ -23,11 +23,14 @@ class TTTenantVisitor < Arel::Visitors::DepthFirst
   private
 
   def tenant_relation?(table)
-    model = table.name.classify.constantize
+    model = table.name.classify.safe_constantize
     model && model.respond_to?(:scoped_by_tenant?) && model.scoped_by_tenant?
   end
 end
 
+
+require 'active_record/relation'
+require 'active_record/relation/query_methods'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
