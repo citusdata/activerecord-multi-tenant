@@ -23,7 +23,6 @@ module Sidekiq::Middleware::MultiTenant
           yield
         end
       else
-        Rails.logger.warn("Running #{worker_class} without tenant.")
         yield
       end
     end
