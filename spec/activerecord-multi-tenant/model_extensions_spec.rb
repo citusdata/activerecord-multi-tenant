@@ -146,6 +146,22 @@ describe MultiTenant do
     end
   end
 
+  describe 'eager loading' do
+    let(:account) { Account.create!(name: 'foo') }
+    let(:project) { Project.create!(name: 'project', account: account) }
+    let(:manager) { Manager.create!(name: 'manager', account: account, project: project) }
+    let(:task) { project.tasks.create!(name: 'task') }
+    let(:sub_task) { task.sub_tasks.create!(name: 'sub task') }
+
+    it 'handles table aliases through joins' do
+      MultiTenant.with(account) do
+        sub_task
+        manager
+        expect(Project.eager_load([{manager: :project}, {tasks: :project}]).first).to eq project
+      end
+    end
+  end
+
   describe 'Subclass of Multi Tenant Model' do
     let(:account) { Account.create!(name: 'foo') }
     let(:project) { Project.create!(name: 'project', account: account) }

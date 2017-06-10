@@ -29,18 +29,23 @@ module MultiTenant
   end
 end
 
-class ActiveRecord::Relation
-  alias :build_arel_orig :build_arel
-  def build_arel
-    arel = build_arel_orig
-
-    if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
-      relations_needing_tenant_id = MultiTenant::ArelTenantVisitor.new(arel).tenant_relations
-      arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
-        arel.where(relation[self.partition_key].eq(MultiTenant.current_tenant_id))
+module ActiveRecord
+  module ConnectionAdapters # :nodoc:
+    module DatabaseStatements
+      alias :to_sql_orig :to_sql
+      # Converts an arel AST to SQL
+      def to_sql(arel, binds = [])
+        if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled? &&
+          [Arel::SelectManager, Arel::UpdateManager, Arel::DeleteManager, ActiveRecord::Relation].include?(arel.class)
+          relations_needing_tenant_id = MultiTenant::ArelTenantVisitor.new(arel).tenant_relations
+          arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
+            model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
+            next arel unless model.present?
+            arel.where(relation[model.partition_key].eq(MultiTenant.current_tenant_id))
+          end
+        end
+        to_sql_orig(arel, binds)
       end
     end
-
-    arel
   end
 end

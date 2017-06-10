@@ -11,7 +11,7 @@ module MultiTenant
 
   # In some cases we only have an ID - if defined we'll return the default tenant class in such cases
   def self.default_tenant_class=(tenant_class); @@default_tenant_class = tenant_class; end
-  def self.default_tenant_class; @@default_tenant_class; end
+  def self.default_tenant_class; @@default_tenant_class ||= nil; end
 
   # Write-only Mode - this only adds the tenant_id to new records, but doesn't
   # require its presence for SELECTs/UPDATEs/DELETEs
