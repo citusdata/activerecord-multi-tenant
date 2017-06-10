@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0       2017-06-09
+
+* Query rewriter
+  * Change hook from per-relation to be pre-SQL statement thats being output
+    - This should resolve issues where we added conditions in the wrong place
+  * Use table name to model klass registry
+* Improve tests for activerecord-multi-tenant
+  * Use lower shard count to speed up tests
+  * Drop database cleaner dependency
+
+
 ## 0.5.0       2017-05-08
 
 * Write-only mode that enables step-by-step migrations
