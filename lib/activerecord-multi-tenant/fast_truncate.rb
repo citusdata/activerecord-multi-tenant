@@ -25,7 +25,9 @@ module MultiTenant
           END IF;
         END LOOP;
 
-        EXECUTE 'TRUNCATE TABLE ' || array_to_string(tables, ', ') || ' RESTART IDENTITY CASCADE';
+        IF array_length(tables, 1) > 0 THEN
+          EXECUTE 'TRUNCATE TABLE ' || array_to_string(tables, ', ') || ' RESTART IDENTITY CASCADE';
+        END IF;
       END$$;), exclude.map { |t| "'" + t + "'" }.join('\n'))
     end
   end
