@@ -38,7 +38,9 @@ module ActiveRecord
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         relations_needing_tenant_id = MultiTenant::ArelTenantVisitor.new(arel).tenant_relations
         arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
-          arel.where(relation[self.partition_key].eq(MultiTenant.current_tenant_id))
+          model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
+          next arel unless model.present?
+          arel.where(relation[model.partition_key].eq(MultiTenant.current_tenant_id))
         end
       end
 
