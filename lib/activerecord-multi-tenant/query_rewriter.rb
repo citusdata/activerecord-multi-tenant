@@ -14,17 +14,17 @@ module MultiTenant
     end
 
     def visit_Arel_Table(table, _collector = nil)
-      @tenant_relations << table if tenant_relation?(table)
+      @tenant_relations << table if tenant_relation?(table.table_name)
     end
 
     def visit_Arel_Nodes_TableAlias(table_alias, _collector = nil)
-      @tenant_relations << table_alias if tenant_relation?(table_alias.left)
+      @tenant_relations << table_alias if tenant_relation?(table_alias.table_name)
     end
 
     private
 
-    def tenant_relation?(table)
-      MultiTenant.multi_tenant_model_for_table(table.name).present?
+    def tenant_relation?(table_name)
+      MultiTenant.multi_tenant_model_for_table(table_name).present?
     end
   end
 end
