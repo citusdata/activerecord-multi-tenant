@@ -34,13 +34,22 @@ module ActiveRecord
     alias :build_arel_orig :build_arel
     def build_arel
       arel = build_arel_orig
+      puts '***'
+      puts arel.to_dot
 
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         relations_needing_tenant_id = MultiTenant::ArelTenantVisitor.new(arel).tenant_relations
+        first_model = nil
         arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
+          puts relation.table_name.inspect
           model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
           next arel unless model.present?
-          arel.where(relation[model.partition_key].eq(MultiTenant.current_tenant_id))
+          if first_model
+            arel.where(relation[model.partition_key].eq(first_model.arel_table[first_model.partition_key]))
+          else
+            first_model = model
+            arel.where(relation[model.partition_key].eq(MultiTenant.current_tenant_id))
+          end
         end
       end
 
