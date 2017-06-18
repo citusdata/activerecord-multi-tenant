@@ -29,6 +29,7 @@ module MultiTenant
   end
 end
 
+require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
