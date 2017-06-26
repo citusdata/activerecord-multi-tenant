@@ -66,7 +66,7 @@ module MultiTenant
             end
 
             define_method "#{tenant_name}" do
-              if !MultiTenant.current_tenant_is_id? && MultiTenant.current_tenant_id && public_send(partition_key) == MultiTenant.current_tenant_id
+              if !association(tenant_name.to_sym).loaded? && !MultiTenant.current_tenant_is_id? && MultiTenant.current_tenant_id && public_send(partition_key) == MultiTenant.current_tenant_id
                 return MultiTenant.current_tenant
               else
                 super()
