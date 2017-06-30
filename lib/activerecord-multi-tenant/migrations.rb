@@ -24,6 +24,8 @@ module MultiTenant
 
     def citus_version
       execute("SELECT extversion FROM pg_extension WHERE extname = 'citus'").getvalue(0,0).try(:split, '-').try(:first)
+    rescue ArgumentError => e
+      raise unless e.message == "invalid tuple number 0"
     end
   end
 end
