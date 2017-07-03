@@ -41,7 +41,7 @@ module MultiTenant
 
         # Create an implicit belongs_to association only if tenant class exists
         if MultiTenant.tenant_klass_defined?(tenant_name)
-          belongs_to tenant_name, options.slice(:class_name, :inverse_of).merge(foreign_key: partition_key)
+          belongs_to tenant_name, options.slice(:class_name, :inverse_of).merge(foreign_key: options[:partition_key])
         end
 
         # New instances should have the tenant set
