@@ -259,7 +259,6 @@ describe MultiTenant do
     before do
       @account = Account.create!(name: "reflection tenant")
       @manager = Manager.new(account: @account)
-      puts "\n\n\n\n#{@account.manager.inspect}\n\n\n\n"
       MultiTenant.current_tenant = @account
       @account.update(name: "reflection tenant update")
     end
