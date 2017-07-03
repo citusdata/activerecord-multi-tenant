@@ -81,6 +81,7 @@ end
 class Account < ActiveRecord::Base
   multi_tenant :account
   has_many :projects
+  has_one :manager, inverse_of: :account
 end
 
 class Project < ActiveRecord::Base
