@@ -1,5 +1,5 @@
 PATH
-  remote: ../
+  remote: ..
   specs:
     activerecord-multi-tenant (0.6.0)
       rails (>= 3.1)
@@ -159,4 +159,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   1.13.6
+   1.15.0

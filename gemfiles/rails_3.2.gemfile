@@ -6,4 +6,4 @@ gem "appraisal"
 gem "test-unit", "~> 3.0"
 gem "rails", "3.2.22.5"
 
-gemspec :path => "../"
+gemspec path: "../"
