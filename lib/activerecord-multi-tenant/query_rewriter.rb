@@ -4,44 +4,54 @@ module MultiTenant
   class ArelTenantVisitor < Arel::Visitors::DepthFirst
     def initialize(arel)
       super(Proc.new {})
-      @tenant_relations = []
-      @existing_tenant_relations = []
+      @tenant_relations = {}
+      @existing_tenant_relations = {}
       @outer_joins_by_table_name = {}
+      @statement_node_id = nil
 
       accept(arel.ast)
     end
 
     def tenant_relations
-      @tenant_relations.uniq
+      @tenant_relations
     end
 
     def existing_tenant_relations
-      @existing_tenant_relations.uniq
+      @existing_tenant_relations
     end
 
     def outer_joins_by_table_name
       @outer_joins_by_table_name
     end
 
-    def visit_Arel_Table(table, _collector = nil)
-      @tenant_relations << table if tenant_relation?(table.table_name)
+    def visit_Arel_Table(o, _collector = nil)
+      @tenant_relations[@statement_node_id] ||= []
+      @tenant_relations[@statement_node_id] << o if tenant_relation?(o.table_name)
     end
+    alias :visit_Arel_Nodes_TableAlias :visit_Arel_Table
 
-    def visit_Arel_Nodes_TableAlias(table_alias, _collector = nil)
-      @tenant_relations << table_alias if tenant_relation?(table_alias.table_name)
+    def visit_Arel_Nodes_SelectStatement o
+      @statement_node_id = o.object_id
+      visit o.cores
+      visit o.orders
+      visit o.limit
+      visit o.lock
+      visit o.offset
     end
 
     def visit_Arel_Nodes_Equality(o, _collector = nil)
       if o.left.is_a?(Arel::Attributes::Attribute)
         table_name = o.left.relation.table_name
         model = MultiTenant.multi_tenant_model_for_table(table_name)
-        @existing_tenant_relations << o.left.relation if model.present? && o.left.name == model.partition_key
+        @existing_tenant_relations[@statement_node_id] ||= []
+        @existing_tenant_relations[@statement_node_id] << o.left.relation if model.present? && o.left.name == model.partition_key
       end
     end
 
     def visit_Arel_Nodes_OuterJoin(o, collector = nil)
       if o.left.is_a?(Arel::Nodes::TableAlias) || o.left.is_a?(Arel::Table)
-        @outer_joins_by_table_name[o.left.name] = o
+        @outer_joins_by_table_name[@statement_node_id] ||= {}
+        @outer_joins_by_table_name[@statement_node_id][o.left.name] = o
       end
       visit o.left
       visit o.right
@@ -66,32 +76,36 @@ module ActiveRecord
 
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
-        relations_needing_tenant_id = visitor.tenant_relations
-        known_relations = visitor.existing_tenant_relations
-        relations_needing_tenant_id.each do |relation|
-          model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
-          next unless model.present?
-          next if known_relations.map(&:name).include?(relation.name)
+        visitor.tenant_relations.each do |statement_node_id, relations|
+          # Process every level of the statement separately, so we don't mix subselects
+          known_relations = visitor.existing_tenant_relations[statement_node_id] || []
+          outer_joins_by_table_name = visitor.outer_joins_by_table_name[statement_node_id] || {}
 
-          top_level_tenant_relation = known_relations.reject { |r| visitor.outer_joins_by_table_name.key?(r.name) }.first
-          tenant_value = if top_level_tenant_relation.present?
-                           known_model = MultiTenant.multi_tenant_model_for_table(top_level_tenant_relation.table_name)
-                           top_level_tenant_relation[known_model.partition_key]
-                         else
-                           MultiTenant.current_tenant_id
-                         end
+          relations.each do |relation|
+            model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
+            next unless model.present?
+            next if known_relations.map(&:name).include?(relation.name)
 
-          known_relations << relation
+            tenant_relation = known_relations.reject { |r| outer_joins_by_table_name.key?(r.name) }.first
+            tenant_value = if tenant_relation.present?
+                             known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
+                             tenant_relation[known_model.partition_key]
+                           else
+                             MultiTenant.current_tenant_id
+                           end
 
-          outer_join = visitor.outer_joins_by_table_name[relation.name]
-          if outer_join
-            outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
-          else
-            ctx = arel.ast.cores.last
-            if ctx.wheres.size == 1
-              ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+            known_relations << relation
+
+            outer_join = outer_joins_by_table_name[relation.name]
+            if outer_join
+              outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
             else
-              arel = arel.where(relation[model.partition_key].eq(tenant_value))
+              ctx = arel.ast.cores.last
+              if ctx.wheres.size == 1
+                ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+              else
+                arel = arel.where(relation[model.partition_key].eq(tenant_value))
+              end
             end
           end
         end
