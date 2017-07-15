@@ -6,7 +6,7 @@ module MultiTenant
       super(Proc.new {})
       @tenant_relations = []
       @existing_tenant_relations = []
-      @outer_joined_relation_names = []
+      @outer_joins_by_table_name = {}
 
       accept(arel.ast)
     end
@@ -19,8 +19,8 @@ module MultiTenant
       @existing_tenant_relations.uniq
     end
 
-    def outer_joined_relation_names
-      @outer_joined_relation_names
+    def outer_joins_by_table_name
+      @outer_joins_by_table_name
     end
 
     def visit_Arel_Table(table, _collector = nil)
@@ -41,7 +41,7 @@ module MultiTenant
 
     def visit_Arel_Nodes_OuterJoin(o, collector = nil)
       if o.left.is_a?(Arel::Nodes::TableAlias) || o.left.is_a?(Arel::Table)
-        @outer_joined_relation_names << o.left.name
+        @outer_joins_by_table_name[o.left.name] = o
       end
       visit o.left
       visit o.right
@@ -68,12 +68,12 @@ module ActiveRecord
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         relations_needing_tenant_id = visitor.tenant_relations
         known_relations = visitor.existing_tenant_relations
-        arel = relations_needing_tenant_id.reduce(arel) do |arel, relation|
+        relations_needing_tenant_id.each do |relation|
           model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
-          next arel unless model.present?
-          next arel if known_relations.map(&:name).include?(relation.name)
+          next unless model.present?
+          next if known_relations.map(&:name).include?(relation.name)
 
-          top_level_tenant_relation = known_relations.reject { |r| visitor.outer_joined_relation_names.include?(r.name) }.first
+          top_level_tenant_relation = known_relations.reject { |r| visitor.outer_joins_by_table_name.key?(r.name) }.first
           tenant_value = if top_level_tenant_relation.present?
                            known_model = MultiTenant.multi_tenant_model_for_table(top_level_tenant_relation.table_name)
                            top_level_tenant_relation[known_model.partition_key]
@@ -83,12 +83,16 @@ module ActiveRecord
 
           known_relations << relation
 
-          ctx = arel.ast.cores.last
-          if ctx.wheres.size == 1
-            ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
-            arel
+          outer_join = visitor.outer_joins_by_table_name[relation.name]
+          if outer_join
+            outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
           else
-            arel.where(relation[model.partition_key].eq(tenant_value))
+            ctx = arel.ast.cores.last
+            if ctx.wheres.size == 1
+              ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+            else
+              arel = arel.where(relation[model.partition_key].eq(tenant_value))
+            end
           end
         end
       end
