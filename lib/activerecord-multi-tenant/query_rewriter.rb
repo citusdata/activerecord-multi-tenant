@@ -30,7 +30,7 @@ module MultiTenant
     end
     alias :visit_Arel_Nodes_TableAlias :visit_Arel_Table
 
-    def visit_Arel_Nodes_SelectStatement o
+    def visit_Arel_Nodes_SelectStatement(o, _collector = nil)
       @statement_node_id = o.object_id
       visit o.cores
       visit o.orders
