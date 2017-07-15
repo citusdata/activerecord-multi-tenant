@@ -162,6 +162,17 @@ describe MultiTenant do
     end
   end
 
+  describe 'sub selects' do
+    let(:account) { Account.create!(name: 'foo') }
+    let(:project) { Project.create!(name: 'project', account: account) }
+
+    it 'rewrites sub-selects correctly' do
+      MultiTenant.with(account) do
+        expect(Project.where(id: Project.where(id: project.id)).where(id: Project.where(id: project.id)).first).to eq project
+      end
+    end
+  end
+
   describe 'STI Subclass of Multi Tenant Model' do
     let(:account) { Account.create!(name: 'foo') }
     let(:project) { Project.create!(name: 'project', account: account) }
@@ -180,7 +191,7 @@ describe MultiTenant do
     it 'handles associations' do
       MultiTenant.with(account) do
         expect(sti_task.project).to eq project
-        expect(project.sub_tasks).to eq [sti_task]
+        expect(project.sub_tasks.to_a).to eq [sti_task]
       end
     end
   end
