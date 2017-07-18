@@ -150,8 +150,8 @@ describe MultiTenant do
     let(:account) { Account.create!(name: 'foo') }
     let(:project) { Project.create!(name: 'project', account: account) }
     let(:manager) { Manager.create!(name: 'manager', account: account, project: project) }
-    let(:task) { project.tasks.create!(name: 'task') }
-    let(:sub_task) { task.sub_tasks.create!(name: 'sub task') }
+    let(:task) { project.tasks.create!(name: 'eager loading test task') }
+    let(:sub_task) { task.sub_tasks.create!(name: 'eager loading test sub task') }
 
     it 'handles table aliases through joins' do
       MultiTenant.with(account) do
@@ -162,11 +162,11 @@ describe MultiTenant do
     end
   end
 
-  describe 'Subclass of Multi Tenant Model' do
+  describe 'STI Subclass of Multi Tenant Model' do
     let(:account) { Account.create!(name: 'foo') }
     let(:project) { Project.create!(name: 'project', account: account) }
-    let(:task) { project.tasks.create!(name: 'task') }
-    let(:sti_task) { StiSubTask.create!(task: task, name: 'sub task') }
+    let(:task) { project.tasks.create!(name: 'subclass test task') }
+    let(:sti_task) { StiSubTask.create!(task: task, name: 'subclass test sub task') }
 
     it 'has partition key' do
       expect(StiSubTask.partition_key).to eq 'account_id'
@@ -177,21 +177,43 @@ describe MultiTenant do
       expect(StiSubTask.primary_key).to eq 'id'
     end
 
-    it 'handles belongs_to through' do
+    it 'handles associations' do
       MultiTenant.with(account) do
         expect(sti_task.project).to eq project
-      end
-    end
-
-    it 'handles has_many through' do
-      MultiTenant.with(account) do
         expect(project.sub_tasks).to eq [sti_task]
       end
     end
+  end
 
-    it 'handles unscoped' do
-      MultiTenant.with(account) do
-        expect(StiSubTask.unscoped.find(sti_task.id)).to eq sti_task
+  describe 'non-STI Subclass of abstract Multi Tenant Model' do
+    let(:tenant_id_1) { 42 }
+    let(:tenant_id_2) { 314158 }
+    let(:name) { 'fooname' }
+    let(:subclass_task_1) do
+      MultiTenant.with(tenant_id_1) { SubclassTask.create! name: name }
+    end
+    let(:subclass_task_2) do
+      MultiTenant.with(tenant_id_2) { SubclassTask.create! name: name }
+    end
+
+    before do
+      subclass_task_1
+      subclass_task_2
+    end
+
+    it 'injects tenant_id on create' do
+      expect(subclass_task_1.non_model_id).to be tenant_id_1
+      expect(subclass_task_2.non_model_id).to be tenant_id_2
+    end
+
+    it 'rewrites query' do
+      MultiTenant.with(tenant_id_1) do
+        expect(SubclassTask.where(name: name).count).to be 1
+        expect(SubclassTask.where(name: name).first).to eq subclass_task_1
+      end
+      MultiTenant.with(tenant_id_2) do
+        expect(SubclassTask.where(name: name).count).to be 1
+        expect(SubclassTask.where(name: name).first).to eq subclass_task_2
       end
     end
   end
