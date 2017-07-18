@@ -15,7 +15,7 @@ module MultiTenant
         FOR t IN SELECT schemaname, tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN (%s) LOOP
           EXECUTE 'SELECT EXISTS (SELECT * from pg_class c WHERE c.relkind = ''S'' AND c.relname=''' || t.tablename || '_id_seq'')' into seq_exists;
           IF seq_exists THEN
-            EXECUTE 'SELECT last_value != start_value FROM ' || t.tablename || '_id_seq' INTO needs_truncate;
+            EXECUTE 'SELECT is_called FROM ' || t.tablename || '_id_seq' INTO needs_truncate;
           ELSE
             needs_truncate := true;
           END IF;
