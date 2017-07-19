@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.0       2017-07-18
+
+* Switch back to Relation-based mechanism of hooking into ActiveRecord (this resolves issues for simple queries that didn't get rewritten)
+* Query rewriter improvements
+  * Handle OUTER JOIN correctly
+  * Correctly rewrite sub-selects
+* Model tenant method: Only return cached object if not loaded
+* Fix support for inherited model classes that only have `multi-tenant` on a higher level object [Aaron Severs](https://github.com/webandtech) [#13](https://github.com/citusdata/activerecord-multi-tenant/pull/13)
+* Sidekiq middleware: Don't automatically perform a find for the tenant object for every job [Scott Mitchell](https://github.com/smitchelus) [#14](https://github.com/citusdata/activerecord-multi-tenant/pull/14)
+* Fix automatic inverse of on singular associations [Kyle Bock](https://github.com/kwbock) [#15](https://github.com/citusdata/activerecord-multi-tenant/pull/15)
+* Fix bug that prevents fast truncate from running [Kyle Bock](https://github.com/kwbock) [#17](https://github.com/citusdata/activerecord-multi-tenant/pull/17)
+
+
 ## 0.6.0       2017-06-09
 
 * Query rewriter
