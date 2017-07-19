@@ -287,18 +287,19 @@ describe MultiTenant do
     end
   end
 
-  # Reflection
-  describe 'with unsaved association' do
-    before do
-      @account = Account.create!(name: "reflection tenant")
-      @manager = Manager.new(account: @account)
-      MultiTenant.current_tenant = @account
-      @account.name = "reflection tenant update"
-      @account.save!
-    end
+  if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR > 0)
+    # Reflection
+    describe 'with unsaved association' do
+      before do
+        @account = Account.create!(name: 'reflection tenant')
+        @manager = Manager.new(account: @account)
+        MultiTenant.current_tenant = @account
+        @account.update! name: 'reflection tenant update'
+      end
 
-    it "persists the reflected association" do
-      expect(@manager.persisted?).to eq(true)
+      it 'persists the reflected association' do
+        expect(@manager.persisted?).to eq(true)
+      end
     end
   end
 end
