@@ -293,7 +293,8 @@ describe MultiTenant do
       @account = Account.create!(name: "reflection tenant")
       @manager = Manager.new(account: @account)
       MultiTenant.current_tenant = @account
-      @account.update(name: "reflection tenant update")
+      @account.name = "reflection tenant update"
+      @account.save!
     end
 
     it "persists the reflected association" do
