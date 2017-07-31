@@ -107,8 +107,6 @@ class Task < ActiveRecord::Base
   belongs_to :project
   has_many :sub_tasks
 
-  default_scope -> { where(completed: nil).order('name') }
-
   validates_uniqueness_of :name
 end
 

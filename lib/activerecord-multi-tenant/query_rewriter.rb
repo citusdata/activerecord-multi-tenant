@@ -65,6 +65,24 @@ module MultiTenant
       MultiTenant.multi_tenant_model_for_table(table_name).present?
     end
   end
+
+  class BindValueSubstitute
+    def initialize(column_type)
+      @column_type = column_type
+    end
+
+    def value_for_database
+      MultiTenant.current_tenant_id
+    end
+
+    def value
+      MultiTenant.current_tenant_id
+    end
+
+    def cast_type
+      @column_type
+    end
+  end
 end
 
 require 'active_record/relation'
@@ -91,18 +109,26 @@ module ActiveRecord
                              known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
                              tenant_relation[known_model.partition_key]
                            else
-                             MultiTenant.current_tenant_id
+                             if ActiveRecord::VERSION::MAJOR >= 5
+                               #arel.bind_values << Relation::QueryAttribute.new(model.partition_key, MultiTenant.current_tenant_id, model.type_for_attribute(model.partition_key))
+                               arel.bind_values << MultiTenant::BindValueSubstitute.new(model.columns_hash[model.partition_key])
+                               Arel::Nodes::BindParam.new
+                             else
+                               #arel.bind_values << [model.columns_hash[model.partition_key], MultiTenant.current_tenant_id]
+                               # FIXME
+                               MultiTenant.current_tenant_id
+                             end
                            end
 
             known_relations << relation
 
             outer_join = outer_joins_by_table_name[relation.name]
             if outer_join
-              outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
+              outer_join.right.expr = outer_join.right.expr.and(relation[model.partition_key].eq(tenant_value))
             else
               ctx = arel.ast.cores.last
               if ctx.wheres.size == 1
-                ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+                ctx.wheres = [relation[model.partition_key].eq(tenant_value).and(ctx.wheres.first)]
               else
                 arel = arel.where(relation[model.partition_key].eq(tenant_value))
               end
