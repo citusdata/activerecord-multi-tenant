@@ -33,11 +33,11 @@ module MultiTenant
   end
 
   def self.current_tenant=(tenant)
-    RequestStore.store[:current_tenant] = tenant
+    @current_tenant = tenant
   end
 
   def self.current_tenant
-    RequestStore.store[:current_tenant]
+    @current_tenant
   end
 
   def self.current_tenant_id
