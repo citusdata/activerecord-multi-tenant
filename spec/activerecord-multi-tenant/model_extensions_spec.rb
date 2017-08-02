@@ -153,10 +153,10 @@ describe MultiTenant do
 
     it 'allows switching tenants' do
       MultiTenant.with(account_1) do
-        expect(Project.find(project.id).to_not raise_error
+        expect { Project.find(project.id) }.to_not raise_error
       end
       MultiTenant.with(account_2) do
-        expect(Project.find(project.id).to raise_error(ActiveRecord::RecordNotFound)
+        expect { Project.find(project.id) }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
   end
