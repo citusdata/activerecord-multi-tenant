@@ -84,7 +84,6 @@ module ActiveRecord
           relations.each do |relation|
             model = MultiTenant.multi_tenant_model_for_table(relation.table_name)
             next unless model.present?
-            next if known_relations.map(&:name).include?(relation.name)
 
             tenant_relation = known_relations.reject { |r| outer_joins_by_table_name.key?(r.name) }.first
             tenant_value = if tenant_relation.present?
