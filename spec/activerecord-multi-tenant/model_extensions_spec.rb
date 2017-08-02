@@ -146,6 +146,21 @@ describe MultiTenant do
     end
   end
 
+  describe 'tenant switching' do
+    let!(:account_1) { Account.create!(name: 'foo') }
+    let!(:account_2) { Account.create!(name: 'bar') }
+    let!(:project) { Project.create!(name: 'project', account: account_1) }
+
+    it 'allows switching tenants' do
+      MultiTenant.with(account_1) do
+        expect { Project.find(project.id) }.to_not raise_error
+      end
+      MultiTenant.with(account_2) do
+        expect { Project.find(project.id) }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
   describe 'eager loading' do
     let(:account) { Account.create!(name: 'foo') }
     let(:project) { Project.create!(name: 'project', account: account) }
