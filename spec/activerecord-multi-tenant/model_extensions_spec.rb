@@ -149,7 +149,7 @@ describe MultiTenant do
   describe 'tenant switching' do
     let!(:account_1) { Account.create!(name: 'foo') }
     let!(:account_2) { Account.create!(name: 'bar') }
-    let!(:project) { Project.create!(name: 'project', account: account) }
+    let!(:project) { Project.create!(name: 'project', account: account_1) }
 
     it 'allows switching tenants' do
       MultiTenant.with(account_1) do
