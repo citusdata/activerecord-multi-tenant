@@ -65,7 +65,34 @@ module MultiTenant
       MultiTenant.multi_tenant_model_for_table(table_name).present?
     end
   end
+
+  # We use a proxy object in the arel tree instead of the actual value to avoid
+  # the tenant value being cached by the Rails statement cache. Whilst it would
+  # also be possible to use bind parameters for a similar benefit, they interact
+  # oddly with the statement cache in Rails versions before 5.0.
+  class TenantValueParam < Arel::Nodes::Node
+    def to_s
+      MultiTenant.current_tenant_id.to_s
+    end
+
+    def to_str; to_s; end
+    def to_sql(*args); to_s; end
+  end
+
+  module TenantValueVisitor
+    if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+      def visit_MultiTenant_TenantValueParam(o, collector)
+        collector << o
+      end
+    else
+      def visit_MultiTenant_TenantValueParam(o, a = nil)
+        o
+      end
+    end
+  end
 end
+
+Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 
 require 'active_record/relation'
 module ActiveRecord
@@ -90,6 +117,8 @@ module ActiveRecord
             tenant_value = if tenant_relation.present?
                              known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
                              tenant_relation[known_model.partition_key]
+                           elsif ActiveRecord::VERSION::MAJOR >= 4
+                             MultiTenant::TenantValueParam.new # Prevents caching issues, see above
                            else
                              MultiTenant.current_tenant_id
                            end
@@ -98,11 +127,11 @@ module ActiveRecord
 
             outer_join = outer_joins_by_table_name[relation.name]
             if outer_join
-              outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
+              outer_join.right.expr = outer_join.right.expr.and(relation[model.partition_key].eq(tenant_value))
             else
               ctx = arel.ast.cores.last
               if ctx.wheres.size == 1
-                ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+                ctx.wheres = [relation[model.partition_key].eq(tenant_value).and(ctx.wheres.first)]
               else
                 arel = arel.where(relation[model.partition_key].eq(tenant_value))
               end
