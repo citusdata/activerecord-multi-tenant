@@ -92,7 +92,7 @@ module ActiveRecord
     def build_arel
       arel = build_arel_orig
 
-      if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
+      unless MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.tenant_relations.each do |statement_node_id, relations|
           # Process every level of the statement separately, so we don't mix subselects
@@ -108,7 +108,7 @@ module ActiveRecord
             tenant_value = if tenant_relation.present?
                              known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
                              tenant_relation[known_model.partition_key]
-                           else
+                           elsif MultiTenant.current_tenant_id
                              if ActiveRecord::VERSION::MAJOR >= 5
                                #arel.bind_values << Relation::QueryAttribute.new(model.partition_key, MultiTenant.current_tenant_id, model.type_for_attribute(model.partition_key))
                                arel.bind_values << MultiTenant::BindValueSubstitute.new(model.columns_hash[model.partition_key])
@@ -119,6 +119,8 @@ module ActiveRecord
                                MultiTenant.current_tenant_id
                              end
                            end
+
+            next unless tenant_value
 
             known_relations << relation
 
