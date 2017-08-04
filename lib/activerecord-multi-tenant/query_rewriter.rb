@@ -96,10 +96,22 @@ module MultiTenant
       end
     end
 
-    # Citus does not support cross-partition COUNT(DISTINCT) at the moment
-    # Note this will cause counts to be off with left joins / eager loads
-    if projections.is_a?(Arel::Nodes::Count)
-      projections.distinct = false
+    # Citus does not support cross-partition COUNT(DISTINCT) except
+    # For approximations using the HLL extension
+    # However, if the query can be converted into a distinct via GROUP BY
+    # We can convert it into SELECT COUNT(*) FROM (... GROUP BY ...)
+    if projections.is_a?(Arel::Nodes::Count) && projections.distinct
+      ctx.projections = projections.expressions
+      partition_keys = projections.expressions.map do |e|
+        model = MultiTenant.multi_tenant_model_for_table(e.try(:relation).try(:name))
+        model.arel_table[model.partition_key] if model
+      end.compact
+      if partition_keys
+        return Arel::Subquery.new(
+          arel.group(projections.expressions + partition_keys),
+          as: 'countme'
+        ).project(Arel.star.count)
+      end
     end
     arel
   end

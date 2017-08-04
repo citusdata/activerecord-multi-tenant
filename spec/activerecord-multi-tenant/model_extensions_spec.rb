@@ -208,8 +208,8 @@ describe MultiTenant do
         ].squish
       end
 
-      it 'can count across partitions' do
-        expect(base_relation.count).to be 3 # Because of left joins
+      it 'can count distinct across partitions' do
+        expect(base_relation.distinct.count).to be 2
       end
 
       it 'can distinct across partitions' do
