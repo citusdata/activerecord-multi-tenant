@@ -18,10 +18,6 @@ module Arel
         end
         collector << ") #{quote_table_name o.name}"
       end
-
-      # def visit_Arel_Nodes_Distinct o, collector
-      #   collector << ''
-      # end
     end
   end
 end
