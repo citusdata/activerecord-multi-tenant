@@ -68,6 +68,26 @@ module MultiTenant
     end
   end
 
+  # Use to bypass rewriting of cross partition COUNT(DISTINCT) queries
+  # to use the hll extension to get approximate counts, if enabled
+  def self.with_hll_counts(&block)
+    orig_hll = self.use_hll_counts?
+    begin
+      self.use_hll_counts = true
+      return block.call
+    ensure
+      self.use_hll_counts = orig_hll
+    end
+  end
+
+  def self.use_hll_counts=(bool)
+    RequestStore.store[:hll_counts] = bool
+  end
+
+  def self.use_hll_counts?
+    RequestStore.store[:hll_counts].present?
+  end
+
   # Preserve backward compatibility for people using .with_id
   singleton_class.send(:alias_method, :with_id, :with)
 

@@ -166,7 +166,7 @@ describe MultiTenant do
       end
     end
 
-    context 'multi-partition eager loading' do
+    context 'cross-partition queries' do
       let(:account_2) { Account.create!(name: 'bar') }
       let(:project_2) { Project.create!(name: 'project_2', account: account_2) }
       let(:manager_2) { Manager.create!(name: 'manager_2', account: account_2, project: project_2) }
@@ -208,8 +208,18 @@ describe MultiTenant do
         ].squish
       end
 
-      it 'can count distinct across partitions' do
+      it 'can count distinct across partitions without HLL extension' do
         expect(base_relation.distinct.count).to be 2
+      end
+
+      context '.with_hll_counts' do
+        it 'does not modify COUNT(DISTINCT) queries' do
+          begin
+            base_relation.distinct.count
+          rescue => ex
+            expect(ex.message).to include 'PG::FeatureNotSupported: ERROR:  cannot compute aggregate (distinct)'
+          end
+        end
       end
 
       it 'can distinct across partitions' do

@@ -101,6 +101,7 @@ module MultiTenant
     # However, if the query can be converted into a distinct via GROUP BY
     # We can convert it into SELECT COUNT(*) FROM (... GROUP BY ...)
     if projections.is_a?(Arel::Nodes::Count) && projections.distinct
+      return arel if MultiTenant.use_hll_counts?
       ctx.projections = projections.expressions
       partition_keys = projections.expressions.map do |e|
         model = MultiTenant.multi_tenant_model_for_table(e.try(:relation).try(:name))
