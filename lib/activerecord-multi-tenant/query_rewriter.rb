@@ -83,6 +83,26 @@ module MultiTenant
       @column_type
     end
   end
+
+  # Converts SELECT DISTINCT foo, bar to GROUP BY foo, bar
+  # to support cross partition queries with eager loaded associations
+  def self.convert_distinct_to_group_by(arel)
+    ctx = arel.ast.cores.last
+    projections = ctx.projections.first
+    if ctx.set_quantifier.is_a?(Arel::Nodes::Distinct)
+      ctx.set_quantifier = nil
+      if projections.is_a?(String)
+        return arel.group(ctx.projections.first.gsub(/ AS.*/, ''))
+      end
+    end
+
+    # Citus does not support cross-partition COUNT(DISTINCT) at the moment
+    # Note this will cause counts to be off with left joins / eager loads
+    if projections.is_a?(Arel::Nodes::Count)
+      projections.distinct = false
+    end
+    arel
+  end
 end
 
 require 'active_record/relation'
@@ -120,9 +140,8 @@ module ActiveRecord
                              end
                            end
 
-            next unless tenant_value
-
             known_relations << relation
+            next unless tenant_value
 
             outer_join = outer_joins_by_table_name[relation.name]
             if outer_join
@@ -137,6 +156,8 @@ module ActiveRecord
             end
           end
         end
+
+        arel = MultiTenant.convert_distinct_to_group_by(arel) unless MultiTenant.current_tenant
       end
 
       arel
