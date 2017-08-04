@@ -83,6 +83,39 @@ module MultiTenant
       @column_type
     end
   end
+
+  # Converts SELECT DISTINCT foo, bar to GROUP BY foo, bar
+  # to support cross partition queries with eager loaded associations
+  def self.convert_distinct_to_group_by(arel)
+    ctx = arel.ast.cores.last
+    projections = ctx.projections.first
+    if ctx.set_quantifier.is_a?(Arel::Nodes::Distinct)
+      ctx.set_quantifier = nil
+      if projections.is_a?(String)
+        return arel.group(ctx.projections.first.gsub(/ AS.*/, ''))
+      end
+    end
+
+    # Citus does not support cross-partition COUNT(DISTINCT) except
+    # For approximations using the HLL extension
+    # However, if the query can be converted into a distinct via GROUP BY
+    # We can convert it into SELECT COUNT(*) FROM (... GROUP BY ...)
+    if projections.is_a?(Arel::Nodes::Count) && projections.distinct
+      return arel if MultiTenant.use_hll_counts?
+      ctx.projections = projections.expressions
+      partition_keys = projections.expressions.map do |e|
+        model = MultiTenant.multi_tenant_model_for_table(e.try(:relation).try(:name))
+        model.arel_table[model.partition_key] if model
+      end.compact
+      if partition_keys
+        return Arel::Subquery.new(
+          arel.group(projections.expressions + partition_keys),
+          as: 'countme'
+        ).project(Arel.star.count)
+      end
+    end
+    arel
+  end
 end
 
 require 'active_record/relation'
@@ -92,7 +125,7 @@ module ActiveRecord
     def build_arel
       arel = build_arel_orig
 
-      if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
+      unless MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.tenant_relations.each do |statement_node_id, relations|
           # Process every level of the statement separately, so we don't mix subselects
@@ -108,7 +141,7 @@ module ActiveRecord
             tenant_value = if tenant_relation.present?
                              known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
                              tenant_relation[known_model.partition_key]
-                           else
+                           elsif MultiTenant.current_tenant_id
                              if ActiveRecord::VERSION::MAJOR >= 5
                                #arel.bind_values << Relation::QueryAttribute.new(model.partition_key, MultiTenant.current_tenant_id, model.type_for_attribute(model.partition_key))
                                arel.bind_values << MultiTenant::BindValueSubstitute.new(model.columns_hash[model.partition_key])
@@ -121,6 +154,7 @@ module ActiveRecord
                            end
 
             known_relations << relation
+            next unless tenant_value
 
             outer_join = outer_joins_by_table_name[relation.name]
             if outer_join
@@ -135,6 +169,8 @@ module ActiveRecord
             end
           end
         end
+
+        arel = MultiTenant.convert_distinct_to_group_by(arel) unless MultiTenant.current_tenant
       end
 
       arel
