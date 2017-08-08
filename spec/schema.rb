@@ -1,5 +1,7 @@
 # Resets the database, except when we are only running a specific spec
 ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
+  enable_extension_on_all_nodes 'uuid-ossp'
+
   create_table :accounts, force: true do |t|
     t.column :name, :string
     t.column :subdomain, :string
@@ -66,6 +68,15 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
   end
 
+  create_table :organizations, force: true, id: :uuid do |t|
+    t.column :name, :string
+  end
+
+  create_table :uuid_records, force: true, partition_key: :organization_id do |t|
+    t.column :organization_id, :uuid
+    t.column :description, :string
+  end
+
   create_distributed_table :accounts, :id
   create_distributed_table :projects, :account_id
   create_distributed_table :managers, :account_id
@@ -76,6 +87,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :comments, :account_id
   create_distributed_table :partition_key_not_model_tasks, :non_model_id
   create_distributed_table :subclass_tasks, :non_model_id
+  create_distributed_table :uuid_records, :organization_id
 end
 
 class Account < ActiveRecord::Base
@@ -157,4 +169,12 @@ class Comment < ActiveRecord::Base
   if ActiveRecord::VERSION::MAJOR >= 4
     belongs_to :task, -> { where(comments: { commentable_type: 'Task'  }) }, foreign_key: 'commentable_id'
   end
+end
+
+class Organization < ActiveRecord::Base
+  has_many :uuid_records
+end
+
+class UuidRecord < ActiveRecord::Base
+  multi_tenant :organization
 end

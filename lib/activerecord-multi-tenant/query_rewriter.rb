@@ -72,7 +72,7 @@ module MultiTenant
   # oddly with the statement cache in Rails versions before 5.0.
   class TenantValueParam < Arel::Nodes::Node
     def to_s
-      MultiTenant.current_tenant_id.to_s
+      ActiveRecord::Base.connection.quote(MultiTenant.current_tenant_id)
     end
 
     def to_str; to_s; end
