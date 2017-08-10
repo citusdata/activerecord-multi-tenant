@@ -8,4 +8,12 @@ describe MultiTenant, 'Record finding' do
       expect(Project.find(project.id)).to be_present
     end
   end
+
+  it 'supports UUIDs' do
+    organization = Organization.create! name: 'test'
+    uuid_record = organization.uuid_records.create! description: 'something'
+    MultiTenant.with(organization) do
+      expect(UuidRecord.find(uuid_record.id)).to be_present
+    end
+  end
 end

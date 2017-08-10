@@ -9,7 +9,6 @@ rvm:
   - 2.4.0
 
 gemfile:
-  - gemfiles/rails_3.2.gemfile
   - gemfiles/rails_4.0.gemfile
   - gemfiles/rails_4.1.gemfile
   - gemfiles/rails_4.2.gemfile
@@ -26,8 +25,6 @@ matrix:
       gemfile: gemfiles/rails_5.1.gemfile
     - rvm: 2.1
       gemfile: gemfiles/active_record_5.1.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_3.2.gemfile
     - rvm: 2.4.0
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.4.0

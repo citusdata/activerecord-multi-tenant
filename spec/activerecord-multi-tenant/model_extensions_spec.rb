@@ -287,6 +287,27 @@ describe MultiTenant do
     end
   end
 
+  it 'does not cache tenancy in associations' do
+    account1 = Account.create! name: 'test1'
+    account2 = Account.create! name: 'test2'
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'something1'
+      task1 = Task.create! name: 'task1', project: project1
+      subtask1 = SubTask.create! task: task1
+
+      expect(subtask1.project).to be_present
+    end
+
+    MultiTenant.with(account2) do
+      project2 = Project.create! name: 'something2'
+      task2 = Task.create! name: 'task2', project: project2
+      subtask2 = SubTask.create! task: task2
+
+      expect(subtask2.project).to be_present
+    end
+  end
+
   if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR > 0)
     # Reflection
     describe 'with unsaved association' do

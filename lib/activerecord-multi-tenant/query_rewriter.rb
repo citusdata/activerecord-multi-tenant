@@ -31,6 +31,7 @@ module MultiTenant
     alias :visit_Arel_Nodes_TableAlias :visit_Arel_Table
 
     def visit_Arel_Nodes_SelectStatement(o, _collector = nil)
+      return if @statement_node_id
       @statement_node_id = o.object_id
       visit o.cores
       visit o.orders
@@ -65,7 +66,65 @@ module MultiTenant
       MultiTenant.multi_tenant_model_for_table(table_name).present?
     end
   end
+
+  # We use a proxy object in the arel tree instead of the actual value to avoid
+  # the tenant value being cached by the Rails statement cache. Whilst it would
+  # also be possible to use bind parameters for a similar benefit, they interact
+  # oddly with the statement cache in Rails versions before 5.0.
+  class TenantValueParam < Arel::Nodes::Node
+    def to_s
+      ActiveRecord::Base.connection.quote(MultiTenant.current_tenant_id)
+    end
+
+    def to_str; to_s; end
+    def to_sql(*args); to_s; end
+  end
+
+  class TenantEnforcementClause < Arel::Nodes::Node
+    def initialize(tenant_attribute)
+      @tenant_attribute = tenant_attribute
+    end
+
+    def to_s; to_sql; end
+    def to_str; to_sql; end
+
+    def to_sql(*)
+      if MultiTenant.current_tenant_id
+        tenant_arel.to_sql
+      else
+        "1=1"
+      end
+    end
+
+    private
+
+    def tenant_arel
+      @tenant_attribute.eq(MultiTenant.current_tenant_id)
+    end
+  end
+
+  module TenantValueVisitor
+    if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+      def visit_MultiTenant_TenantValueParam(o, collector)
+        collector << o
+      end
+
+      def visit_MultiTenant_TenantEnforcementClause(o, collector)
+        collector << o
+      end
+    else
+      def visit_MultiTenant_TenantValueParam(o, a = nil)
+        o
+      end
+
+      def visit_MultiTenant_TenantEnforcementClause(o, a = nil)
+        o
+      end
+    end
+  end
 end
+
+Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 
 require 'active_record/relation'
 module ActiveRecord
@@ -90,6 +149,8 @@ module ActiveRecord
             tenant_value = if tenant_relation.present?
                              known_model = MultiTenant.multi_tenant_model_for_table(tenant_relation.table_name)
                              tenant_relation[known_model.partition_key]
+                           elsif ActiveRecord::VERSION::MAJOR >= 4
+                             MultiTenant::TenantValueParam.new # Prevents caching issues, see above
                            else
                              MultiTenant.current_tenant_id
                            end
@@ -98,13 +159,14 @@ module ActiveRecord
 
             outer_join = outer_joins_by_table_name[relation.name]
             if outer_join
-              outer_join.right.expr = Arel::Nodes::And.new([outer_join.right.expr, relation[model.partition_key].eq(tenant_value)])
+              outer_join.right.expr = outer_join.right.expr.and(relation[model.partition_key].eq(tenant_value))
             else
               ctx = arel.ast.cores.last
+              enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation[model.partition_key])
               if ctx.wheres.size == 1
-                ctx.wheres = [Arel::Nodes::And.new([ctx.wheres.first, relation[model.partition_key].eq(tenant_value)])]
+                ctx.wheres = [enforcement_clause.and(ctx.wheres.first)]
               else
-                arel = arel.where(relation[model.partition_key].eq(tenant_value))
+                arel = arel.where(enforcement_clause)
               end
             end
           end
