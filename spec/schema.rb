@@ -1,6 +1,7 @@
 # Resets the database, except when we are only running a specific spec
 ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   enable_extension_on_all_nodes 'uuid-ossp'
+  enable_extension_on_all_nodes 'pgcrypto'
 
   create_table :accounts, force: true do |t|
     t.column :name, :string
@@ -102,11 +103,7 @@ class Project < ActiveRecord::Base
   has_many :tasks
   has_many :sub_tasks, through: :tasks
 
-  if ActiveRecord::VERSION::MAJOR < 4
-    validates_uniqueness_of :name, scope: [:account_id]
-  else
-    validates_uniqueness_of :name, scope: [:account]
-  end
+  validates_uniqueness_of :name, scope: [:account]
 end
 
 class Manager < ActiveRecord::Base
@@ -143,11 +140,7 @@ end
 class CustomPartitionKeyTask < ActiveRecord::Base
   multi_tenant :account, partition_key: 'accountID'
 
-  if ActiveRecord::VERSION::MAJOR < 4
-    validates_uniqueness_of :name, scope: [:accountID]
-  else
-    validates_uniqueness_of :name, scope: [:account]
-  end
+  validates_uniqueness_of :name, scope: [:account]
 end
 
 class PartitionKeyNotModelTask < ActiveRecord::Base
