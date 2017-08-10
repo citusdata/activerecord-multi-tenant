@@ -16,7 +16,7 @@ gem 'activerecord-multi-tenant'
 
 ## Supported Rails versions
 
-All Ruby on Rails versions starting with 3.2 or newer are supported.
+All Ruby on Rails versions starting with 4.0 or newer are supported.
 
 This gem only supports ActiveRecord (the Rails default ORM), and not alternative ORMs like Sequel.
 
@@ -101,4 +101,4 @@ This gem was initially based on [acts_as_tenant](https://github.com/ErwinM/acts_
 ## License
 
 Licensed under the MIT license<br>
-Copyright (c) 2016, Citus Data Inc.
+Copyright (c) 2017, Citus Data Inc.
