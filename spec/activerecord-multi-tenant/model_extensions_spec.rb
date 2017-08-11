@@ -308,6 +308,22 @@ describe MultiTenant do
     end
   end
 
+  it "applies the team_id conditions in the where clause" do
+    expected_sql = <<-sql
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+    sql
+    account1 = Account.create! name: 'Account 1'
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'Project 1'
+      task1 = Task.create! name: 'Task 1', project: project1
+      subtask1 = SubTask.create! task: task1
+
+      expect(project1.sub_tasks.to_sql).to eq(expected_sql.strip)
+      expect(project1.sub_tasks).to include(subtask1)
+    end
+  end
+
   if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR > 0)
     # Reflection
     describe 'with unsaved association' do
