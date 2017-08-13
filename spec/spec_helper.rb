@@ -8,7 +8,7 @@ require 'rspec/rails'
 require 'activerecord-multi-tenant'
 
 require 'bundler'
-Bundler.require(:default)
+Bundler.require(:default, :development)
 
 dbconfig = YAML::load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "debug.log"))
