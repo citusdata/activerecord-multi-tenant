@@ -287,6 +287,65 @@ describe MultiTenant do
     end
   end
 
+  it 'does not cache tenancy in associations' do
+    account1 = Account.create! name: 'test1'
+    account2 = Account.create! name: 'test2'
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'something1'
+      task1 = Task.create! name: 'task1', project: project1
+      subtask1 = SubTask.create! task: task1
+
+      expect(subtask1.project).to be_present
+    end
+
+    MultiTenant.with(account2) do
+      project2 = Project.create! name: 'something2'
+      task2 = Task.create! name: 'task2', project: project2
+      subtask2 = SubTask.create! task: task2
+
+      expect(subtask2.project).to be_present
+    end
+  end
+
+  it "applies the team_id conditions in the where clause" do
+    expected_sql = <<-sql
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+    sql
+    account1 = Account.create! name: 'Account 1'
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'Project 1'
+      task1 = Task.create! name: 'Task 1', project: project1
+      subtask1 = SubTask.create! task: task1
+
+      expect(project1.sub_tasks.to_sql).to eq(expected_sql.strip)
+      expect(project1.sub_tasks).to include(subtask1)
+    end
+  end
+
+  it "only applies clauses when a tenant is set" do
+    account = Account.create! name: 'Account 1'
+    project = Project.create! name: 'Project 1', account: account
+    project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
+
+    MultiTenant.with(account) do
+      expected_sql = <<-sql.strip
+      SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+      sql
+      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+      expect(Project.find(project.id)).to eq(project)
+    end
+
+    MultiTenant.with(nil) do
+      expected_sql = <<-sql.strip
+      SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
+      sql
+      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+      expect(Project.find(project2.id)).to eq(project2)
+    end
+  end
+
   if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR > 0)
     # Reflection
     describe 'with unsaved association' do

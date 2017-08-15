@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'sidekiq'
   s.add_development_dependency 'thor'
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'pry-byebug'
 end
