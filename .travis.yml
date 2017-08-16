@@ -4,9 +4,9 @@ cache: bundler
 language: ruby
 
 rvm:
-  - 2.1
-  - 2.3.3
-  - 2.4.0
+  - 2.2.7
+  - 2.3.4
+  - 2.4.1
 
 gemfile:
   - gemfiles/rails_4.0.gemfile
@@ -19,15 +19,9 @@ gemfile:
 matrix:
   fast_finish: true
   exclude:
-    - rvm: 2.1
-      gemfile: gemfiles/rails_5.0.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/rails_5.1.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/active_record_5.1.gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rails_4.0.gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rails_4.1.gemfile
 
 services:
