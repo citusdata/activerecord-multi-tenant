@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.0       2017-08-16
+
+* Significant improvements and simplifications of query rewriting
+  * Big thanks to [Kyle Bock](https://github.com/kwbock) and [Ben Olive](https://github.com/sionide21)
+    for (re-)writing this code and verifying it works well
+  * This fixes caching issues across multiple MultiTenant.with { } blocks when
+    interacting with the Rails statement cache
+* Drop support for Rails 3.2
+  * The arel version used in Rails 3.2 has caused more trouble than its worth -
+    it seems less troublesome to ask any users of this library to upgrade to at
+    least Rails 4.0
+
+
 ## 0.7.0       2017-07-18
 
 * Switch back to Relation-based mechanism of hooking into ActiveRecord (this resolves issues for simple queries that didn't get rewritten)

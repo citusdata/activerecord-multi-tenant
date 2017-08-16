@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-multi-tenant (0.7.0)
+    activerecord-multi-tenant (0.8.0)
       rails (>= 3.1)
       request_store (>= 1.0.5)
 
@@ -62,7 +62,7 @@ GEM
     i18n (0.8.1)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
-    mail (2.6.5)
+    mail (2.6.6)
       mime-types (>= 1.16, < 4)
     method_source (0.8.2)
     mime-types (3.1)
@@ -70,7 +70,7 @@ GEM
     mime-types-data (3.2016.0521)
     mini_portile2 (2.1.0)
     minitest (5.10.1)
-    nio4r (2.0.0)
+    nio4r (2.1.0)
     nokogiri (1.7.1)
       mini_portile2 (~> 2.1.0)
     pg (0.20.0)

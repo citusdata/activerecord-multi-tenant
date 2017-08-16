@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-multi-tenant (0.7.0)
+    activerecord-multi-tenant (0.8.0)
       rails (>= 3.1)
       request_store (>= 1.0.5)
 
