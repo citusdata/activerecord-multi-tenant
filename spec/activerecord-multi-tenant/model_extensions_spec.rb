@@ -324,30 +324,34 @@ describe MultiTenant do
     end
   end
 
-  it "only applies clauses when a tenant is set" do
-    account = Account.create! name: 'Account 1'
-    project = Project.create! name: 'Project 1', account: account
-    project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
+  # Versions earlier than 4.2 pass an arel object to find_by_sql(...) and it would make
+  # this test unnecesssarily complicated to support that
+  if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+    it "only applies clauses when a tenant is set" do
+      account = Account.create! name: 'Account 1'
+      project = Project.create! name: 'Project 1', account: account
+      project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
 
-    MultiTenant.with(account) do
-      expected_sql = <<-sql.strip
-      SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
-      sql
-      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
-      expect(Project.find(project.id)).to eq(project)
-    end
+      MultiTenant.with(account) do
+        expected_sql = <<-sql.strip
+        SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+        sql
+        expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+        expect(Project.find(project.id)).to eq(project)
+      end
 
-    MultiTenant.with(nil) do
-      expected_sql = <<-sql.strip
-      SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
-      sql
-      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
-      expect(Project.find(project2.id)).to eq(project2)
+      MultiTenant.with(nil) do
+        expected_sql = <<-sql.strip
+        SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
+        sql
+        expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+        expect(Project.find(project2.id)).to eq(project2)
+      end
     end
   end
 
-  if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR > 0)
-    # Reflection
+  # Versions earlier than 4.1 have a different behaviour regarding unsaved associations
+  if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1)
     describe 'with unsaved association' do
       before do
         @account = Account.create!(name: 'reflection tenant')

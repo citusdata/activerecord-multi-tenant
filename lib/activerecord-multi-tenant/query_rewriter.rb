@@ -97,7 +97,11 @@ module MultiTenant
         visit o.wheres
         visit o.groups
         visit o.windows
-        visit o.having
+        if defined?(o.having)
+          visit o.having
+        else
+          visit o.havings
+        end
       end
     end
 
@@ -109,10 +113,8 @@ module MultiTenant
         end
       end
     end
-    alias :visit_Arel_Nodes_OuterJoin :visit_join
-    alias :visit_Arel_Nodes_FullOuterJoin :visit_join
-    alias :visit_Arel_Nodes_RightOuterJoin :visit_join
-    alias :visit_Arel_Nodes_InnerJoin :visit_join
+    alias :visit_Arel_Nodes_FullOuterJoin :visit_Arel_Nodes_OuterJoin
+    alias :visit_Arel_Nodes_RightOuterJoin :visit_Arel_Nodes_OuterJoin
 
     private
 
@@ -163,7 +165,11 @@ module MultiTenant
     private
 
     def tenant_arel
-      @tenant_attribute.eq(MultiTenant.current_tenant_id)
+      if defined?(Arel::Nodes::Quoted)
+        @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
+      else
+        @tenant_attribute.eq(MultiTenant.current_tenant_id)
+      end
     end
   end
 
