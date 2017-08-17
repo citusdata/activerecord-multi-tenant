@@ -212,16 +212,15 @@ describe MultiTenant do
           FROM "projects"
           LEFT OUTER JOIN "managers" ON "managers"."project_id" = "projects"."id"
           AND "managers"."account_id" = "projects"."account_id"
-          AND 1=1
           LEFT OUTER JOIN "projects" "projects_managers" ON "projects_managers"."id" = "managers"."project_id"
           AND "projects_managers"."account_id" = "projects"."account_id"
           AND "managers"."account_id" = "projects"."account_id"
           LEFT OUTER JOIN "tasks" ON "tasks"."project_id" = "projects"."id"
-          AND "tasks"."account_id" = "projects"."account_id" AND 1=1
+          AND "tasks"."account_id" = "projects"."account_id"
           LEFT OUTER JOIN "sub_tasks" ON "sub_tasks"."task_id" = "tasks"."id"
           AND "sub_tasks"."account_id" = "projects"."account_id"
-          AND "tasks"."account_id" = "projects"."account_id" WHERE 1=1
-          AND "projects"."account_id" IN (1, 2)
+          AND "tasks"."account_id" = "projects"."account_id"
+          WHERE 1=1 AND "projects"."account_id" IN (1, 2)
         ].squish
       end
 
@@ -393,7 +392,7 @@ describe MultiTenant do
 
   it "applies the team_id conditions in the where clause" do
     expected_sql = <<-sql
-      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = "sub_tasks"."account_id" AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
     sql
     account1 = Account.create! name: 'Account 1'
 
@@ -401,7 +400,6 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       task1 = Task.create! name: 'Task 1', project: project1
       subtask1 = SubTask.create! task: task1
-
       expect(project1.sub_tasks.to_sql).to eq(expected_sql.strip)
       expect(project1.sub_tasks).to include(subtask1)
     end
