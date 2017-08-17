@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'arel/visitors/reduce'
+require 'arel/visitors'
 
 # Monkey-patch Arel::Visitors::ToSql to support Arel::Subquery
 module Arel
