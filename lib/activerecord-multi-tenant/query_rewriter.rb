@@ -80,16 +80,6 @@ module MultiTenant
       super(o, *args)
     end
 
-    # def visit_Arel_Nodes_Equality(o, _collector = nil)
-    #   if o.left.is_a?(Arel::Attributes::Attribute)
-    #     table_name = o.left.relation.table_name
-    #     model = MultiTenant.multi_tenant_model_for_table(table_name)
-    #     @current_context.visited_handled_relation(o.left.relation) if model.present? && o.left.name == model.partition_key
-    #     @existing_tenant_relations[@statement_node_id] ||= []
-    #     @existing_tenant_relations[@statement_node_id] << o.left.relation if model.present? && o.left.name == model.partition_key
-    #   end
-    # end
-
     def visit_MultiTenant_TenantEnforcementClause(o, *)
       @current_context.visited_handled_relation(o.tenant_attribute.relation)
     end
@@ -156,16 +146,17 @@ module MultiTenant
   end
 
   class TenantEnforcementClause < Arel::Nodes::Node
-    attr_reader :tenant_attribute
-    def initialize(tenant_attribute)
+    attr_reader :tenant_attribute, :source_attribute
+    def initialize(tenant_attribute, source_attribute = nil)
       @tenant_attribute = tenant_attribute
+      @source_attribute = source_attribute || MultiTenant.current_tenant_id
     end
 
     def to_s; to_sql; end
     def to_str; to_sql; end
 
     def to_sql(*)
-      if MultiTenant.current_tenant_id
+      if source_attribute
         tenant_arel.to_sql
       else
         '1=1'
@@ -175,10 +166,10 @@ module MultiTenant
     private
 
     def tenant_arel
-      if defined?(Arel::Nodes::Quoted)
-        @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
+      if defined?(Arel::Nodes::Quoted) && source_attribute.is_a?(String)
+        @tenant_attribute.eq(Arel::Nodes::Quoted.new(source_attribute))
       else
-        @tenant_attribute.eq(MultiTenant.current_tenant_id)
+        @tenant_attribute.eq(source_attribute)
       end
     end
   end
@@ -241,12 +232,29 @@ module ActiveRecord
       arel = build_arel_orig
 
       unless MultiTenant.with_write_only_mode_enabled?
+        # Get select source to be used in enforcement clause if it is a multi-tenant table
+        source_table = arel.source.left
+        source_model = MultiTenant.multi_tenant_model_for_table(source_table.table_name)
+        source_partition_key = source_model.try(:partition_key)
+
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.contexts.each do |context|
           node = context.arel_node
-          context.unhandled_relations.each do |relation|
+          relations = if MultiTenant.current_tenant
+                        context.unhandled_relations.uniq
+                      else
+                        relations = context.known_relations.uniq
+                      end
+          relations.each do |relation|
             model = MultiTenant.multi_tenant_model_for_table(relation.arel_table.table_name)
-            enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
+            if model != source_model && model.partition_key == source_partition_key
+              enforcement_clause = MultiTenant::TenantEnforcementClause.new(
+                relation.arel_table[model.partition_key],
+                source_table[source_partition_key]
+              )
+            else
+              enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
+            end
 
             case node
             when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
