@@ -189,7 +189,7 @@ describe MultiTenant do
         rel = base_relation
         expect(rel.to_a).to eq [project, project_2]
         expect(rel.to_sql).to eq %[
-          SELECT "projects"."id" AS t0_r0,
+        SELECT "projects"."id" AS t0_r0,
           "projects"."account_id" AS t0_r1,
           "projects"."name" AS t0_r2,
           "managers"."id" AS t1_r0,
@@ -207,20 +207,20 @@ describe MultiTenant do
           "sub_tasks"."id" AS t4_r0,
           "sub_tasks"."account_id" AS t4_r1,
           "sub_tasks"."name" AS t4_r2,
-          "sub_tasks"."task_id" AS t4_r3,
-          "sub_tasks"."type" AS t4_r4
-          FROM "projects"
-          LEFT OUTER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+          "sub_tasks"."task_id"
+          AS t4_r3, "sub_tasks"."type" AS t4_r4
+        FROM "projects"
+        LEFT OUTER JOIN "managers" ON "managers"."project_id" = "projects"."id"
           AND "managers"."account_id" = "projects"."account_id"
-          LEFT OUTER JOIN "projects" "projects_managers" ON "projects_managers"."id" = "managers"."project_id"
+        LEFT OUTER JOIN "projects" "projects_managers" ON "projects_managers"."id" = "managers"."project_id"
           AND "projects_managers"."account_id" = "projects"."account_id"
           AND "managers"."account_id" = "projects"."account_id"
-          LEFT OUTER JOIN "tasks" ON "tasks"."project_id" = "projects"."id"
+        LEFT OUTER JOIN "tasks" ON "tasks"."project_id" = "projects"."id"
           AND "tasks"."account_id" = "projects"."account_id"
-          LEFT OUTER JOIN "sub_tasks" ON "sub_tasks"."task_id" = "tasks"."id"
+        LEFT OUTER JOIN "sub_tasks" ON "sub_tasks"."task_id" = "tasks"."id"
           AND "sub_tasks"."account_id" = "projects"."account_id"
           AND "tasks"."account_id" = "projects"."account_id"
-          WHERE 1=1 AND "projects"."account_id" IN (1, 2)
+        WHERE "projects"."account_id" IN (1, 2)
         ].squish
       end
 

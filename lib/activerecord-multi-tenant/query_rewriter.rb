@@ -241,6 +241,7 @@ module ActiveRecord
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.contexts.each do |context|
           node = context.arel_node
+          next unless MultiTenant.current_tenant || node.is_a?(Arel::Nodes::Join)
           relations = if MultiTenant.current_tenant
                         context.unhandled_relations.uniq
                       else
@@ -251,13 +252,13 @@ module ActiveRecord
             case node
               when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
                 next if relation.arel_table.name == source_table.name
-                if model.partition_key == source_partition_key
-                  enforcement_clause = MultiTenant::TenantEnforcementClause.new(
+                enforcement_clause = if model.partition_key == source_partition_key
+                  MultiTenant::TenantEnforcementClause.new(
                     relation.arel_table[model.partition_key],
                     source_table[source_partition_key]
                   )
                 else
-                  enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
+                  MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
                 end
                 node.right.expr = node.right.expr.and(enforcement_clause)
               when Arel::Nodes::SelectCore
