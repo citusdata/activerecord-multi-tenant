@@ -54,6 +54,15 @@ module MultiTenant
     end
   end
 
+  class MultiTenantSubquery < Arel::Table
+    attr_accessor :data_source
+
+    def initialize(data_source, as:, type_caster: nil)
+      super(as, type_caster: type_caster)
+      @data_source = data_source
+    end
+  end
+
   class ArelTenantVisitor < Arel::Visitors::DepthFirst
     def initialize(arel)
       super(Proc.new {})
@@ -113,6 +122,7 @@ module MultiTenant
         end
       end
     end
+
     alias :visit_Arel_Nodes_FullOuterJoin :visit_Arel_Nodes_OuterJoin
     alias :visit_Arel_Nodes_RightOuterJoin :visit_Arel_Nodes_OuterJoin
 
@@ -187,6 +197,35 @@ module MultiTenant
     end
   end
 
+  module MultiTenantSubqueryVisitor
+    if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+      def visit_MultiTenant_MultiTenantSubquery(o, collector)
+        collector << '('
+        collector << case o.data_source
+                       when String
+                         o.data_source
+                       when Arel::SelectManager
+                         o.data_source.to_sql
+                       else
+                         o.data_source.to_s
+                     end
+        collector << ") #{quote_table_name o.name}"
+      end
+    else
+      def visit_MultiTenant_TenantEnforcementClause(o, a = nil)
+        query = case o.data_source
+                  when String
+                    o.data_source
+                  when Arel::SelectManager
+                    o.data_source.to_sql
+                  else
+                    o.data_source.to_s
+                end
+        "(#{query}) #{quote_table_name o.name}"
+      end
+    end
+  end
+
   module SqlWorkarounds
     # Converts SELECT DISTINCT foo, bar to GROUP BY foo, bar
     # to support cross partition queries with eager loaded associations
@@ -212,7 +251,7 @@ module MultiTenant
           model.arel_table[model.partition_key] if model
         end.compact
         if partition_keys
-          return Arel::Subquery.new(
+          return MultiTenant::MultiTenantSubquery.new(
             arel.group(projections.expressions + partition_keys),
             as: 'countme'
           ).project(Arel.star.count)
@@ -224,6 +263,7 @@ module MultiTenant
 end
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
+Arel::Visitors::ToSql.include(MultiTenant::MultiTenantSubqueryVisitor)
 
 require 'active_record/relation'
 module ActiveRecord

@@ -1,8 +1,6 @@
 if Object.const_defined?(:ActionController)
   require_relative 'activerecord-multi-tenant/controller_extensions'
 end
-require_relative 'arel/subquery'
-require_relative 'arel/visitors/subquery_to_sql'
 require_relative 'activerecord-multi-tenant/copy_from_client'
 require_relative 'activerecord-multi-tenant/fast_truncate'
 require_relative 'activerecord-multi-tenant/migrations'
