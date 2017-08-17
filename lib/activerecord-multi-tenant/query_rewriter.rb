@@ -80,6 +80,16 @@ module MultiTenant
       super(o, *args)
     end
 
+    # def visit_Arel_Nodes_Equality(o, _collector = nil)
+    #   if o.left.is_a?(Arel::Attributes::Attribute)
+    #     table_name = o.left.relation.table_name
+    #     model = MultiTenant.multi_tenant_model_for_table(table_name)
+    #     @current_context.visited_handled_relation(o.left.relation) if model.present? && o.left.name == model.partition_key
+    #     @existing_tenant_relations[@statement_node_id] ||= []
+    #     @existing_tenant_relations[@statement_node_id] << o.left.relation if model.present? && o.left.name == model.partition_key
+    #   end
+    # end
+
     def visit_MultiTenant_TenantEnforcementClause(o, *)
       @current_context.visited_handled_relation(o.tenant_attribute.relation)
     end
@@ -184,6 +194,41 @@ module MultiTenant
       end
     end
   end
+
+  module SqlWorkarounds
+    # Converts SELECT DISTINCT foo, bar to GROUP BY foo, bar
+    # to support cross partition queries with eager loaded associations
+    def self.convert_distinct_to_group_by(arel)
+      ctx = arel.ast.cores.last
+      projections = ctx.projections.first
+      if ctx.set_quantifier.is_a?(Arel::Nodes::Distinct)
+        ctx.set_quantifier = nil
+        if projections.is_a?(String)
+          return arel.group(ctx.projections.first.gsub(/ AS.*/, ''))
+        end
+      end
+
+      # Citus does not support cross-partition COUNT(DISTINCT) except
+      # For approximations using the HLL extension
+      # However, if the query can be converted into a distinct via GROUP BY
+      # We can convert it into SELECT COUNT(*) FROM (... GROUP BY ...)
+      if projections.is_a?(Arel::Nodes::Count) && projections.distinct
+        return arel if MultiTenant.use_hll_counts?
+        ctx.projections = projections.expressions
+        partition_keys = projections.expressions.map do |e|
+          model = MultiTenant.multi_tenant_model_for_table(e.try(:relation).try(:name))
+          model.arel_table[model.partition_key] if model
+        end.compact
+        if partition_keys
+          return Arel::Subquery.new(
+            arel.group(projections.expressions + partition_keys),
+            as: 'countme'
+          ).project(Arel.star.count)
+        end
+      end
+      arel
+    end
+  end
 end
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
@@ -195,7 +240,7 @@ module ActiveRecord
     def build_arel
       arel = build_arel_orig
 
-      if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
+      unless MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.contexts.each do |context|
           node = context.arel_node
@@ -218,8 +263,8 @@ module ActiveRecord
           end
         end
       end
-
-      arel
+      return arel if MultiTenant.current_tenant
+      MultiTenant::SqlWorkarounds.convert_distinct_to_group_by(arel)
     end
   end
 end
