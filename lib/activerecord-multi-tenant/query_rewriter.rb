@@ -212,7 +212,7 @@ module MultiTenant
         collector << ") #{quote_table_name o.name}"
       end
     else
-      def visit_MultiTenant_TenantEnforcementClause(o, a = nil)
+      def visit_MultiTenant_MultiTenantSubquerye(o, a = nil)
         query = case o.data_source
                   when String
                     o.data_source
