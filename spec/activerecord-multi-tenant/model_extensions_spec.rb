@@ -153,11 +153,94 @@ describe MultiTenant do
     let(:task) { project.tasks.create!(name: 'eager loading test task') }
     let(:sub_task) { task.sub_tasks.create!(name: 'eager loading test sub task') }
 
-    it 'handles table aliases through joins' do
+    before do
       MultiTenant.with(account) do
         sub_task
         manager
+      end
+    end
+
+    it 'handles table aliases through joins' do
+      MultiTenant.with(account) do
         expect(Project.eager_load([{manager: :project}, {tasks: :project}]).first).to eq project
+      end
+    end
+
+    context 'cross-partition queries' do
+      let(:account_2) { Account.create!(name: 'bar') }
+      let(:project_2) { Project.create!(name: 'project_2', account: account_2) }
+      let(:manager_2) { Manager.create!(name: 'manager_2', account: account_2, project: project_2) }
+      let(:task_2) { project_2.tasks.create!(name: 'eager loading test task') }
+      let(:sub_task_2) { task_2.sub_tasks.create!(name: 'eager loading test sub task 2') }
+      let(:sub_task_3) { task_2.sub_tasks.create!(name: 'eager loading test sub task 3') }
+      let(:base_relation) do
+        Project.eager_load([{manager: :project}, {tasks: :sub_tasks}]).where(account_id: [account.id, account_2.id])
+      end
+
+      before do
+        MultiTenant.with(account_2) do
+          sub_task_2
+          sub_task_3
+          manager_2
+        end
+      end
+
+      it 'handles table aliases through joins' do
+        rel = base_relation
+        expect(rel.to_a).to eq [project, project_2]
+        expect(rel.to_sql).to eq %[
+          SELECT "projects"."id" AS t0_r0,
+          "projects"."account_id" AS t0_r1,
+          "projects"."name" AS t0_r2,
+          "managers"."id" AS t1_r0,
+          "managers"."account_id" AS t1_r1,
+          "managers"."name" AS t1_r2,
+          "managers"."project_id" AS t1_r3,
+          "projects_managers"."id" AS t2_r0,
+          "projects_managers"."account_id" AS t2_r1,
+          "projects_managers"."name" AS t2_r2,
+          "tasks"."id" AS t3_r0,
+          "tasks"."name" AS t3_r1,
+          "tasks"."account_id" AS t3_r2,
+          "tasks"."project_id" AS t3_r3,
+          "tasks"."completed" AS t3_r4,
+          "sub_tasks"."id" AS t4_r0,
+          "sub_tasks"."account_id" AS t4_r1,
+          "sub_tasks"."name" AS t4_r2,
+          "sub_tasks"."task_id" AS t4_r3,
+          "sub_tasks"."type" AS t4_r4
+          FROM "projects"
+          LEFT OUTER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+          AND "managers"."account_id" = "projects"."account_id"
+          AND 1=1
+          LEFT OUTER JOIN "projects" "projects_managers" ON "projects_managers"."id" = "managers"."project_id"
+          AND "projects_managers"."account_id" = "projects"."account_id"
+          AND "managers"."account_id" = "projects"."account_id"
+          LEFT OUTER JOIN "tasks" ON "tasks"."project_id" = "projects"."id"
+          AND "tasks"."account_id" = "projects"."account_id" AND 1=1
+          LEFT OUTER JOIN "sub_tasks" ON "sub_tasks"."task_id" = "tasks"."id"
+          AND "sub_tasks"."account_id" = "projects"."account_id"
+          AND "tasks"."account_id" = "projects"."account_id" WHERE 1=1
+          AND "projects"."account_id" IN (1, 2)
+        ].squish
+      end
+
+      it 'can count distinct across partitions without HLL extension' do
+        expect(base_relation.distinct.count).to be 2
+      end
+
+      context '.with_hll_counts' do
+        it 'does not modify COUNT(DISTINCT) queries' do
+          begin
+            base_relation.distinct.count
+          rescue => ex
+            expect(ex.message).to include 'PG::FeatureNotSupported: ERROR:  cannot compute aggregate (distinct)'
+          end
+        end
+      end
+
+      it 'can distinct across partitions' do
+        expect(base_relation.distinct.to_a).to eq [project, project_2]
       end
     end
   end
@@ -310,7 +393,7 @@ describe MultiTenant do
 
   it "applies the team_id conditions in the where clause" do
     expected_sql = <<-sql
-      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = "sub_tasks"."account_id" AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
     sql
     account1 = Account.create! name: 'Account 1'
 

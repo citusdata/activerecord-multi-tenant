@@ -149,14 +149,14 @@ module MultiTenant
     attr_reader :tenant_attribute, :source_attribute
     def initialize(tenant_attribute, source_attribute = nil)
       @tenant_attribute = tenant_attribute
-      @source_attribute = source_attribute || MultiTenant.current_tenant_id
+      @source_attribute = source_attribute
     end
 
     def to_s; to_sql; end
     def to_str; to_sql; end
 
     def to_sql(*)
-      if source_attribute
+      if source_attribute || MultiTenant.current_tenant_id
         tenant_arel.to_sql
       else
         '1=1'
@@ -166,10 +166,11 @@ module MultiTenant
     private
 
     def tenant_arel
-      if defined?(Arel::Nodes::Quoted) && source_attribute.is_a?(String)
-        @tenant_attribute.eq(Arel::Nodes::Quoted.new(source_attribute))
+      src = source_attribute || MultiTenant.current_tenant_id
+      if defined?(Arel::Nodes::Quoted) && src.is_a?(String)
+        @tenant_attribute.eq(Arel::Nodes::Quoted.new(src))
       else
-        @tenant_attribute.eq(source_attribute)
+        @tenant_attribute.eq(src)
       end
     end
   end
@@ -247,7 +248,7 @@ module ActiveRecord
                       end
           relations.each do |relation|
             model = MultiTenant.multi_tenant_model_for_table(relation.arel_table.table_name)
-            if model != source_model && model.partition_key == source_partition_key
+            if relation.arel_table.name != source_table.name && model.partition_key == source_partition_key
               enforcement_clause = MultiTenant::TenantEnforcementClause.new(
                 relation.arel_table[model.partition_key],
                 source_table[source_partition_key]
