@@ -184,7 +184,30 @@ module MultiTenant
       end
     end
   end
+
+  module DatabaseStatements
+    def join_to_update(update, *args)
+      update = super(update, *args)
+      model = MultiTenant.multi_tenant_model_for_table(update.ast.relation.table_name)
+      if model.present?
+        update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+      end
+      update
+    end
+
+    def join_to_delete(delete, *args)
+      delete = super(delete, *args)
+      model = MultiTenant.multi_tenant_model_for_table(delete.ast.left.table_name)
+      if model.present?
+        delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+      end
+      delete
+    end
+  end
 end
+
+require 'active_record/connection_adapters/abstract_adapter'
+ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(MultiTenant::DatabaseStatements)
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 
