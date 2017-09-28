@@ -1,18 +1,21 @@
-version: '2'
+version: '2.1'
 
 services:
   master:
-    image: 'citusdata/citus:6.2.3'
+    image: 'citusdata/citus:7.0.1'
     ports: ['5600:5432']
     labels: ['com.citusdata.role=Master']
     volumes: ['/var/run/postgresql']
   worker1:
-    image: 'citusdata/citus:6.2.3'
+    image: 'citusdata/citus:7.0.1'
     labels: ['com.citusdata.role=Worker']
+    depends_on: { manager: { condition: service_healthy } }
   worker2:
-    image: 'citusdata/citus:6.2.3'
+    image: 'citusdata/citus:7.0.1'
     labels: ['com.citusdata.role=Worker']
-  config:
-    image: 'citusdata/workerlist-gen:2.0.0'
-    volumes: ['/var/run/docker.sock:/tmp/docker.sock']
-    volumes_from: ['master']
+    depends_on: { manager: { condition: service_healthy } }
+  manager:
+    container_name: "${COMPOSE_PROJECT_NAME:-citus}_manager"
+    image: 'citusdata/membership-manager:0.1.0'
+    volumes: ['/var/run/docker.sock:/var/run/docker.sock']
+    depends_on: { master: { condition: service_healthy } }
