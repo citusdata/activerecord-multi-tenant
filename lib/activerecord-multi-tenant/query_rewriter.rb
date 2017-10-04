@@ -75,7 +75,7 @@ module MultiTenant
       if o.left.is_a?(Arel::Attributes::Attribute)
         table_name = o.left.relation.table_name
         model = MultiTenant.multi_tenant_model_for_table(table_name)
-        @current_context.visited_handled_relation(o.left.relation) if model.present? && o.left.name.to_s == model.partition_key
+        @current_context.visited_handled_relation(o.left.relation) if model.present? && o.left.name.to_s == model.partition_key.to_s
       end
       super(o, *args)
     end
