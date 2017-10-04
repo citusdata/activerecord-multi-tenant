@@ -188,18 +188,18 @@ module MultiTenant
   module DatabaseStatements
     def join_to_update(update, *args)
       update = super(update, *args)
-      model = MultiTenant.multi_tenant_model_for_table(update.engine.table_name)
+      model = MultiTenant.multi_tenant_model_for_table(update.ast.relation.table_name)
       if model.present?
-        update.where(MultiTenant::TenantEnforcementClause.new(update.engine.arel_table[model.partition_key]))
+        update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       update
     end
 
     def join_to_delete(delete, *args)
       delete = super(delete, *args)
-      model = MultiTenant.multi_tenant_model_for_table(delete.engine.table_name)
+      model = MultiTenant.multi_tenant_model_for_table(delete.ast.left.table_name)
       if model.present?
-        delete.where(MultiTenant::TenantEnforcementClause.new(delete.engine.arel_table[model.partition_key]))
+        delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       delete
     end
