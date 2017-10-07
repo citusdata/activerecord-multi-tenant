@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.1       2017-10-06
+
+* Cast attribute name to a string to avoid double applying tenant clause [Ben Olive](https://github.com/sionide21)
+* Allow bulk delete/update with subqueries on joins [Kyle Bock](https://github.com/kwbock)
+
+
 ## 0.8.0       2017-08-16
 
 * Significant improvements and simplifications of query rewriting
