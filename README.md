@@ -37,7 +37,6 @@ end
 class Site < ActiveRecord::Base
   multi_tenant :customer
   has_many :page_views
-  belongs_to :customer
 
   # ...
 end
