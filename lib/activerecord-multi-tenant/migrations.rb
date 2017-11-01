@@ -5,6 +5,11 @@ module MultiTenant
       execute "SELECT create_distributed_table($$#{table_name}$$, $$#{partition_key}$$)"
     end
 
+    def create_reference_table(table_name)
+      return unless citus_version.present?
+      execute "SELECT create_reference_table($$#{table_name}$$)"
+    end
+
     def execute_on_all_nodes(sql)
       execute sql
 
