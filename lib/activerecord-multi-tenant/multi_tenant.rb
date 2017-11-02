@@ -29,6 +29,7 @@ module MultiTenant
     @@multi_tenant_models[table_name.to_s] = model_klass
   end
   def self.multi_tenant_model_for_table(table_name)
+    @@multi_tenant_models ||= {}
     @@multi_tenant_models[table_name.to_s]
   end
 
