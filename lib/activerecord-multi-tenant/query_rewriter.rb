@@ -215,8 +215,12 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
-    def build_arel
-      arel = build_arel_orig
+    def build_arel(aliases = nil)
+      arel = if ActiveRecord::VERSION::MAJOR > 5 || (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2)
+        build_arel_orig(aliases)
+      else
+        build_arel_orig
+      end
 
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
