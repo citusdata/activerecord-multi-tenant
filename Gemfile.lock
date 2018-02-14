@@ -68,11 +68,11 @@ GEM
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
-    mini_portile2 (2.1.0)
+    mini_portile2 (2.3.0)
     minitest (5.10.1)
     nio4r (1.2.1)
-    nokogiri (1.7.0)
-      mini_portile2 (~> 2.1.0)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
     pg (0.19.0)
     pry (0.10.4)
       coderay (~> 1.1.0)
@@ -170,4 +170,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   1.15.3
+   1.16.0
