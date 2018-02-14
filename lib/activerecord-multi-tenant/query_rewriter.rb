@@ -189,7 +189,7 @@ module MultiTenant
     def join_to_update(update, *args)
       update = super(update, *args)
       model = MultiTenant.multi_tenant_model_for_table(update.ast.relation.table_name)
-      if model.present?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled?
         update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       update
@@ -198,7 +198,7 @@ module MultiTenant
     def join_to_delete(delete, *args)
       delete = super(delete, *args)
       model = MultiTenant.multi_tenant_model_for_table(delete.ast.left.table_name)
-      if model.present?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled?
         delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       delete
