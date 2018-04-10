@@ -264,3 +264,14 @@ module ActiveRecord
     end
   end
 end
+
+require 'active_record/base'
+module NoFindCacheOnScopedModels
+  def cached_find_by_statement(key, &block)
+    cache = @find_by_statement_cache[connection.prepared_statements]
+    cache.synchronize { cache[key] = nil } if respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+    super
+  end
+end
+
+ActiveRecord::Base.singleton_class.prepend(NoFindCacheOnScopedModels)
