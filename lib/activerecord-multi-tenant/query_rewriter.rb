@@ -155,11 +155,7 @@ module MultiTenant
     def to_str; to_sql; end
 
     def to_sql(*)
-      if MultiTenant.current_tenant_id
-        tenant_arel.to_sql
-      else
-        '1=1'
-      end
+      tenant_arel.to_sql
     end
 
     private

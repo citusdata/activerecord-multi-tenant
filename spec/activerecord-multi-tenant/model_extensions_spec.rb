@@ -376,7 +376,7 @@ describe MultiTenant do
 
       MultiTenant.with(nil) do
         expected_sql = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project2.id} LIMIT 1
         sql
         expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
         expect(Project.find(project2.id)).to eq(project2)
