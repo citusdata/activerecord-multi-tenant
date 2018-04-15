@@ -32,7 +32,6 @@ services:
 
 before_install:
   - docker-compose up -d
-  - sleep 5 # wait for postgres to become available
 
 script:
   - bundle exec rake spec
