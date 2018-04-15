@@ -19,3 +19,8 @@ services:
     image: 'citusdata/citus:7.0.1'
     labels: ['com.citusdata.role=Worker']
     depends_on: { manager: { condition: service_healthy } }
+  healthcheck:
+    image: busybox
+    depends_on:
+      worker1: { condition: service_healthy }
+      worker2: { condition: service_healthy }
