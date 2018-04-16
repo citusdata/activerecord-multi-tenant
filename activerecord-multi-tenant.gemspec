@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.license       = 'MIT'
 
   s.add_runtime_dependency('request_store', '>= 1.0.5')
-  s.add_dependency('rails','>= 3.1')
+  s.add_dependency('rails','>= 4.0')
 
   s.add_development_dependency 'rspec', '>= 3.0'
   s.add_development_dependency 'rspec-rails'
