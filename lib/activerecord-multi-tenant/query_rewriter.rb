@@ -155,11 +155,7 @@ module MultiTenant
     def to_str; to_sql; end
 
     def to_sql(*)
-      if MultiTenant.current_tenant_id
-        tenant_arel.to_sql
-      else
-        '1=1'
-      end
+      tenant_arel.to_sql
     end
 
     private
@@ -215,9 +211,8 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
-    def build_arel
-      arel = build_arel_orig
-
+    def build_arel(*aliases)
+      arel = build_arel_orig(*aliases)
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.contexts.each do |context|
@@ -246,3 +241,14 @@ module ActiveRecord
     end
   end
 end
+
+require 'active_record/base'
+module NoFindCacheOnScopedModels
+  def cached_find_by_statement(key, &block)
+    cache = @find_by_statement_cache[connection.prepared_statements]
+    cache.synchronize { cache[key] = nil } if respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+    super
+  end
+end
+
+ActiveRecord::Base.singleton_class.prepend(NoFindCacheOnScopedModels)

@@ -6,6 +6,5 @@ test:
   port: 5600
   pool: 5
   timeout: 5000
-  prepared_statements: false
   variables:
     citus.shard_count: 5
