@@ -211,9 +211,8 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
-    def build_arel
-      arel = build_arel_orig
-
+    def build_arel(*aliases)
+      arel = build_arel_orig(*aliases)
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
         visitor.contexts.each do |context|
