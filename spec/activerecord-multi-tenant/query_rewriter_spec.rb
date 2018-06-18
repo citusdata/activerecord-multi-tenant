@@ -14,6 +14,14 @@ describe "Query Rewriter" do
         end
       }.to change { project.reload.name }.from("Project 1").to("New Name")
     end
+
+    it "update the record" do
+      expect {
+        MultiTenant.with(account) do
+          project.update(name: "New Name")
+        end
+      }.to change { project.reload.name }.from("Project 1").to("New Name")
+    end
   end
 
   context "when bulk deleting" do
@@ -25,6 +33,14 @@ describe "Query Rewriter" do
       expect {
         MultiTenant.with(account) do
           Project.joins(:manager).delete_all
+        end
+      }.to change { Project.count }.from(1).to(0)
+    end
+
+    it "destroy the record" do
+      expect {
+        MultiTenant.with(account) do
+          project.destroy
         end
       }.to change { Project.count }.from(1).to(0)
     end
