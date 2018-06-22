@@ -203,6 +203,24 @@ module MultiTenant
       end
       delete
     end
+
+    if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 2
+      def update(arel, name = nil, binds = [])
+        model = MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+        end
+        super(arel, name, binds)
+      end
+
+      def delete(arel, name = nil, binds = [])
+        model = MultiTenant.multi_tenant_model_for_table(arel.ast.left.table_name)
+        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+        end
+        super(arel, name, binds)
+      end
+    end
   end
 end
 
@@ -215,8 +233,8 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
-    def build_arel
-      arel = build_arel_orig
+    def build_arel(*args)
+      arel = build_arel_orig(*args)
 
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
