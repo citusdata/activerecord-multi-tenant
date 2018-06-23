@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-multi-tenant (0.8.1)
+    activerecord-multi-tenant (0.9.0)
       rails (>= 4.0)
       request_store (>= 1.0.5)
 
@@ -79,7 +79,7 @@ GEM
     pry-byebug (3.4.2)
       byebug (~> 9.0)
       pry (~> 0.10)
-    rack (2.0.1)
+    rack (2.0.5)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
