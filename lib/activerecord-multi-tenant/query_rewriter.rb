@@ -189,7 +189,7 @@ module MultiTenant
     def join_to_update(update, *args)
       update = super(update, *args)
       model = MultiTenant.multi_tenant_model_for_table(update.ast.relation.table_name)
-      if model.present?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled?
         update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       update
@@ -198,10 +198,28 @@ module MultiTenant
     def join_to_delete(delete, *args)
       delete = super(delete, *args)
       model = MultiTenant.multi_tenant_model_for_table(delete.ast.left.table_name)
-      if model.present?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled?
         delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       delete
+    end
+
+    if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 2
+      def update(arel, name = nil, binds = [])
+        model = MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+        end
+        super(arel, name, binds)
+      end
+
+      def delete(arel, name = nil, binds = [])
+        model = MultiTenant.multi_tenant_model_for_table(arel.ast.left.table_name)
+        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
+        end
+        super(arel, name, binds)
+      end
     end
   end
 end
@@ -215,12 +233,8 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
-    def build_arel(aliases = nil)
-      arel = if ActiveRecord::VERSION::MAJOR > 5 || (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2)
-        build_arel_orig(aliases)
-      else
-        build_arel_orig
-      end
+    def build_arel(*args)
+      arel = build_arel_orig(*args)
 
       if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)

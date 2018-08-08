@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0       2018-06-22
+
+* ActiveRecord 5.2 support [Nathan Stitt](https://github.com/nathanstitt) & [osyo-manga](https://github.com/osyo-manga)
+
+
 ## 0.8.1       2017-10-06
 
 * Cast attribute name to a string to avoid double applying tenant clause [Ben Olive](https://github.com/sionide21)

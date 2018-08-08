@@ -100,4 +100,4 @@ This gem was initially based on [acts_as_tenant](https://github.com/ErwinM/acts_
 ## License
 
 Licensed under the MIT license<br>
-Copyright (c) 2017, Citus Data Inc.
+Copyright (c) 2018, Citus Data Inc.
