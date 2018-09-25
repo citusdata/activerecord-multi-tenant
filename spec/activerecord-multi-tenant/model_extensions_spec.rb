@@ -367,16 +367,30 @@ describe MultiTenant do
       project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
 
       MultiTenant.with(account) do
+        if uses_prepared_statements?
+          project_id = "$1"
+          limit = "$2"
+        else
+          project_id = project.id
+          limit = 1
+        end
         expected_sql = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+        SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project_id} LIMIT #{limit}
         sql
         expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
         expect(Project.find(project.id)).to eq(project)
       end
 
       MultiTenant.with(nil) do
+        if uses_prepared_statements?
+          project_id = "$1"
+          limit = "$2"
+        else
+          project_id = project2.id
+          limit = 1
+        end
         expected_sql = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project_id} LIMIT #{limit}
         sql
         expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
         expect(Project.find(project2.id)).to eq(project2)
