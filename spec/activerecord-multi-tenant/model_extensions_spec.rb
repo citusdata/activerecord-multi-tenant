@@ -274,6 +274,40 @@ describe MultiTenant do
     end
   end
 
+  # ::without
+  describe "::without" do
+    it "should unset current_tenant inside the block" do
+      @account = Account.create!(:name => 'baz')
+
+      MultiTenant.current_tenant = @account
+      MultiTenant.without do
+        expect(MultiTenant.current_tenant).to eq(nil)
+      end
+    end
+
+    it "should reset current_tenant to the previous tenant once exiting the block" do
+      @account1 = Account.create!(:name => 'foo')
+
+      MultiTenant.current_tenant = @account1
+      MultiTenant.without do
+
+      end
+
+      expect(MultiTenant.current_tenant).to eq(@account1)
+    end
+
+    it "should return the value of the block" do
+      @account1 = Account.create!(:name => 'foo')
+
+      MultiTenant.current_tenant = @account1
+      value = MultiTenant.without do
+        "something"
+      end
+
+      expect(value).to eq "something"
+    end
+  end
+
   describe '.with_lock' do
     it 'supports with_lock blocks inside the block' do
       @account = Account.create!(name: 'foo')
