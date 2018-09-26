@@ -374,7 +374,7 @@ describe MultiTenant do
         expect(Project.find(project.id)).to eq(project)
       end
 
-      MultiTenant.with(nil) do
+      MultiTenant.without do
         expected_sql = <<-sql.strip
         SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
         sql
