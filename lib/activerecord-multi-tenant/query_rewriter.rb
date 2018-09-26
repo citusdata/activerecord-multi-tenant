@@ -155,7 +155,11 @@ module MultiTenant
     def to_str; to_sql; end
 
     def to_sql(*)
-      tenant_arel.to_sql
+      if MultiTenant.current_tenant_id
+        tenant_arel.to_sql
+      else
+        '1=1'
+      end
     end
 
     private
@@ -262,12 +266,19 @@ module ActiveRecord
 end
 
 require 'active_record/base'
-module NoFindCacheOnScopedModels
-  def cached_find_by_statement(key, &block)
-    cache = @find_by_statement_cache[connection.prepared_statements]
-    cache.synchronize { cache[key] = nil } if respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
-    super
+module MultiTenantFindBy
+
+  # Add the current_tenant if this is a MultiTenant model
+  def find_by(*args)
+    # ignore non-multi-tenant models
+    return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+    # ignore when there is no current tenant
+    return super if MultiTenant.current_tenant_id.nil? || MultiTenant.with_write_only_mode_enabled?
+    # add the tenant to the args if it isn't already set
+    args.first[self.partition_key.to_sym] ||= MultiTenant.current_tenant_id
+    # TODO: should cross tenant queries raise an error?
+    super(*args)
   end
 end
 
-ActiveRecord::Base.singleton_class.prepend(NoFindCacheOnScopedModels)
+ActiveRecord::Base.singleton_class.prepend(MultiTenantFindBy)
