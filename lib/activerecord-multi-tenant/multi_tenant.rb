@@ -68,6 +68,17 @@ module MultiTenant
     end
   end
 
+  def self.without(&block)
+    return block.call if self.current_tenant.nil?
+    old_tenant = self.current_tenant
+    begin
+      self.current_tenant = nil
+      return block.call
+    ensure
+      self.current_tenant = old_tenant
+    end
+  end
+
   # Preserve backward compatibility for people using .with_id
   singleton_class.send(:alias_method, :with_id, :with)
 
