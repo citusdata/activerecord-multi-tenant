@@ -343,9 +343,15 @@ describe MultiTenant do
   end
 
   it "applies the team_id conditions in the where clause" do
-    expected_sql = <<-sql
-      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
-    sql
+    expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
+                     <<-sql
+                     SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = $1
+                     sql
+                   else
+                     <<-sql
+                     SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+                     sql
+                   end
     account1 = Account.create! name: 'Account 1'
 
     MultiTenant.with(account1) do
@@ -367,17 +373,37 @@ describe MultiTenant do
       project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
 
       MultiTenant.with(account) do
-        expected_sql = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
-        sql
+        expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 4
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
+                         sql
+                       elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT 1
+                         sql
+                       else
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+                         sql
+                       end
         expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
         expect(Project.find(project.id)).to eq(project)
       end
 
       MultiTenant.without do
-        expected_sql = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE 1=1 AND "projects"."id" = #{project2.id} LIMIT 1
-        sql
+        expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 4
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+                         sql
+                       elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT 1
+                         sql
+                       else
+                         <<-sql.strip
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project2.id} LIMIT 1
+                         sql
+                       end
         expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
         expect(Project.find(project2.id)).to eq(project2)
       end

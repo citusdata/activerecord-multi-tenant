@@ -155,11 +155,7 @@ module MultiTenant
     def to_str; to_sql; end
 
     def to_sql(*)
-      if MultiTenant.current_tenant_id
-        tenant_arel.to_sql
-      else
-        '1=1'
-      end
+      tenant_arel.to_sql
     end
 
     private
@@ -264,3 +260,68 @@ module ActiveRecord
     end
   end
 end
+
+require 'active_record/base'
+module MultiTenantFindBy
+  if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2
+    # Disable caching for find and find_by in Rails 4.2 - we don't have a good
+    # way to prevent caching problems here when prepared statements are enabled
+    def find_by(*args)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+
+      # This duplicates a bunch of code from AR's find() method
+      return super if current_scope || !(Hash === args.first) || reflect_on_all_aggregations.any?
+      return super if default_scopes.any?
+
+      hash = args.first
+
+      return super if hash.values.any? { |v| v.nil? || Array === v || Hash === v }
+      return super unless hash.keys.all? { |k| columns_hash.has_key?(k.to_s) }
+
+      key = hash.keys
+
+      # Ensure we never use the cached version
+      find_by_statement_cache.synchronize { find_by_statement_cache[key] = nil }
+
+      super
+    end
+
+    def find(*ids)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+
+      # This duplicates a bunch of code from AR's find() method
+      return super unless ids.length == 1
+      return super if ids.first.kind_of?(Symbol)
+      return super if block_given? ||
+                      primary_key.nil? ||
+                      default_scopes.any? ||
+                      current_scope ||
+                      columns_hash.include?(inheritance_column) ||
+                      ids.first.kind_of?(Array)
+
+      id = ids.first
+        if ActiveRecord::Base === id
+          id = id.id
+          ActiveSupport::Deprecation.warn(<<-MSG.squish)
+            You are passing an instance of ActiveRecord::Base to `find`.
+            Please pass the id of the object by calling `.id`
+          MSG
+        end
+      key = primary_key
+
+      # Ensure we never use the cached version
+      find_by_statement_cache.synchronize { find_by_statement_cache[key] = nil }
+
+      super
+    end
+  elsif ActiveRecord::VERSION::MAJOR > 4
+    def cached_find_by_statement(key, &block)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+
+      key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
+      super(key, &block)
+    end
+  end
+end
+
+ActiveRecord::Base.singleton_class.prepend(MultiTenantFindBy)

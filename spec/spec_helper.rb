@@ -42,4 +42,13 @@ end
 MultiTenantTest::Application.config.secret_token = 'x' * 40
 MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 
+def uses_prepared_statements?
+  if ActiveRecord::VERSION::MAJOR == 4
+    config = ActiveRecord::Base.connection.instance_variable_get(:@config)
+    config.fetch(:prepared_statements, true)
+  else
+    ActiveRecord::Base.connection.prepared_statements
+  end
+end
+
 require 'schema'

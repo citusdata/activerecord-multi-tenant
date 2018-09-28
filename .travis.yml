@@ -18,6 +18,10 @@ gemfile:
   - gemfiles/active_record_5.1.gemfile
   - gemfiles/active_record_5.2.gemfile
 
+env:
+  - PREPARED_STATEMENTS=0
+  - PREPARED_STATEMENTS=1
+
 matrix:
   fast_finish: true
   exclude:

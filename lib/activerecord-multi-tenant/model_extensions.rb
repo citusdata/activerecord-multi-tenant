@@ -112,3 +112,13 @@ end
 if defined?(ActiveRecord::Base)
   ActiveRecord::Base.extend(MultiTenant::ModelExtensionsClassMethods)
 end
+
+if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+  class ActiveRecord::Associations::Association
+    alias skip_statement_cache_orig skip_statement_cache?
+    def skip_statement_cache?(*scope)
+      return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
+      skip_statement_cache_orig(*scope)
+    end
+  end
+end
