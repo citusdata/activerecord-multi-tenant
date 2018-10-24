@@ -57,6 +57,13 @@ module MultiTenant
     end
   end
 
+  def self.load_current_tenant!
+    return MultiTenant.current_tenant if MultiTenant.current_tenant && !current_tenant_is_id?
+    raise 'MultiTenant.current_tenant must be set to load' if MultiTenant.current_tenant.nil?
+    klass = MultiTenant.default_tenant_class || fail('Only have tenant id, and no default tenant class set')
+    self.current_tenant = klass.find(MultiTenant.current_tenant_id)
+  end
+
   def self.with(tenant, &block)
     return block.call if self.current_tenant == tenant
     old_tenant = self.current_tenant
