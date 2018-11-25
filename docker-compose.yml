@@ -6,11 +6,6 @@ services:
     ports: ['5600:5432']
     labels: ['com.citusdata.role=Master']
     volumes: ['/var/run/postgresql']
-  manager:
-    container_name: "${COMPOSE_PROJECT_NAME:-citus}_manager"
-    image: 'citusdata/membership-manager:0.2.0'
-    volumes: ['/var/run/docker.sock:/var/run/docker.sock']
-    depends_on: { master: { condition: service_healthy } }
   worker1:
     image: 'citusdata/citus:8.0.0'
     labels: ['com.citusdata.role=Worker']
@@ -19,6 +14,11 @@ services:
     image: 'citusdata/citus:8.0.0'
     labels: ['com.citusdata.role=Worker']
     depends_on: { manager: { condition: service_healthy } }
+  manager:
+    container_name: "${COMPOSE_PROJECT_NAME:-citus}_manager"
+    image: 'citusdata/membership-manager:0.2.0'
+    volumes: ['/var/run/docker.sock:/var/run/docker.sock']
+    depends_on: { master: { condition: service_healthy } }
   healthcheck:
     image: busybox
     depends_on:
