@@ -51,7 +51,7 @@ module MultiTenant
 
         # New instances should have the tenant set
         after_initialize Proc.new { |record|
-          if MultiTenant.current_tenant_id && record.public_send(partition_key.to_sym).nil?
+          if MultiTenant.current_tenant_id && record.has_attribute?(partition_key.to_sym) && record.public_send(partition_key.to_sym).nil?
             record.public_send("#{partition_key}=".to_sym, MultiTenant.current_tenant_id)
           end
         }
