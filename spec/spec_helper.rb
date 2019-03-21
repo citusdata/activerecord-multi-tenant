@@ -27,9 +27,6 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     MultiTenant::FastTruncate.run
-
-    # Keep this here until https://github.com/citusdata/citus/issues/1236 is fixed
-    MultiTenant.enable_with_lock_workaround
   end
 
   config.after(:each) do
