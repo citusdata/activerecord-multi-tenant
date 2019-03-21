@@ -10,6 +10,8 @@ require 'activerecord-multi-tenant'
 require 'bundler'
 Bundler.require(:default, :development)
 
+require 'pg'
+
 dbconfig = YAML::load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "debug.log"))
 ActiveRecord::Base.establish_connection(dbconfig['test'])
