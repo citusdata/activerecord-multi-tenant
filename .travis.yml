@@ -33,6 +33,8 @@ matrix:
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.4.5
       gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.4.5
+      gemfile: gemfiles/rails_6.0.gemfile
     - rvm: 2.5.5
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.5.5
