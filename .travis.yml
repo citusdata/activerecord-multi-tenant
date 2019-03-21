@@ -27,6 +27,8 @@ env:
 matrix:
   fast_finish: true
   exclude:
+    - rvm: 2.3.8
+      gemfile: gemfiles/rails_6.0.gemfile
     - rvm: 2.4.5
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.4.5
@@ -39,12 +41,15 @@ matrix:
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.6.2
       gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.6.2
+      gemfile: gemfiles/rails_4.2.gemfile
 
 services:
   - docker
 
 before_install:
   - docker-compose up -d
+  - bundle update --bundler
 
 script:
   - bundle exec rake spec
