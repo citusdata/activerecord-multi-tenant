@@ -347,6 +347,10 @@ describe MultiTenant do
                      <<-sql
                      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = $1
                      sql
+                   elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR == 0
+                     <<-sql
+                     SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."account_id" = 1 AND "tasks"."project_id" = 1
+                     sql
                    else
                      <<-sql
                      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
