@@ -298,9 +298,11 @@ module ActiveRecord
               end
             end
 
-            node_right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-              join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table, node_join.left)
-              node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
+            if node.is_a? Arel::Nodes::SelectCore
+              node_right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
+                join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table, node_join.left)
+                node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
+              end
             end
           end
         end
