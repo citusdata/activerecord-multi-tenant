@@ -175,13 +175,12 @@ module MultiTenant
 
 
   class TenantJoinEnforcementClause < Arel::Nodes::Node
-    attr_reader :table_right
+    attr_reader :tenant_attribute
     attr_reader :table_left
-    def initialize(table_right, table_left)
+    def initialize(tenant_attribute, table_left)
       @table_left = table_left
-      @model_right = MultiTenant.multi_tenant_model_for_table(table_right.table_name)
       @model_left = MultiTenant.multi_tenant_model_for_table(table_left.table_name)
-      @tenant_attribute = table_right[@model_right.partition_key]
+      @tenant_attribute = tenant_attribute
     end
 
     def to_s; to_sql; end
@@ -276,14 +275,12 @@ module ActiveRecord
 
         visitor.contexts.each do |context|
           node = context.arel_node
-          node_right = node.source.right
 
           context.unhandled_relations.each do |relation|
             model = MultiTenant.multi_tenant_model_for_table(relation.arel_table.table_name)
 
             if MultiTenant.current_tenant_id
               enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
-
               case node
               when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
                 node.right.expr = node.right.expr.and(enforcement_clause)
@@ -299,8 +296,8 @@ module ActiveRecord
             end
 
             if node.is_a? Arel::Nodes::SelectCore
-              node_right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table, node_join.left)
+              node.source.right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
+                join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table[model.partition_key], node_join.left)
                 node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
               end
             end
