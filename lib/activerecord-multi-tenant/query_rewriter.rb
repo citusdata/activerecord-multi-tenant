@@ -194,11 +194,7 @@ module MultiTenant
     private
 
     def tenant_arel
-      if defined?(Arel::Nodes::Quoted) && MultiTenant.current_tenant_id
-        @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
-      else
-        @tenant_attribute.eq(@table_left[@model_left.partition_key])
-      end
+      @tenant_attribute.eq(@table_left[@model_left.partition_key])
     end
   end
 
