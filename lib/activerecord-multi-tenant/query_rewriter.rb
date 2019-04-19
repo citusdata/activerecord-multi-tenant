@@ -84,6 +84,10 @@ module MultiTenant
       @current_context.visited_handled_relation(o.tenant_attribute.relation)
     end
 
+    def visit_MultiTenant_TenantJoinEnforcementClause(o, *)
+      @current_context.visited_handled_relation(o.tenant_attribute.relation)
+    end
+
     def visit_Arel_Table(o, _collector = nil)
       @current_context.visited_relation(o) if tenant_relation?(o.table_name)
     end
@@ -169,13 +173,52 @@ module MultiTenant
     end
   end
 
+
+  class TenantJoinEnforcementClause < Arel::Nodes::Node
+    attr_reader :table_right
+    attr_reader :table_left
+    def initialize(table_right, table_left)
+      @table_left = table_left
+      @model_right = MultiTenant.multi_tenant_model_for_table(table_right.table_name)
+      @model_left = MultiTenant.multi_tenant_model_for_table(table_left.table_name)
+      @tenant_attribute = table_right[@model_right.partition_key]
+    end
+
+    def to_s; to_sql; end
+    def to_str; to_sql; end
+
+    def to_sql(*)
+      tenant_arel.to_sql
+    end
+
+    private
+
+    def tenant_arel
+      if defined?(Arel::Nodes::Quoted) && MultiTenant.current_tenant_id
+        @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
+      else
+        @tenant_attribute.eq(@table_left[@model_left.partition_key])
+      end
+    end
+  end
+
+
   module TenantValueVisitor
     if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
       def visit_MultiTenant_TenantEnforcementClause(o, collector)
         collector << o
       end
+
+      def visit_MultiTenant_TenantJoinEnforcementClause(o, collector)
+        collector << o
+      end
+
     else
       def visit_MultiTenant_TenantEnforcementClause(o, a = nil)
+        o
+      end
+
+      def visit_MultiTenant_TenantJoinEnforcementClause(o, a = nil)
         o
       end
     end
@@ -232,25 +275,36 @@ module ActiveRecord
     def build_arel(*args)
       arel = build_arel_orig(*args)
 
-      if MultiTenant.current_tenant_id && !MultiTenant.with_write_only_mode_enabled?
+      if !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
+
         visitor.contexts.each do |context|
           node = context.arel_node
+          node_right = node.source.right
+
           context.unhandled_relations.each do |relation|
             model = MultiTenant.multi_tenant_model_for_table(relation.arel_table.table_name)
-            enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
 
-            case node
-            when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
-              node.right.expr = node.right.expr.and(enforcement_clause)
-            when Arel::Nodes::SelectCore
-              if node.wheres.empty?
-                node.wheres = [enforcement_clause]
+            if MultiTenant.current_tenant_id
+              enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
+
+              case node
+              when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
+                node.right.expr = node.right.expr.and(enforcement_clause)
+              when Arel::Nodes::SelectCore
+                if node.wheres.empty?
+                  node.wheres = [enforcement_clause]
+                else
+                  node.wheres[0] = enforcement_clause.and(node.wheres[0])
+                end
               else
-                node.wheres[0] = enforcement_clause.and(node.wheres[0])
+                raise "UnknownContext"
               end
-            else
-              raise "UnknownContext"
+            end
+
+            node_right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
+              join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table, node_join.left)
+              node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
             end
           end
         end
