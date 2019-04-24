@@ -297,7 +297,8 @@ module ActiveRecord
 
             if node.is_a? Arel::Nodes::SelectCore
               node.source.right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if node_join.left != relation.arel_table
+                model_left = MultiTenant.multi_tenant_model_for_table(node_join.left.table_name)
+                if node_join.left != relation.arel_table && model_left
                   join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation.arel_table[model.partition_key], node_join.left)
                   node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
                 end

@@ -381,8 +381,46 @@ describe MultiTenant do
       project = Project.first
       expect(project.sub_tasks.to_sql).to eq(expected_sql.strip)
     end
-
   end
+
+  it "tests joins between distributed and reference table" do
+    expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
+                     <<-sql
+                     SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."account_id" = 1 AND "project_categories"."project_id" = $1
+                     sql
+                   else
+                     <<-sql
+                     SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."account_id" = 1 AND "project_categories"."project_id" = 1
+                     sql
+                   end
+    account1 = Account.create! name: 'Account 1'
+    category1 = Category.create! name: 'Category 1'
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'Project 1'
+      projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
+      expect(project1.categories.to_sql).to eq(expected_sql.strip)
+      expect(project1.categories).to include(category1)
+      expect(project1.project_categories).to include(projectcategory)
+    end
+
+    MultiTenant.without do
+      expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
+                       <<-sql
+                     SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."project_id" = $1
+                     sql
+                     else
+                       <<-sql
+                     SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."project_id" = 1
+                     sql
+                     end
+
+      project = Project.first
+      expect(project.categories.to_sql).to eq(expected_sql.strip)
+      expect(project.categories).to include(category1)
+    end
+  end
+
 
   # Versions earlier than 4.2 pass an arel object to find_by_sql(...) and it would make
   # this test unnecesssarily complicated to support that
