@@ -190,6 +190,8 @@ class UuidRecord < ActiveRecord::Base
 end
 
 class Category < ActiveRecord::Base
+  has_many  :project_categories
+  has_many :projects, through: :project_categories
 end
 
 
@@ -197,4 +199,5 @@ class ProjectCategory < ActiveRecord::Base
   multi_tenant :account
   belongs_to :project
   belongs_to :category
+  belongs_to :account
 end
