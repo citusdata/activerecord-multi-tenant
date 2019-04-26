@@ -89,7 +89,6 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :category_id, :integer
   end
 
-
   create_distributed_table :accounts, :id
   create_distributed_table :projects, :account_id
   create_distributed_table :managers, :account_id
@@ -193,7 +192,6 @@ class Category < ActiveRecord::Base
   has_many  :project_categories
   has_many :projects, through: :project_categories
 end
-
 
 class ProjectCategory < ActiveRecord::Base
   multi_tenant :account

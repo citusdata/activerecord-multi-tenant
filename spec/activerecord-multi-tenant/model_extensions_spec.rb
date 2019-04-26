@@ -419,15 +419,9 @@ describe MultiTenant do
       expect(project.categories).to include(category1)
 
 
-      expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
-                       <<-sql
-                        SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = $1
+      expected_sql = <<-sql
+                        SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
                      sql
-                     else
-                       <<-sql
-                       SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
-                     sql
-                     end
 
       expect(Project.where(account_id: 1).joins(:categories).to_sql).to eq(expected_sql.strip)
       project = Project.where(account_id: 1).joins(:categories).first
