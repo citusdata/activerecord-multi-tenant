@@ -434,11 +434,7 @@ describe MultiTenant do
     category1 = Category.create! name: 'Category 1'
 
     MultiTenant.with(account1) do
-      expected_sql =  if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
-                        <<-sql
-                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = $1
-                        sql
-                      elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR > 1
+      expected_sql =  if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR > 1
                         <<-sql
                         SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
                         sql
