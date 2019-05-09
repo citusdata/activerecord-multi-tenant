@@ -429,6 +429,44 @@ describe MultiTenant do
     end
   end
 
+  it "test raw SQL joins" do
+    account1 = Account.create! name: 'Account 1'
+    category1 = Category.create! name: 'Category 1'
+
+    MultiTenant.with(account1) do
+      expected_sql =  if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
+                        <<-sql
+                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = $1
+                        sql
+                      elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR > 1
+                        <<-sql
+                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
+                        sql
+                      else
+                        <<-sql
+                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "projects"."account_id" = 1 AND "tasks"."account_id" = 1
+                        sql
+                      end
+
+      project1 = Project.create! name: 'Project 1'
+      projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
+
+      project1.tasks.create! name: 'baz'
+
+      expect(Task.joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql).to eq(expected_sql.strip)
+    end
+
+    MultiTenant.without do
+      expected_sql = <<-sql
+                     SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
+                     sql
+      expect(Task.where(account_id: 1).joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql).to eq(expected_sql.strip)
+
+    end
+
+  end
+
+
 
   # Versions earlier than 4.2 pass an arel object to find_by_sql(...) and it would make
   # this test unnecesssarily complicated to support that
