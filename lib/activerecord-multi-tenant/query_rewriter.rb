@@ -297,18 +297,14 @@ module ActiveRecord
 
             if node.is_a?(Arel::Nodes::SelectCore) || node.is_a?(Arel::Nodes::Join)
 
-              if node.is_a? Arel::Nodes::Join
+              if node.is_a?Arel::Nodes::Join
                 node_list = [node]
               else
                 node_list = node.source.right
               end
 
               node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if !node_join.right
-                  next
-                end
-
-                if !node_join.right.expr.right.is_a? Arel::Attributes::Attribute
+                if !node_join.right || !node_join.right.expr.right.is_a?(Arel::Attributes::Attribute)
                   next
                 end
 
