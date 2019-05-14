@@ -418,7 +418,6 @@ describe MultiTenant do
       expect(project.categories.to_sql).to eq(expected_sql.strip)
       expect(project.categories).to include(category1)
 
-
       expected_sql = <<-sql
                         SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
                      sql
@@ -426,6 +425,39 @@ describe MultiTenant do
       expect(Project.where(account_id: 1).joins(:categories).to_sql).to eq(expected_sql.strip)
       project = Project.where(account_id: 1).joins(:categories).first
       expect(project.categories).to include(category1)
+    end
+  end
+
+
+  it "test eager_load" do
+    account1 = Account.create! name: 'Account 1'
+    category1 = Category.create! name: 'Category 1'
+
+    expected_sql = <<-sql
+                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
+                     sql
+
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'Project 1'
+      projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
+
+      expect(Project.eager_load(:categories).to_sql).to eq(expected_sql.strip)
+
+      project = Project.eager_load(:categories).first
+      expect(project.categories).to include(category1)
+      expect(project.project_categories).to include(projectcategory)
+    end
+
+    MultiTenant.without do
+      expected_sql = <<-sql
+                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
+                     sql
+
+      expect(Project.where(account_id: 1).eager_load(:categories).to_sql).to eq(expected_sql.strip)
+
+      project = Project.where(account_id: 1).eager_load(:categories).first
+      expect(project.categories).to include(category1)
+
     end
   end
 

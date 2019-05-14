@@ -295,8 +295,15 @@ module ActiveRecord
               end
             end
 
-            if node.is_a? Arel::Nodes::SelectCore
-              node.source.right.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
+            if node.is_a?(Arel::Nodes::SelectCore) || node.is_a?(Arel::Nodes::Join)
+
+              if node.is_a? Arel::Nodes::Join
+                node_list = [node]
+              else
+                node_list = node.source.right
+              end
+
+              node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
                 if !node_join.right
                   next
                 end
