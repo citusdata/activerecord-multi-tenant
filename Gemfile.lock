@@ -49,7 +49,7 @@ GEM
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-    appraisal (2.1.0)
+    appraisal (2.2.0)
       bundler
       rake
       thor (>= 0.14.0)
@@ -180,4 +180,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   2.0.1
+   1.16.4
