@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    activerecord-multi-tenant (0.9.0)
+    activerecord-multi-tenant (0.10.0)
       rails (>= 4.0)
       request_store (>= 1.0.5)
 
@@ -62,7 +62,7 @@ GEM
     crass (1.0.4)
     diff-lcs (1.2.5)
     erubi (1.7.1)
-    globalid (0.4.1)
+    globalid (0.4.2)
       activesupport (>= 4.2.0)
     i18n (1.1.1)
       concurrent-ruby (~> 1.0)
@@ -74,7 +74,7 @@ GEM
     marcel (0.3.3)
       mimemagic (~> 0.3.2)
     method_source (0.8.2)
-    mimemagic (0.3.2)
+    mimemagic (0.3.3)
     mini_mime (1.0.1)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
@@ -180,4 +180,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   1.16.4
+   2.0.1

@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.10.0      2019-05-31
+
+* Add `MultiTenant.without` to remove already set tenant context in a block [#45](https://github.com/citusdata/activerecord-multi-tenant/pull/45) [Jackson Miller](https://github.com/jaxn)
+* Fix uninitialized constant X::ActiveRecord::VERSION [#42](https://github.com/citusdata/activerecord-multi-tenant/pull/42) [vollnhals](https://github.com/vollnhals)
+* Fix find and find_by caching issues
+  - This builds on work by multiple contributors, and fixes issues where the
+    tenant_id would be cached across different tenant contexts for find
+    and find_by methods. This issue was only present with prepared
+    statements turned on
+  -  Note that the mechanism to solve this is slightly different for Rails 4
+    and 5:
+    - Rails 4: Disable any caching for find and find_by methods
+    - Rails 5: Explicitly add the current_tenant_id into the cache key
+  - This also ensures that we test both prepared statements on and off
+    on Travis
+* Added method to ensure that the current tenant is loaded [#49](https://github.com/citusdata/activerecord-multi-tenant/pull/49) [Stephen Bussey](https://github.com/sb8244)
+  - This is ideal for fully utilizing the ActiveRecord extensions, as they only take effect when the
+    current tenant is not an ID
+* Update loofah and rack to fix security warnings
+  - Note that loofah is not a direct dependency of the libary, so this only
+    applies when running the test suite
+* Remove monkey patch that previously disabled referential integrity (DISABLE/ENABLE TRIGGER ALL) [#53](https://github.com/citusdata/activerecord-multi-tenant/pull/53) [Rémi Piotaix](https://github.com/piotaixr)
+  - This was required for Citus compatibility, but the issue has been fixed in
+    Citus for over a year (https://github.com/citusdata/citus/issues/1080)
+
+
 ## 0.9.0       2018-06-22
 
 * ActiveRecord 5.2 support [Nathan Stitt](https://github.com/nathanstitt) & [osyo-manga](https://github.com/osyo-manga)
