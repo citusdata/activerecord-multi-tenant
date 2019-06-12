@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-multi-tenant (0.10.0)
+    activerecord-multi-tenant (0.11.0)
       rails (>= 4.0)
       request_store (>= 1.0.5)
 
@@ -158,9 +158,9 @@ GEM
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
-    websocket-driver (0.7.0)
+    websocket-driver (0.7.1)
       websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.3)
+    websocket-extensions (0.1.4)
 
 PLATFORMS
   ruby
@@ -179,4 +179,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   1.16.4
+   1.17.2
