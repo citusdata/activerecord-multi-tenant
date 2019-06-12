@@ -1,5 +1,12 @@
 # Changelog
 
+
+## 0.11.0      2019-06-12
+
+* Fix queries with joins by including the tenant column when current tenant isn't set
+  - A common use case is having a filter on the tenant, but `MultiTenant.with` isn't used like `Project.where(account_id: 1).eager_load(:categories)`. This version fixes the ORM call to include in the `join`: `"project_categories"."account_id" = "projects"."account_id"`
+
+
 ## 0.10.0      2019-05-31
 
 * Add `MultiTenant.without` to remove already set tenant context in a block [#45](https://github.com/citusdata/activerecord-multi-tenant/pull/45) [Jackson Miller](https://github.com/jaxn)
