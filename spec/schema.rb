@@ -78,6 +78,17 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :description, :string
   end
 
+  create_table :categories, force: true do |t|
+    t.column :name, :string
+  end
+
+  create_table :project_categories, force: true, partition_key: :account_id do |t|
+    t.column :name, :string
+    t.column :account_id, :integer
+    t.column :project_id, :integer
+    t.column :category_id, :integer
+  end
+
   create_distributed_table :accounts, :id
   create_distributed_table :projects, :account_id
   create_distributed_table :managers, :account_id
@@ -89,6 +100,8 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :partition_key_not_model_tasks, :non_model_id
   create_distributed_table :subclass_tasks, :non_model_id
   create_distributed_table :uuid_records, :organization_id
+  create_distributed_table :project_categories, :account_id
+  create_reference_table :categories
 end
 
 class Account < ActiveRecord::Base
@@ -102,6 +115,9 @@ class Project < ActiveRecord::Base
   has_one :manager
   has_many :tasks
   has_many :sub_tasks, through: :tasks
+
+  has_many :project_categories
+  has_many :categories, through: :project_categories
 
   validates_uniqueness_of :name, scope: [:account]
 end
@@ -170,4 +186,16 @@ end
 
 class UuidRecord < ActiveRecord::Base
   multi_tenant :organization
+end
+
+class Category < ActiveRecord::Base
+  has_many  :project_categories
+  has_many :projects, through: :project_categories
+end
+
+class ProjectCategory < ActiveRecord::Base
+  multi_tenant :account
+  belongs_to :project
+  belongs_to :category
+  belongs_to :account
 end
