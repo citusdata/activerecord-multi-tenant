@@ -573,4 +573,14 @@ describe MultiTenant do
       end
     end
   end
+
+  it "test value of RETURNING insert in table with no pkey" do
+    account1 = Account.create(name: 'test1')
+
+    MultiTenant.with(account1) do
+      allowed_place = AllowedPlace.create! name: 'something1'
+
+      project = Project.create! name: 'Project 1'
+    end
+  end
 end
