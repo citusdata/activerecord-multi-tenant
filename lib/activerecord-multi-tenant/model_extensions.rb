@@ -23,13 +23,21 @@ module MultiTenant
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
             return @primary_key if @primary_key
-            return @primary_key = super || DEFAULT_ID_FIELD if ::ActiveRecord::VERSION::MAJOR < 5
+
+            if ::ActiveRecord::VERSION::MAJOR < 5
+              @primary_key = super || DEFAULT_ID_FIELD
+              return @primary_key if connection.schema_cache.columns_hash(table_name).include? @primary_key
+            end
 
             primary_object_keys = Array.wrap(connection.schema_cache.primary_keys(table_name)) - [partition_key]
+
             if primary_object_keys.size == 1
               @primary_key = primary_object_keys.first
-            else
+            elsif connection.schema_cache.columns_hash(table_name).include? DEFAULT_ID_FIELD
               @primary_key = DEFAULT_ID_FIELD
+            else
+              # table without a primary key and DEFAULT_ID_FIELD is not present in the table
+              @primary_key = nil
             end
           end
 
