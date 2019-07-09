@@ -44,6 +44,13 @@ describe MultiTenant do
       MultiTenant.current_tenant = @account
     end
     it {expect(Project.new.account_id).to eq(@account.id)}
+
+    it 'should handle partial selects' do
+      project = Project.create!
+      expect{project = Project.select(:name).find(project.id)}.not_to raise_error
+      expect(project.account_id).to eq(@account.id)
+    end
+
   end
 
   describe 'Handles custom partition_key on tenant model' do
@@ -583,4 +590,5 @@ describe MultiTenant do
       project = Project.create! name: 'Project 1'
     end
   end
+
 end
