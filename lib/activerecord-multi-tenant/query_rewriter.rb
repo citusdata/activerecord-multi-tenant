@@ -160,6 +160,10 @@ module MultiTenant
     def to_str; to_sql; end
 
     def to_sql(*)
+      if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR < 2
+        return @tenant_model.connection.visitor.accept tenant_arel
+      end
+
       collector = Arel::Collectors::SQLString.new
       collector = @tenant_model.connection.visitor.accept tenant_arel, collector
       collector.value
