@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.0.0      2019-07-05
+
+* Fix `RETURNING id` for distributed tables with no primary key
+* Include fix for partial select described in issue [#34](https://github.com/citusdata/activerecord-multi-tenant/issues/34).
+  - When doing a partial select without the tenant like `Project.select(:name).find(project.id)` it would raise `ActiveModel::MissingAttributeError (missing attribute: tenant_id)`
+
+
 ## 0.11.0      2019-06-12
 
 * Fix queries with joins by including the tenant column when current tenant isn't set
