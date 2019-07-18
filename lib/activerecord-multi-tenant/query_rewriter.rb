@@ -238,9 +238,9 @@ module MultiTenant
       delete
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 2
+    if (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2) || ActiveRecord::VERSION::MAJOR > 5
       def update(arel, name = nil, binds = [])
-        model = MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+        model = MultiTenant.multi_tenant_model_for_arel(arel)
         if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
           arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
         end
@@ -248,7 +248,7 @@ module MultiTenant
       end
 
       def delete(arel, name = nil, binds = [])
-        model = MultiTenant.multi_tenant_model_for_table(arel.ast.left.table_name)
+        model = MultiTenant.multi_tenant_model_for_arel(arel)
         if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
           arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
         end
@@ -296,7 +296,6 @@ module ActiveRecord
             end
 
             if node.is_a?(Arel::Nodes::SelectCore) || node.is_a?(Arel::Nodes::Join)
-
               if node.is_a?Arel::Nodes::Join
                 node_list = [node]
               else
@@ -304,14 +303,20 @@ module ActiveRecord
               end
 
               node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if !node_join.right || !node_join.right.expr.right.is_a?(Arel::Attributes::Attribute)
+                if (!node_join.right ||
+                    (ActiveRecord::VERSION::MAJOR <= 5 &&
+                     !node_join.right.expr.right.is_a?(Arel::Attributes::Attribute)))
                   next
                 end
 
-                relation_right = node_join.right.expr.right.relation
-                relation_left = node_join.right.expr.left.relation
-                model_left = MultiTenant.multi_tenant_model_for_table(relation_right.table_name)
+                relation_right, relation_left = relations_from_node_join(node_join)
+
+                if !relation_right || !relation_left
+                  next
+                end
+
                 model_right = MultiTenant.multi_tenant_model_for_table(relation_left.table_name)
+                model_left = MultiTenant.multi_tenant_model_for_table(relation_right.table_name)
                 if model_right && model_left
                   join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation_left[model_left.partition_key], relation_right)
                   node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
@@ -323,6 +328,20 @@ module ActiveRecord
       end
 
       arel
+    end
+
+    private
+    def relations_from_node_join(node_join)
+      if ActiveRecord::VERSION::MAJOR <= 5 || node_join.right.expr.is_a?(Arel::Nodes::Equality)
+        return node_join.right.expr.right.relation, node_join.right.expr.left.relation
+      end
+
+      children = node_join.right.expr.children
+      children.select{ |n| (n.is_a?(MultiTenant::TenantEnforcementClause) || n.is_a?(MultiTenant::TenantJoinEnforcementClause)) }.each do
+        return nil, nil
+      end
+
+      return children[0].right.relation, children[0].left.relation
     end
   end
 end

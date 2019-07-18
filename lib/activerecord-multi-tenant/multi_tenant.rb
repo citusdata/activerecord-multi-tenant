@@ -33,6 +33,14 @@ module MultiTenant
     @@multi_tenant_models[table_name.to_s]
   end
 
+  def self.multi_tenant_model_for_arel(arel)
+    if arel.ast.relation.is_a? Arel::Nodes::JoinSource
+      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.left.table_name)
+    else
+      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+    end
+  end
+
   def self.current_tenant=(tenant)
     RequestStore.store[:current_tenant] = tenant
   end
