@@ -588,4 +588,22 @@ describe MultiTenant do
       project = Project.create! name: 'Project 1'
     end
   end
+
+  it "test insert of jsonb" do
+    account1 = Account.create! name: 'Account 1'
+    category1 = Category.create! name: 'Category 1'
+    MultiTenant.with(account1) do
+      project1 = Project.create! name: 'Project 1'
+      projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1, data: {test: 1}
+
+      projectcategory = ProjectCategory.first
+      expect(projectcategory.data['test']).to eq(1)
+
+      projectcategory2 = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1, data: 1
+      projectcategory2 = ProjectCategory.find(projectcategory2.id)
+      expect(projectcategory2.data).to eq('1')
+
+    end
+
+  end
 end

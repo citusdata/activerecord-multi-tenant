@@ -87,6 +87,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :account_id, :integer
     t.column :project_id, :integer
     t.column :category_id, :integer
+    t.column :data, :jsonb, null: true
   end
 
 
