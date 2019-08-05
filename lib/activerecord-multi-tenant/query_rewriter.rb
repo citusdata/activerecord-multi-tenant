@@ -223,7 +223,7 @@ module MultiTenant
     def join_to_update(update, *args)
       update = super(update, *args)
       model = MultiTenant.multi_tenant_model_for_table(update.ast.relation.table_name)
-      if model.present? && !MultiTenant.with_write_only_mode_enabled?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       update
@@ -232,7 +232,7 @@ module MultiTenant
     def join_to_delete(delete, *args)
       delete = super(delete, *args)
       model = MultiTenant.multi_tenant_model_for_table(delete.ast.left.table_name)
-      if model.present? && !MultiTenant.with_write_only_mode_enabled?
+      if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
       delete
@@ -241,7 +241,7 @@ module MultiTenant
     if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 2
       def update(arel, name = nil, binds = [])
         model = MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
-        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+        if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
           arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
         end
         super(arel, name, binds)
@@ -249,7 +249,7 @@ module MultiTenant
 
       def delete(arel, name = nil, binds = [])
         model = MultiTenant.multi_tenant_model_for_table(arel.ast.left.table_name)
-        if model.present? && !MultiTenant.with_write_only_mode_enabled?
+        if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
           arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
         end
         super(arel, name, binds)
