@@ -70,4 +70,5 @@ before_install:
   - docker-compose up -d
 
 script:
+  - gem install bundler
   - bundle exec rake spec
