@@ -337,7 +337,9 @@ module ActiveRecord
       end
 
       children = node_join.right.expr.children
-      if children.map { |n| (n.is_a?(MultiTenant::TenantEnforcementClause) || n.is_a?(MultiTenant::TenantJoinEnforcementClause)) }.any?
+      if ( (children.map { |n| (n.is_a?(MultiTenant::TenantEnforcementClause) ||
+                                n.is_a?(MultiTenant::TenantJoinEnforcementClause)) }.any?
+           ) || (children.empty?) )
         return nil, nil
       end
 
