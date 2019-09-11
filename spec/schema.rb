@@ -82,7 +82,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
   end
 
-  create_table :project_categories, force: true, partition_key: :account_id do |t|
+  create_table :project_categories, force: true do |t|
     t.column :name, :string
     t.column :account_id, :integer
     t.column :project_id, :integer
@@ -106,9 +106,13 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :partition_key_not_model_tasks, :non_model_id
   create_distributed_table :subclass_tasks, :non_model_id
   create_distributed_table :uuid_records, :organization_id
-  create_distributed_table :project_categories, :account_id
   create_distributed_table :allowed_places, :account_id
   create_reference_table :categories
+
+  change_table :project_categories, partition_key: :account_id do |t|
+  end
+
+  create_distributed_table :project_categories, :account_id
 end
 
 class Account < ActiveRecord::Base

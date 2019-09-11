@@ -43,12 +43,24 @@ module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module SchemaStatements
       alias :orig_create_table :create_table
+      alias :orig_change_table :change_table
+
+      def change_primary_key(table_name, options)
+        if options[:partition_key] && options[:partition_key].to_s != 'id'
+          execute "ALTER TABLE #{table_name} DROP CONSTRAINT IF EXISTS #{table_name}_pkey"
+          execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
+        end
+      end
+
       def create_table(table_name, options = {}, &block)
         ret = orig_create_table(table_name, options.except(:partition_key), &block)
-        if options[:partition_key] && options[:partition_key].to_s != 'id'
-          execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{table_name}_pkey"
-          execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(id, \"#{options[:partition_key]}\")"
-        end
+        change_primary_key(table_name, options)
+        ret
+      end
+
+      def change_table(table_name, options, &block)
+        ret = orig_change_table(table_name, options.except(:partition_key), &block)
+        change_primary_key(table_name, options)
         ret
       end
     end
