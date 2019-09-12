@@ -63,8 +63,7 @@ module ActiveRecord
         columns_result = execute(query)
 
         if columns_result.present?
-          columns = []
-          columns_result.values.each {|c| columns.push(c[0])}
+          columns = columns_result.values.map(&:first)
 
           if columns.length != pkey_columns.length
             execute "ALTER TABLE #{table_name} DROP CONSTRAINT IF EXISTS #{table_name}_pkey"
