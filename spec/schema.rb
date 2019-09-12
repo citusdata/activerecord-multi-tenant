@@ -109,9 +109,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :allowed_places, :account_id
   create_reference_table :categories
 
-  change_table :project_categories, partition_key: :account_id do |t|
-  end
-
+  change_table :project_categories, partition_key: :account_id
 
   # primary key shoud not be recreated
   change_table :project_categories, partition_key: :account_id do |t|
