@@ -311,9 +311,7 @@ module ActiveRecord
 
                 relation_right, relation_left = relations_from_node_join(node_join)
 
-                if !relation_right || !relation_left
-                  next
-                end
+                next unless relation_right && relation_left
 
                 model_right = MultiTenant.multi_tenant_model_for_table(relation_left.table_name)
                 model_left = MultiTenant.multi_tenant_model_for_table(relation_right.table_name)
@@ -337,9 +335,9 @@ module ActiveRecord
       end
 
       children = node_join.right.expr.children
-      if ( (children.map { |n| (n.is_a?(MultiTenant::TenantEnforcementClause) ||
-                                n.is_a?(MultiTenant::TenantJoinEnforcementClause)) }.any?
-           ) || (children.empty?) )
+
+      tenant_applied = children.any?(MultiTenant::TenantEnforcementClause) || children.any?(MultiTenant::TenantJoinEnforcementClause)
+      if tenant_applied || children.empty?
         return nil, nil
       end
 
