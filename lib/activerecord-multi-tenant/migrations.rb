@@ -53,17 +53,18 @@ module ActiveRecord
         pkey_columns = ['id', options[:partition_key]]
 
         # we are here comparing the columns in the primary key on the database and the one in the migration file
-        columns_result = execute("select kcu.column_name as key_column " \
+        query = ActiveRecord::Base::sanitize_sql_array(["select kcu.column_name as key_column " \
                                  "from information_schema.table_constraints tco "\
                                  "join information_schema.key_column_usage kcu " \
                                  "ON kcu.constraint_name = tco.constraint_name " \
                                  "AND kcu.constraint_schema = tco.constraint_schema "\
                                  "WHERE tco.constraint_type = 'PRIMARY KEY' " \
-                                 "AND tco.constraint_name = '#{table_name}_pkey'")
+                                 "AND tco.constraint_name = '%s_pkey'", table_name])
+        columns_result = execute(query)
 
         if columns_result.present?
           columns = []
-          columns_result.values.each do |c| columns.push(c[0]) end
+          columns_result.values.each {|c| columns.push(c[0])}
 
           if columns.length != pkey_columns.length
             execute "ALTER TABLE #{table_name} DROP CONSTRAINT IF EXISTS #{table_name}_pkey"
@@ -80,7 +81,10 @@ module ActiveRecord
       end
 
       def change_table(table_name, options, &block)
-        ret = orig_change_table(table_name, options.except(:partition_key), &block)
+        ret = nil
+        if block
+          ret = orig_change_table(table_name, options.except(:partition_key), &block)
+        end
         change_primary_key(table_name, options)
         ret
       end
