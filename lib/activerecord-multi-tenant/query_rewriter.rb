@@ -199,23 +199,12 @@ module MultiTenant
 
 
   module TenantValueVisitor
-    if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
-      def visit_MultiTenant_TenantEnforcementClause(o, collector)
-        collector << o
-      end
+    def visit_MultiTenant_TenantEnforcementClause(o, collector)
+      collector << o
+    end
 
-      def visit_MultiTenant_TenantJoinEnforcementClause(o, collector)
-        collector << o
-      end
-
-    else
-      def visit_MultiTenant_TenantEnforcementClause(o, a = nil)
-        o
-      end
-
-      def visit_MultiTenant_TenantJoinEnforcementClause(o, a = nil)
-        o
-      end
+    def visit_MultiTenant_TenantJoinEnforcementClause(o, collector)
+      collector << o
     end
   end
 
