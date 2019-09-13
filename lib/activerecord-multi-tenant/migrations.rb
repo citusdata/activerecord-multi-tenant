@@ -53,14 +53,15 @@ module ActiveRecord
         pkey_columns = ['id', options[:partition_key]]
 
         # we are here comparing the columns in the primary key on the database and the one in the migration file
-        query = ActiveRecord::Base::sanitize_sql_array(["select kcu.column_name as key_column " \
-                                 "from information_schema.table_constraints tco "\
-                                 "join information_schema.key_column_usage kcu " \
-                                 "ON kcu.constraint_name = tco.constraint_name " \
-                                 "AND kcu.constraint_schema = tco.constraint_schema "\
-                                 "WHERE tco.constraint_type = 'PRIMARY KEY' " \
-                                 "AND tco.constraint_name = '%s_pkey'", table_name])
-        columns_result = execute(query)
+        query = "select kcu.column_name as key_column " \
+                "from information_schema.table_constraints tco "\
+                "join information_schema.key_column_usage kcu " \
+                "ON kcu.constraint_name = tco.constraint_name " \
+                "AND kcu.constraint_schema = tco.constraint_schema "\
+                "WHERE tco.constraint_type = 'PRIMARY KEY' " \
+                "AND tco.constraint_name = '%s_pkey'"
+
+        columns_result = execute(ActiveRecord::Base.send(:sanitize_sql_array, [query, table_name]))
 
         if columns_result.present?
           columns = columns_result.values.map(&:first)
