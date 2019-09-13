@@ -2,6 +2,8 @@ require "active_record"
 
 
 Rake::Task["db:structure:dump"].enhance do
+  return unless ActiveRecord::SchemaDumper.include_distribute_statements
+
   if ActiveRecord::VERSION::MAJOR >= 6
     databases = ActiveRecord::Tasks::DatabaseTasks.setup_initial_database_yaml
   else
