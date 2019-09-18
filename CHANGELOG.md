@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1      2019-08-27
+
+* Ensure current tenant is present before adding tenant id filter in DatabaseStatements
+
 
 ## 1.0.0      2019-07-05
 
