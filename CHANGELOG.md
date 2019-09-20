@@ -1,5 +1,13 @@
 # Changelog
 
+
+## 1.0.2      2019-09-20
+
+* Compatibility  with rails 6
+* Remove support for rails 4.0  and  4.1
+* Fix bug when multiple databases are used
+
+
 ## 1.0.1      2019-08-27
 
 * Ensure current tenant is present before adding tenant id filter in DatabaseStatements
