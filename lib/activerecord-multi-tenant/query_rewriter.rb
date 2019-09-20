@@ -149,21 +149,27 @@ module MultiTenant
     end
   end
 
-  class TenantEnforcementClause < Arel::Nodes::Node
+  class BaseTenantEnforcementClause < Arel::Nodes::Node
     attr_reader :tenant_attribute
     def initialize(tenant_attribute)
       @tenant_attribute = tenant_attribute
+      @tenant_model = MultiTenant.multi_tenant_model_for_table(tenant_attribute.relation.table_name)
     end
 
     def to_s; to_sql; end
     def to_str; to_sql; end
 
     def to_sql(*)
-      tenant_arel.to_sql
+      collector = Arel::Collectors::SQLString.new
+      collector = @tenant_model.connection.visitor.accept tenant_arel, collector
+      collector.value
     end
 
-    private
 
+  end
+
+  class TenantEnforcementClause < BaseTenantEnforcementClause
+    private
     def tenant_arel
       if defined?(Arel::Nodes::Quoted)
         @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
@@ -174,24 +180,15 @@ module MultiTenant
   end
 
 
-  class TenantJoinEnforcementClause < Arel::Nodes::Node
-    attr_reader :tenant_attribute
+  class TenantJoinEnforcementClause < BaseTenantEnforcementClause
     attr_reader :table_left
     def initialize(tenant_attribute, table_left)
+      super(tenant_attribute)
       @table_left = table_left
       @model_left = MultiTenant.multi_tenant_model_for_table(table_left.table_name)
-      @tenant_attribute = tenant_attribute
-    end
-
-    def to_s; to_sql; end
-    def to_str; to_sql; end
-
-    def to_sql(*)
-      tenant_arel.to_sql
     end
 
     private
-
     def tenant_arel
       @tenant_attribute.eq(@table_left[@model_left.partition_key])
     end
