@@ -68,7 +68,7 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.1.0)
     minitest (5.12.2)
-    nio4r (2.5.1)
+    nio4r (2.5.2)
     nokogiri (1.7.2)
       mini_portile2 (~> 2.1.0)
     pg (1.1.4)
@@ -137,7 +137,7 @@ GEM
       rack (>= 1.5.0)
       rack-protection (>= 1.5.0)
       redis (>= 3.3.5, < 5)
-    sprockets (4.0.0)
+    sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     sprockets-rails (3.2.1)
@@ -166,6 +166,7 @@ DEPENDENCIES
   rspec (>= 3.0)
   rspec-rails
   sidekiq
+  sprockets (~> 3.7.1)
   thor
 
 BUNDLED WITH
