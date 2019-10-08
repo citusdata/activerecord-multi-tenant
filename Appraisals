@@ -5,6 +5,8 @@ appraise 'rails-4.2' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'rails-5.0' do
@@ -14,6 +16,8 @@ appraise 'rails-5.0' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'rails-5.1' do
@@ -23,6 +27,8 @@ appraise 'rails-5.1' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'rails-5.2' do
@@ -32,6 +38,8 @@ appraise 'rails-5.2' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'rails-6.0' do
@@ -45,6 +53,8 @@ appraise 'active-record-5.1' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'active-record-5.2' do
@@ -54,6 +64,8 @@ appraise 'active-record-5.2' do
   gem "nio4r", "~> 2.3.1"
   gem 'sprockets', '~> 3.7.1'
   gem 'byebug', '~> 9.0.6'
+  gem 'rake', '12.0.0'
+  gem 'redis', '3.3.3'
 end
 
 appraise 'active-record-6.0' do
