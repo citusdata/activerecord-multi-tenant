@@ -43,12 +43,49 @@ module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module SchemaStatements
       alias :orig_create_table :create_table
+      alias :orig_change_table :change_table
+
+      def change_primary_key(table_name, options)
+        if !options[:partition_key] || options[:partition_key].to_s == 'id'
+          return
+        end
+
+        pkey_columns = ['id', options[:partition_key]]
+
+        # we are here comparing the columns in the primary key on the database and the one in the migration file
+        query = "select kcu.column_name as key_column " \
+                "from information_schema.table_constraints tco "\
+                "join information_schema.key_column_usage kcu " \
+                "ON kcu.constraint_name = tco.constraint_name " \
+                "AND kcu.constraint_schema = tco.constraint_schema "\
+                "WHERE tco.constraint_type = 'PRIMARY KEY' " \
+                "AND tco.constraint_name = '%s_pkey'"
+
+        columns_result = execute(ActiveRecord::Base.send(:sanitize_sql_array, [query, table_name]))
+
+        if columns_result.present?
+          columns = columns_result.values.map(&:first)
+
+          if columns.length != pkey_columns.length
+            execute "ALTER TABLE #{table_name} DROP CONSTRAINT IF EXISTS #{table_name}_pkey"
+            execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
+          end
+        end
+
+      end
+
       def create_table(table_name, options = {}, &block)
         ret = orig_create_table(table_name, options.except(:partition_key), &block)
-        if options[:partition_key] && options[:partition_key].to_s != 'id'
-          execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{table_name}_pkey"
-          execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(id, \"#{options[:partition_key]}\")"
+        change_primary_key(table_name, options)
+        ret
+      end
+
+      def change_table(table_name, options, &block)
+        ret = nil
+        if block
+          ret = orig_change_table(table_name, options.except(:partition_key), &block)
         end
+        change_primary_key(table_name, options)
         ret
       end
     end
