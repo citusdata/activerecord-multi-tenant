@@ -31,28 +31,31 @@ describe MultiTenant, 'Record modifications' do
 
   end
 
-  it 'includes the tenant_id in DELETEs when using object.delete' do
-    # two records with same id but different account_id
-    # when project.delete it should delete only the current one
-    # by adding account_id to the destroy
+  if (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2) || ActiveRecord::VERSION::MAJOR > 5  
 
-    expect(project.account).to eq(account)
-    expect(project2.account).to eq(account2)
-    expect(project.id).to eq(project2.id)
+    it 'includes the tenant_id in DELETEs when using object.delete' do
+      # two records with same id but different account_id
+      # when project.delete it should delete only the current one
+      # by adding account_id to the destroy
 
-    MultiTenant.without() do
-      expect(Project.count).to eq(2)
-      project.delete
-      expect(Project.count).to eq(1)
+      expect(project.account).to eq(account)
+      expect(project2.account).to eq(account2)
+      expect(project.id).to eq(project2.id)
+
+      MultiTenant.without() do
+        expect(Project.count).to eq(2)
+        project.delete
+        expect(Project.count).to eq(1)
+      end
+
+      MultiTenant.with(account) do
+        expect(Project.where(id: project.id).first).not_to be_present
+      end
+      MultiTenant.with(account2) do
+        expect(Project.where(id: project2.id).first).to be_present
+      end
+
     end
-
-    MultiTenant.with(account) do
-      expect(Project.where(id: project.id).first).not_to be_present
-    end
-    MultiTenant.with(account2) do
-      expect(Project.where(id: project2.id).first).to be_present
-    end
-
   end
 
 
