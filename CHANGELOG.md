@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 1.0.4      2019-10-30
+
+* Fix bug introduced in 1.0.3 for delete when table is reference or not distributed
+
+
+## 1.0.3      2019-10-28
+
+* Ensure that when using object.delete, we set the tenant
+
+
 ## 1.0.2      2019-09-20
 
 * Compatibility  with rails 6
