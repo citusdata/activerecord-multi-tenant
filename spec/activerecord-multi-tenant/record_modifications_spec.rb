@@ -52,7 +52,20 @@ describe MultiTenant, 'Record modifications' do
     MultiTenant.with(account2) do
       expect(Project.where(id: project2.id).first).to be_present
     end
+  end
 
+  it 'test delete for reference tables' do
+    category1 = Category.create! name: 'Category 1'
+    expect(Category.count).to eq(1)
+    category1.delete
+    expect(Category.count).to eq(0)
+  end
+
+  it 'test delete for non distributed tables' do
+    unscoped = UnscopedModel.create! name: 'Canada'
+    expect(UnscopedModel.count).to eq(1)
+    unscoped.delete
+    expect(UnscopedModel.count).to eq(0)
   end
 
   it 'includes the tenant_id in UPDATEs' do
