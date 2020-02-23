@@ -126,10 +126,9 @@ module MultiTenant
   end
 end
 
-if defined?(ActiveRecord::Base)
-  ActiveRecord::Base.extend(MultiTenant::ModelExtensionsClassMethods)
+ActiveSupport.on_load(:active_record) do |base|
+  base.extend MultiTenant::ModelExtensionsClassMethods
 end
-
 
 class ActiveRecord::Associations::Association
   alias skip_statement_cache_orig skip_statement_cache?

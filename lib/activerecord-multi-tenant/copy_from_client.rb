@@ -28,6 +28,6 @@ module MultiTenant
   end
 end
 
-if defined?(ActiveRecord::Base)
-  ActiveRecord::Base.extend(MultiTenant::CopyFromClient)
+ActiveSupport.on_load(:active_record) do |base|
+  base.extend(MultiTenant::CopyFromClient)
 end
