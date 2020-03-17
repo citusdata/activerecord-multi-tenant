@@ -24,11 +24,6 @@ module MultiTenant
           def primary_key
             return @primary_key if @primary_key
 
-            if ::ActiveRecord::VERSION::MAJOR < 5
-              @primary_key = super || DEFAULT_ID_FIELD
-              return @primary_key if connection.schema_cache.columns_hash(table_name).include? @primary_key
-            end
-
             primary_object_keys = Array.wrap(connection.schema_cache.primary_keys(table_name)) - [partition_key]
 
             if primary_object_keys.size == 1
