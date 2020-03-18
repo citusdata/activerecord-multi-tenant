@@ -1,15 +1,3 @@
-appraise 'rails-4.2' do
-  gem 'rails', '~> 4.2.8'
-  gem 'i18n',  '~> 0.9.5'
-  gem 'nokogiri', '~> 1.7.1'
-  gem 'nio4r', '~> 2.3.1'
-  gem 'sprockets', '~> 3.7.1'
-  gem 'byebug', '~> 9.0.6'
-  gem 'rake', '12.0.0'
-  gem 'redis', '3.3.3'
-  gem 'pg', '~> 0.15'
-end
-
 appraise 'rails-5.0' do
   gem 'rails', '~> 5.0.1'
   gem 'i18n',  '~> 0.9.5'
