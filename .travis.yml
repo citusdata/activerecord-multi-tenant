@@ -7,16 +7,17 @@ rvm:
   - 2.2.7
   - 2.3.4
   - 2.4.1
+  - 2.4.4
+  - 2.6.4
 
 gemfile:
-  - gemfiles/rails_4.0.gemfile
-  - gemfiles/rails_4.1.gemfile
-  - gemfiles/rails_4.2.gemfile
   - gemfiles/rails_5.0.gemfile
   - gemfiles/rails_5.1.gemfile
   - gemfiles/rails_5.2.gemfile
+  - gemfiles/rails_6.0.gemfile
   - gemfiles/active_record_5.1.gemfile
   - gemfiles/active_record_5.2.gemfile
+  - gemfiles/active_record_6.0.gemfile
 
 env:
   - PREPARED_STATEMENTS=0
@@ -25,16 +26,30 @@ env:
 matrix:
   fast_finish: true
   exclude:
+    - rvm: 2.2.7
+      gemfile: gemfiles/rails_6.0.gemfile
+    - rvm: 2.2.7
+      gemfile: gemfiles/active_record_6.0.gemfile
+    - rvm: 2.3.4
+      gemfile: gemfiles/rails_6.0.gemfile
+    - rvm: 2.3.4
+      gemfile: gemfiles/active_record_6.0.gemfile
     - rvm: 2.4.1
-      gemfile: gemfiles/rails_4.0.gemfile
+      gemfile: gemfiles/rails_6.0.gemfile
     - rvm: 2.4.1
-      gemfile: gemfiles/rails_4.1.gemfile
+      gemfile: gemfiles/active_record_6.0.gemfile
+    - rvm: 2.4.4
+      gemfile: gemfiles/rails_6.0.gemfile
+    - rvm: 2.4.4
+      gemfile: gemfiles/active_record_6.0.gemfile
+
 
 services:
   - docker
 
 before_install:
   - docker-compose up -d
+  - gem install bundler -v 1.17.3
 
 script:
   - bundle exec rake spec

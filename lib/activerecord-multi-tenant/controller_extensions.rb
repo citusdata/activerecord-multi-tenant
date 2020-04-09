@@ -20,10 +20,6 @@ module MultiTenant
   end
 end
 
-if defined?(ActionController::Base)
-  ActionController::Base.extend MultiTenant::ControllerExtensions
-end
-
-if defined?(ActionController::API)
-  ActionController::API.extend MultiTenant::ControllerExtensions
+ActiveSupport.on_load(:action_controller) do |base|
+  base.extend MultiTenant::ControllerExtensions
 end

@@ -23,13 +23,16 @@ module MultiTenant
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
             return @primary_key if @primary_key
-            return @primary_key = super || DEFAULT_ID_FIELD if ::ActiveRecord::VERSION::MAJOR < 5
 
             primary_object_keys = Array.wrap(connection.schema_cache.primary_keys(table_name)) - [partition_key]
+
             if primary_object_keys.size == 1
               @primary_key = primary_object_keys.first
-            else
+            elsif connection.schema_cache.columns_hash(table_name).include? DEFAULT_ID_FIELD
               @primary_key = DEFAULT_ID_FIELD
+            else
+              # table without a primary key and DEFAULT_ID_FIELD is not present in the table
+              @primary_key = nil
             end
           end
 
@@ -51,7 +54,8 @@ module MultiTenant
 
         # New instances should have the tenant set
         after_initialize Proc.new { |record|
-          if MultiTenant.current_tenant_id && record.public_send(partition_key.to_sym).nil?
+          if MultiTenant.current_tenant_id &&
+              (!record.attribute_present?(partition_key) || record.public_send(partition_key.to_sym).nil?)
             record.public_send("#{partition_key}=".to_sym, MultiTenant.current_tenant_id)
           end
         }
@@ -59,7 +63,15 @@ module MultiTenant
         to_include = Module.new do
           define_method "#{partition_key}=" do |tenant_id|
             write_attribute("#{partition_key}", tenant_id)
-            raise MultiTenant::TenantIsImmutable if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
+
+            # Rails 5 `attribute_will_change!` uses the attribute-method-call rather than `read_attribute`
+            # and will raise ActiveModel::MissingAttributeError if that column was not selected.
+            # This is rescued as NoMethodError and in MRI attribute_was is assigned an arbitrary Object
+            # This is still true after the Rails 5.2 refactor
+            was = send("#{partition_key}_was")
+            was_nil_or_skipped = was.nil? || was.class == Object
+
+            raise MultiTenant::TenantIsImmutable if send("#{partition_key}_changed?") && persisted? && !was_nil_or_skipped
             tenant_id
           end
 
@@ -109,16 +121,14 @@ module MultiTenant
   end
 end
 
-if defined?(ActiveRecord::Base)
-  ActiveRecord::Base.extend(MultiTenant::ModelExtensionsClassMethods)
+ActiveSupport.on_load(:active_record) do |base|
+  base.extend MultiTenant::ModelExtensionsClassMethods
 end
 
-if ActiveRecord::VERSION::MAJOR > 4 || (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
-  class ActiveRecord::Associations::Association
-    alias skip_statement_cache_orig skip_statement_cache?
-    def skip_statement_cache?(*scope)
-      return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
-      skip_statement_cache_orig(*scope)
-    end
+class ActiveRecord::Associations::Association
+  alias skip_statement_cache_orig skip_statement_cache?
+  def skip_statement_cache?(*scope)
+    return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
+    skip_statement_cache_orig(*scope)
   end
 end
