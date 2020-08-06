@@ -187,7 +187,7 @@ DEPENDENCIES
   pg
   pry
   pry-byebug
-  rails (~> 6.0.0)
+  rails (~> 6.0.3)
   rake
   rspec (>= 3.0)
   rspec-rails
