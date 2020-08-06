@@ -4,9 +4,6 @@ cache: bundler
 language: ruby
 
 rvm:
-  - 2.3.4
-  - 2.4.1
-  - 2.4.4
   - 2.5.8
   - 2.6.4
   - 2.7.1
@@ -23,20 +20,6 @@ env:
 
 matrix:
   fast_finish: true
-  exclude:
-    - rvm: 2.3.4
-      gemfile: gemfiles/rails_6.0.gemfile
-    - rvm: 2.3.4
-      gemfile: gemfiles/active_record_6.0.gemfile
-    - rvm: 2.4.1
-      gemfile: gemfiles/rails_6.0.gemfile
-    - rvm: 2.4.1
-      gemfile: gemfiles/active_record_6.0.gemfile
-    - rvm: 2.4.4
-      gemfile: gemfiles/rails_6.0.gemfile
-    - rvm: 2.4.4
-      gemfile: gemfiles/active_record_6.0.gemfile
-
 
 services:
   - docker
