@@ -224,22 +224,20 @@ module MultiTenant
       delete
     end
 
-    if (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2) || ActiveRecord::VERSION::MAJOR > 5
-      def update(arel, name = nil, binds = [])
-        model = MultiTenant.multi_tenant_model_for_arel(arel)
-        if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
-          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
-        end
-        super(arel, name, binds)
+    def update(arel, name = nil, binds = [])
+      model = MultiTenant.multi_tenant_model_for_arel(arel)
+      if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
+        arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
+      super(arel, name, binds)
+    end
 
-      def delete(arel, name = nil, binds = [])
-        model = MultiTenant.multi_tenant_model_for_arel(arel)
-        if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
-          arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
-        end
-        super(arel, name, binds)
+    def delete(arel, name = nil, binds = [])
+      model = MultiTenant.multi_tenant_model_for_arel(arel)
+      if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
+        arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
+      super(arel, name, binds)
     end
   end
 end
@@ -290,7 +288,7 @@ module ActiveRecord
 
               node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
                 if (!node_join.right ||
-                    (ActiveRecord::VERSION::MAJOR <= 5 &&
+                    (ActiveRecord::VERSION::MAJOR == 5 &&
                      !node_join.right.expr.right.is_a?(Arel::Attributes::Attribute)))
                   next
                 end
@@ -316,7 +314,7 @@ module ActiveRecord
 
     private
     def relations_from_node_join(node_join)
-      if ActiveRecord::VERSION::MAJOR <= 5 || node_join.right.expr.is_a?(Arel::Nodes::Equality)
+      if ActiveRecord::VERSION::MAJOR == 5 || node_join.right.expr.is_a?(Arel::Nodes::Equality)
         return node_join.right.expr.right.relation, node_join.right.expr.left.relation
       end
 
