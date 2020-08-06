@@ -412,17 +412,13 @@ describe MultiTenant do
     account1 = Account.create! name: 'Account 1'
     category1 = Category.create! name: 'Category 1'
 
-    expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR > 0
+    expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5
                      <<-sql
                      SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
                      sql
-                   elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 6
-                     <<-sql
-                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."account_id" = 1 AND "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
-                     sql
                    else
                      <<-sql
-                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
+                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."account_id" = 1 AND "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
                      sql
                    end
 
@@ -455,17 +451,13 @@ describe MultiTenant do
     category1 = Category.create! name: 'Category 1'
 
     MultiTenant.with(account1) do
-      expected_sql =  if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR > 0
+      expected_sql =  if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 5
                         <<-sql
                         SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
                         sql
-                      elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 6
-                        <<-sql
-                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."account_id" = 1 AND "projects"."id" = "tasks"."project_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
-                        sql
                       else
                         <<-sql
-                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "projects"."account_id" = 1 AND "tasks"."account_id" = 1
+                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."account_id" = 1 AND "projects"."id" = "tasks"."project_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
                         sql
                       end
 
@@ -497,17 +489,9 @@ describe MultiTenant do
                        <<-sql.strip
                                 SELECT "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
                          sql
-                     elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 4
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
-                         sql
-                     elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT 1
-                         sql
                      else
                        <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
                          sql
                      end
 
@@ -520,17 +504,9 @@ describe MultiTenant do
                        <<-sql.strip
                          SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
                          sql
-                     elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 4
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
-                         sql
-                     elsif uses_prepared_statements? && ActiveRecord::VERSION::MAJOR == 4
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT 1
-                         sql
                      else
                        <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project2.id} LIMIT 1
+                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
                          sql
                      end
 
