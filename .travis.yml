@@ -48,7 +48,7 @@ services:
 
 before_install:
   - docker-compose up -d
-  - gem install bundler -v 2.1.2
+  - gem install bundler -v 2.1.4
 
 script:
   - bundle exec rake spec
