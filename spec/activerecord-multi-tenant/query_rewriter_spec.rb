@@ -90,4 +90,12 @@ describe "Query Rewriter" do
       }.to change { Project.count }.from(3).to(1)
     end
   end
+
+  context "when update without arel" do
+    it "can call method" do
+      expect {
+        ActiveRecord::Base.connection.update("SELECT 1")
+      }.not_to raise_error
+    end
+  end
 end
