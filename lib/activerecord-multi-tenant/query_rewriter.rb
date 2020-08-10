@@ -31,6 +31,7 @@ module MultiTenant
       @arel_node = arel_node
       @known_relations = []
       @handled_relations = []
+      @discovering = false
     end
 
     def discover_relations
