@@ -247,6 +247,31 @@ ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(MultiTenant::DatabaseS
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 
+if ActiveRecord::VERSION::MAJOR == 6
+  require 'arel/visitors/to_sql'
+  module Arel
+    module Visitors
+      class ToSql < Arel::Visitors::Visitor
+        alias :prepare_update_statement_orig :prepare_update_statement
+        def prepare_update_statement(o)
+          o_prepared = prepare_update_statement_orig(o)
+
+          # TODO: do this only for citus < 7.4
+          if has_join_sources?(o)
+            model = MultiTenant.multi_tenant_model_for_table(o_prepared.relation.table_name)
+            if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
+              o_prepared.wheres << MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key])
+            end
+          end
+
+          o_prepared
+        end
+        alias :prepare_delete_statement :prepare_update_statement
+      end
+    end
+  end
+end
+
 require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
