@@ -129,6 +129,12 @@ class ActiveRecord::Associations::Association
   alias skip_statement_cache_orig skip_statement_cache?
   def skip_statement_cache?(*scope)
     return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
+
+    if reflection.through_reflection
+      through_klass = reflection.through_reflection.klass
+      return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
+    end
+
     skip_statement_cache_orig(*scope)
   end
 end
