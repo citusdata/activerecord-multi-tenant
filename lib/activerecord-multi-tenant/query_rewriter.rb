@@ -1,4 +1,5 @@
 require 'active_record'
+require_relative "./arel_visitors_depth_first.rb"
 
 module MultiTenant
   class Table
@@ -54,7 +55,7 @@ module MultiTenant
     end
   end
 
-  class ArelTenantVisitor < Arel::Visitors::DepthFirst
+  class ArelTenantVisitor < ::MultiTenant::ArelVisitorsDepthFirst
     def initialize(arel)
       super(Proc.new {})
       @statement_node_id = nil
