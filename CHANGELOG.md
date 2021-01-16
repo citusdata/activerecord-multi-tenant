@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1      2021-01-15
+
+* Add support for Rails 6.1 [#108](https://github.com/citusdata/activerecord-multi-tenant/pull/108)
+* Fix statement cache for has_many through relations [#103](https://github.com/citusdata/activerecord-multi-tenant/pull/103)
+
+
+## 1.1.0      2020-08-06
+
+* See commits for changes:
+  https://github.com/citusdata/activerecord-multi-tenant/commits/v1.1.0
+
 
 ## 1.0.4      2019-10-30
 
