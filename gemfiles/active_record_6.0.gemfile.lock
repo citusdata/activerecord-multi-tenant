@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-multi-tenant (1.1.0)
+    activerecord-multi-tenant (1.1.1)
       rails (>= 4.2)
       request_store (>= 1.0.5)
 
@@ -91,7 +91,7 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.14.1)
-    nio4r (2.5.2)
+    nio4r (2.5.4)
     nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
     pg (1.2.3)
@@ -162,10 +162,10 @@ GEM
       rack (~> 2.0)
       rack-protection (>= 2.0.0)
       redis (>= 4.1.0)
-    sprockets (4.0.0)
+    sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
-    sprockets-rails (3.2.1)
+    sprockets-rails (3.2.2)
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
@@ -173,9 +173,9 @@ GEM
     thread_safe (0.3.6)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
-    websocket-driver (0.7.2)
+    websocket-driver (0.7.3)
       websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.4)
+    websocket-extensions (0.1.5)
     zeitwerk (2.3.0)
 
 PLATFORMS
