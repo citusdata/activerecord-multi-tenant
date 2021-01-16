@@ -14,6 +14,10 @@ appraise 'rails-6.0' do
   gem 'rails', '~> 6.0.3'
 end
 
+appraise 'rails-6.1' do
+  gem 'rails', '~> 6.1.0'
+end
+
 appraise 'active-record-5.2' do
   gem 'activerecord', '~> 5.2.0'
   gem 'i18n',  '~> 0.9.5'
@@ -28,4 +32,8 @@ end
 
 appraise 'active-record-6.0' do
   gem 'activerecord', '~> 6.0.3'
+end
+
+appraise 'active-record-6.1' do
+  gem 'activerecord', '~> 6.1.0'
 end
