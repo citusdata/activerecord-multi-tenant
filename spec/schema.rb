@@ -185,6 +185,7 @@ class Comment < ActiveRecord::Base
 end
 
 class Organization < ActiveRecord::Base
+  multi_tenant :organization
   has_many :uuid_records
 end
 
