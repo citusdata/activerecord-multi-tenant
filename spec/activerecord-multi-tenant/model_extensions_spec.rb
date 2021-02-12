@@ -348,9 +348,12 @@ describe MultiTenant do
   end
 
   it "applies the team_id conditions in the where clause" do
-    expected_sql = <<-sql
-                     SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."account_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1
-                     sql
+    option1 = <<-sql.strip
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."project_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."account_id" = 1
+    sql
+    option2 = <<-sql.strip
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1 AND "tasks"."account_id" = 1
+    sql
 
     account1 = Account.create! name: 'Account 1'
 
@@ -358,7 +361,7 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       task1 = Task.create! name: 'Task 1', project: project1
       subtask1 = SubTask.create! task: task1
-      expect(project1.sub_tasks.to_sql).to eq(expected_sql.strip)
+      expect(project1.sub_tasks.to_sql).to eq(option1).or(eq(option2))
       expect(project1.sub_tasks).to include(subtask1)
     end
 
@@ -373,9 +376,13 @@ describe MultiTenant do
   end
 
   it "tests joins between distributed and reference table" do
-    expected_sql = <<-sql
-                     SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."account_id" = 1 AND "project_categories"."project_id" = 1
-                   sql
+    option1 = <<-sql.strip
+      SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."project_id" = 1 AND "project_categories"."account_id" = 1
+    sql
+    option2 = <<-sql.strip
+      SELECT "categories".* FROM "categories" INNER JOIN "project_categories" ON "categories"."id" = "project_categories"."category_id" WHERE "project_categories"."account_id" = 1 AND "project_categories"."project_id" = 1
+    sql
+
     account1 = Account.create! name: 'Account 1'
     category1 = Category.create! name: 'Category 1'
 
@@ -383,7 +390,7 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
-      expect(project1.categories.to_sql).to eq(expected_sql.strip)
+      expect(project1.categories.to_sql).to eq(option1).or(eq(option2))
       expect(project1.categories).to include(category1)
       expect(project1.project_categories).to include(projectcategory)
     end
@@ -412,21 +419,18 @@ describe MultiTenant do
     account1 = Account.create! name: 'Account 1'
     category1 = Category.create! name: 'Category 1'
 
-    expected_sql = if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1))
-                     <<-sql
-                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
-                     sql
-                   else
-                     <<-sql
-                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."account_id" = 1 AND "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
-                     sql
-                   end
+    option1 = <<-sql.strip
+      SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
+    sql
+    option2 = <<-sql.strip
+      SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."account_id" = 1 AND "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
+    sql
 
     MultiTenant.with(account1) do
       project1 = Project.create! name: 'Project 1'
       projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
-      expect(Project.eager_load(:categories).to_sql).to eq(expected_sql.strip)
+      expect(Project.eager_load(:categories).to_sql).to eq(option1).or(eq(option2))
 
       project = Project.eager_load(:categories).first
       expect(project.categories).to include(category1)
@@ -451,21 +455,19 @@ describe MultiTenant do
     category1 = Category.create! name: 'Category 1'
 
     MultiTenant.with(account1) do
-      expected_sql =  if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1))
-                        <<-sql
-                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
-                        sql
-                      else
-                        <<-sql
-                        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."account_id" = 1 AND "projects"."id" = "tasks"."project_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
-                        sql
-                      end
+
+      option1 = <<-sql.strip
+        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
+      sql
+      option2 = <<-sql.strip
+        SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."account_id" = 1 AND "projects"."id" = "tasks"."project_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
+      sql
 
       project1 = Project.create! name: 'Project 1'
       projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
       project1.tasks.create! name: 'baz'
-      expect(Task.joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql).to eq(expected_sql.strip)
+      expect(Task.joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql).to eq(option1).or(eq(option2))
     end
 
     MultiTenant.without do
@@ -485,32 +487,29 @@ describe MultiTenant do
     project2 = Project.create! name: 'Project 2', account: Account.create!(name: 'Account2')
 
     MultiTenant.with(account) do
-      expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 5
-                       <<-sql.strip
-                                SELECT "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
-                         sql
-                     else
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
-                         sql
-                     end
+      option1 = <<-sql.strip
+        SELECT "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
+      sql
+      option2 = <<-sql.strip
+        SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 AND "projects"."account_id" = #{account.id} LIMIT $2
+      sql
+      option3 = <<-sql.strip
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 AND "projects"."account_id" = #{account.id} LIMIT $2
+      sql
 
-      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+      expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)).or(eq(option3)), any_args).and_call_original
       expect(Project.find(project.id)).to eq(project)
     end
 
     MultiTenant.without do
-      expected_sql = if uses_prepared_statements? && ActiveRecord::VERSION::MAJOR > 5
-                       <<-sql.strip
-                         SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
-                         sql
-                     else
-                       <<-sql.strip
-                         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
-                         sql
-                     end
+      option1 = <<-sql.strip
+        SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+      sql
+      option2 = <<-sql.strip
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+      sql
 
-      expect(Project).to receive(:find_by_sql).with(expected_sql, any_args).and_call_original
+      expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)), any_args).and_call_original
       expect(Project.find(project2.id)).to eq(project2)
     end
   end

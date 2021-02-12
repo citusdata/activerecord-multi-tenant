@@ -98,4 +98,21 @@ describe "Query Rewriter" do
       }.not_to raise_error
     end
   end
+
+  context "when joining with a model with a default scope" do
+    let!(:account) { Account.create!(name: "Test Account") }
+
+    it "fetches only records within the default scope" do
+      alive = Domain.create(name: "alive", account: account)
+      deleted = Domain.create(name: "deleted", deleted: true, account: account)
+      page_in_alive_domain = Page.create(name: "alive", account: account, domain: alive)
+      page_in_deleted_domain = Page.create(name: "deleted", account: account, domain: deleted)
+
+      expect(
+        MultiTenant.with(account) do
+          Page.joins(:domain).pluck(:id)
+        end
+      ).to eq([page_in_alive_domain.id])
+    end
+  end
 end

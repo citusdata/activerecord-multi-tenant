@@ -89,10 +89,21 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :category_id, :integer
   end
 
-
   create_table :allowed_places, force: true, id: false do |t|
-  t.string :account_id, :integer
-  t.string :name, :string
+    t.string :account_id, :integer
+    t.string :name, :string
+  end
+
+  create_table :domains, force: true, partition_key: :account_id do |t|
+    t.column :account_id, :integer
+    t.column :name, :string
+    t.column :deleted, :boolean, default: false
+  end
+
+  create_table :pages, force: true, partition_key: :account_id do |t|
+    t.column :account_id, :integer
+    t.column :name, :string
+    t.column :domain_id, :integer
   end
 
   create_distributed_table :accounts, :id
@@ -108,6 +119,8 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :uuid_records, :organization_id
   create_distributed_table :project_categories, :account_id
   create_distributed_table :allowed_places, :account_id
+  create_distributed_table :domains, :account_id
+  create_distributed_table :pages, :account_id
   create_reference_table :categories
 end
 
@@ -204,7 +217,17 @@ class ProjectCategory < ActiveRecord::Base
   belongs_to :account
 end
 
-
 class AllowedPlace < ActiveRecord::Base
   multi_tenant :account
+end
+
+class Domain < ActiveRecord::Base
+  multi_tenant :account
+  has_many :pages
+  default_scope { where(deleted: false) }
+end
+
+class Page < ActiveRecord::Base
+  multi_tenant :account
+  belongs_to :domain
 end
