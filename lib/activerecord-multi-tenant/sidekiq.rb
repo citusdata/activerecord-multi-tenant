@@ -18,7 +18,8 @@ module Sidekiq::Middleware::MultiTenant
   class Server
     def call(worker_class, msg, queue)
       if msg.has_key?('multi_tenant')
-        MultiTenant.with(msg['multi_tenant']['id']) do
+        tenant = msg['multi_tenant']['class'].constantize.find(msg['multi_tenant']['id'])
+        MultiTenant.with(tenant) do
           yield
         end
       else
