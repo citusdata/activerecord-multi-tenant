@@ -4,19 +4,17 @@ cache: bundler
 language: ruby
 
 rvm:
-  - 2.2.7
-  - 2.3.4
-  - 2.4.1
+  - 2.5.8
+  - 2.6.4
+  - 2.7.1
 
 gemfile:
-  - gemfiles/rails_4.0.gemfile
-  - gemfiles/rails_4.1.gemfile
-  - gemfiles/rails_4.2.gemfile
-  - gemfiles/rails_5.0.gemfile
-  - gemfiles/rails_5.1.gemfile
   - gemfiles/rails_5.2.gemfile
-  - gemfiles/active_record_5.1.gemfile
+  - gemfiles/rails_6.0.gemfile
+  - gemfiles/rails_6.1.gemfile
   - gemfiles/active_record_5.2.gemfile
+  - gemfiles/active_record_6.0.gemfile
+  - gemfiles/active_record_6.1.gemfile
 
 env:
   - PREPARED_STATEMENTS=0
@@ -24,17 +22,13 @@ env:
 
 matrix:
   fast_finish: true
-  exclude:
-    - rvm: 2.4.1
-      gemfile: gemfiles/rails_4.0.gemfile
-    - rvm: 2.4.1
-      gemfile: gemfiles/rails_4.1.gemfile
 
 services:
   - docker
 
 before_install:
   - docker-compose up -d
+  - gem install bundler -v 2.1.4
 
 script:
   - bundle exec rake spec

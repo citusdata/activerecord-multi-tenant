@@ -15,11 +15,23 @@ describe "Query Rewriter" do
       }.to change { project.reload.name }.from("Project 1").to("New Name")
     end
 
+    it "updates the records without a current tenant" do
+      expect {
+        Project.joins(:manager).update_all(name: "New Name")
+      }.to change { project.reload.name }.from("Project 1").to("New Name")
+    end
+
     it "update the record" do
       expect {
         MultiTenant.with(account) do
           project.update(name: "New Name")
         end
+      }.to change { project.reload.name }.from("Project 1").to("New Name")
+    end
+
+    it "update the record without a current tenant" do
+      expect {
+        project.update(name: "New Name")
       }.to change { project.reload.name }.from("Project 1").to("New Name")
     end
   end
@@ -40,12 +52,25 @@ describe "Query Rewriter" do
       }.to change { Project.count }.from(3).to(1)
     end
 
+    it "delete_all the records without a current tenant" do
+      expect {
+        Project.joins(:manager).delete_all
+      }.to change { Project.count }.from(3).to(1)
+    end
+
     it "delete the record" do
       expect {
         MultiTenant.with(account) do
           project1.delete
           Project.delete(project2.id)
         end
+      }.to change { Project.count }.from(3).to(1)
+    end
+
+    it "delete the record without a current tenant" do
+      expect {
+        project1.delete
+        Project.delete(project2.id)
       }.to change { Project.count }.from(3).to(1)
     end
 
@@ -56,6 +81,21 @@ describe "Query Rewriter" do
           Project.destroy(project2.id)
         end
       }.to change { Project.count }.from(3).to(1)
+    end
+
+    it "destroy the record without a current tenant" do
+      expect {
+        project1.destroy
+        Project.destroy(project2.id)
+      }.to change { Project.count }.from(3).to(1)
+    end
+  end
+
+  context "when update without arel" do
+    it "can call method" do
+      expect {
+        ActiveRecord::Base.connection.update("SELECT 1")
+      }.not_to raise_error
     end
   end
 end

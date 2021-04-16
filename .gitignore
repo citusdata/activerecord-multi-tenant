@@ -1,2 +1,4 @@
 spec/debug.log
 pkg/
+*.rb#
+*.*~
