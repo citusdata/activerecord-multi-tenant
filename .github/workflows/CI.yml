@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '2.5'
+          - '2.6'
+          - '2.7'
+        gemfile:
+          - rails_5.2
+          - rails_6.0
+          - rails_6.1
+          - active_record_5.2
+          - active_record_6.0
+          - active_record_6.1
+        prepared_statements: [true, false]
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
+    env:
+       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
+       PREPARED_STATEMENTS: ${{ matrix.prepared_statements && '1' }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          docker-compose up -d
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: |
+          bundle exec rake spec
