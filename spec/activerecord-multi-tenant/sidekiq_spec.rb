@@ -5,6 +5,9 @@ require 'activerecord-multi-tenant/sidekiq'
 describe MultiTenant, 'Sidekiq' do
   let(:server) { Sidekiq::Middleware::MultiTenant::Server.new }
   let(:account) { Account.create(name: 'test') }
+  let(:deleted_acount) { Account.create(name: 'deleted') }
+
+  before { deleted_acount.destroy! }
 
   describe 'server middleware' do
     it 'sets the multitenant context when provided in message' do
@@ -12,6 +15,14 @@ describe MultiTenant, 'Sidekiq' do
         'multi_tenant' => { 'class' => account.class.name, 'id' => account.id}},
         'bogus_queue') do
         expect(MultiTenant.current_tenant).to eq(account)
+      end
+    end
+
+    it 'sets the multitenant context (id) even if tenant not found' do
+      server.call(double,{'bogus' => 'message',
+        'multi_tenant' => { 'class' => deleted_acount.class.name, 'id' => deleted_acount.id}},
+        'bogus_queue') do
+        expect(MultiTenant.current_tenant).to eq(deleted_acount.id)
       end
     end
 

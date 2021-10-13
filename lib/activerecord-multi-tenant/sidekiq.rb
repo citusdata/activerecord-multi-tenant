@@ -18,7 +18,11 @@ module Sidekiq::Middleware::MultiTenant
   class Server
     def call(worker_class, msg, queue)
       if msg.has_key?('multi_tenant')
-        tenant = msg['multi_tenant']['class'].constantize.find(msg['multi_tenant']['id'])
+        tenant = begin
+                   msg['multi_tenant']['class'].constantize.find(msg['multi_tenant']['id'])
+                 rescue ActiveRecord::RecordNotFound
+                   msg['multi_tenant']['id']
+                 end
         MultiTenant.with(tenant) do
           yield
         end
