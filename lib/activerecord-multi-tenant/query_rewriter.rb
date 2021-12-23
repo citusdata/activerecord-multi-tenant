@@ -122,6 +122,8 @@ module MultiTenant
     alias :visit_Arel_Nodes_FullOuterJoin :visit_Arel_Nodes_OuterJoin
     alias :visit_Arel_Nodes_RightOuterJoin :visit_Arel_Nodes_OuterJoin
 
+    alias :visit_ActiveModel_Attribute :terminal
+
     private
 
     def tenant_relation?(table_name)
