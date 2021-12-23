@@ -79,7 +79,7 @@ GEM
       rake
     mini_mime (1.0.2)
     mini_portile2 (2.1.0)
-    minitest (5.14.1)
+    minitest (5.14.4)
     nio4r (2.3.1)
     nokogiri (1.7.2)
       mini_portile2 (~> 2.1.0)
@@ -187,4 +187,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   2.1.4
+   2.2.22

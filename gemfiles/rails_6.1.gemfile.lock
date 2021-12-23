@@ -95,11 +95,12 @@ GEM
       nokogiri (~> 1)
       rake
     mini_mime (1.0.2)
-    mini_portile2 (2.4.0)
-    minitest (5.14.2)
+    mini_portile2 (2.6.1)
+    minitest (5.14.4)
     nio4r (2.5.4)
-    nokogiri (1.10.10)
-      mini_portile2 (~> 2.4.0)
+    nokogiri (1.12.5)
+      mini_portile2 (~> 2.6.1)
+      racc (~> 1.4)
     pg (1.2.3)
     pry (0.13.1)
       coderay (~> 1.1)
@@ -107,6 +108,7 @@ GEM
     pry-byebug (3.9.0)
       byebug (~> 11.0)
       pry (~> 0.13.0)
+    racc (1.6.0)
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -136,7 +138,7 @@ GEM
       method_source
       rake (>= 0.8.7)
       thor (~> 1.0)
-    rake (13.0.3)
+    rake (13.0.6)
     redis (4.2.5)
     request_store (1.5.0)
       rack (>= 1.4)
@@ -197,4 +199,4 @@ DEPENDENCIES
   thor
 
 BUNDLED WITH
-   2.1.4
+   2.2.22

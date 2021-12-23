@@ -92,7 +92,7 @@ GEM
       rake
     mini_mime (1.0.2)
     mini_portile2 (2.5.0)
-    minitest (5.14.2)
+    minitest (5.14.4)
     nio4r (2.5.4)
     nokogiri (1.11.1)
       mini_portile2 (~> 2.5.0)
