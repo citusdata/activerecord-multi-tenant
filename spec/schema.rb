@@ -106,6 +106,11 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :domain_id, :integer
   end
 
+  create_table :posts, force: true, partition_key: :account_id do |t|
+    t.column :account_id, :integer
+    t.column :name, :string
+  end
+
   create_distributed_table :accounts, :id
   create_distributed_table :projects, :account_id
   create_distributed_table :managers, :account_id
@@ -121,6 +126,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :allowed_places, :account_id
   create_distributed_table :domains, :account_id
   create_distributed_table :pages, :account_id
+  create_distributed_table :posts, :account_id
   create_reference_table :categories
 end
 

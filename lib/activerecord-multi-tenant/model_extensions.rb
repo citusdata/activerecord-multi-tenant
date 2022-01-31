@@ -38,11 +38,11 @@ module MultiTenant
 
           def inherited(subclass)
             super
-            MultiTenant.register_multi_tenant_model(subclass.table_name, subclass) if subclass.table_name
+            MultiTenant.register_multi_tenant_model(subclass.table_name, subclass)
           end
         end
 
-        MultiTenant.register_multi_tenant_model(table_name, self) if table_name
+        MultiTenant.register_multi_tenant_model(table_name, self)
 
         @partition_key = options[:partition_key] || MultiTenant.partition_key(tenant_name)
         partition_key = @partition_key

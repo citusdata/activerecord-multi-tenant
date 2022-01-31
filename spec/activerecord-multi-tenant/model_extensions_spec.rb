@@ -70,6 +70,47 @@ describe MultiTenant do
     it { expect(@partition_key_not_model_task.non_model_id).to be 77 }
   end
 
+  describe 'Changes table_name after multi_tenant called' do
+    before do
+      account_klass.has_many(:posts, anonymous_class: post_klass)
+      post_klass.belongs_to(:account, anonymous_class: account_klass)
+
+      @account1 = account_klass.create! name: 'foo'
+      @account2 = account_klass.create! name: 'bar'
+
+      @post1 = @account1.posts.create! name: 'foobar'
+      @post2 = @account2.posts.create! name: 'baz'
+
+      MultiTenant.current_tenant = @account1
+      @posts = post_klass.all
+    end
+
+    let(:account_klass) do
+      Class.new(Account) do
+        def self.name
+          'Account'
+        end
+      end
+    end
+
+    let(:post_klass) do
+      Class.new(ActiveRecord::Base) do
+        self.table_name = 'unknown'
+
+        multi_tenant(:account)
+
+        self.table_name = 'posts'
+
+        def self.name
+          'Post'
+        end
+      end
+    end
+
+    it { expect(@posts.length).to eq(1) }
+    it { expect(@posts).to eq([@post1]) }
+  end
+
   # Scoping models
   describe 'Project.all should be scoped to the current tenant if set' do
     before do
