@@ -412,7 +412,7 @@ describe MultiTenant do
     account1 = Account.create! name: 'Account 1'
     category1 = Category.create! name: 'Category 1'
 
-    expected_sql = if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1))
+    expected_sql = if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1) || ActiveRecord::VERSION::MAJOR == 7)
                      <<-sql
                      SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = 1 AND "projects"."account_id" = 1 LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" AND "project_categories"."account_id" = 1 WHERE "projects"."account_id" = 1
                      sql
@@ -451,7 +451,7 @@ describe MultiTenant do
     category1 = Category.create! name: 'Category 1'
 
     MultiTenant.with(account1) do
-      expected_sql =  if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1))
+      expected_sql =  if uses_prepared_statements? && (ActiveRecord::VERSION::MAJOR == 5 || (ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1) || ActiveRecord::VERSION::MAJOR == 7)
                         <<-sql
                         SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = 1 LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
                         sql
