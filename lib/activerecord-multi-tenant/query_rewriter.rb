@@ -276,7 +276,11 @@ module ActiveRecord
                 if node.wheres.empty?
                   node.wheres = [enforcement_clause]
                 else
-                  node.wheres[0] = enforcement_clause.and(node.wheres[0])
+                  if node.wheres[0].is_a?(Arel::Nodes::And)
+                    node.wheres[0].children << enforcement_clause
+                  else
+                    node.wheres[0] = enforcement_clause.and(node.wheres[0])
+                  end
                 end
               else
                 raise "UnknownContext"
