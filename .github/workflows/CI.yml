@@ -16,13 +16,17 @@ jobs:
           - '2.5'
           - '2.6'
           - '2.7'
+          - '3.0'
+          - '3.1'
         gemfile:
           - rails_5.2
           - rails_6.0
           - rails_6.1
+          - rails_7.0
           - active_record_5.2
           - active_record_6.0
           - active_record_6.1
+          - active_record_7.0
         prepared_statements: [true, false]
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
     env:
