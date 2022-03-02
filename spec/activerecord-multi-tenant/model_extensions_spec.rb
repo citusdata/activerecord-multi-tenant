@@ -496,7 +496,12 @@ describe MultiTenant do
         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 AND "projects"."account_id" = #{account.id} LIMIT $2
       sql
 
-      expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)).or(eq(option3)), any_args).and_call_original
+      # Couldn't make the following line pass for some reason, so came up with an uglier alternative
+      # expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)).or(eq(option3)), *any_args).and_call_original
+      expect(Project).to receive(:find_by_sql).and_wrap_original do |m, *args|
+        expect(args[0]).to(eq(option1).or(eq(option2)).or(eq(option3)))
+        m.call(args[0], args[1], preparable:args[2][:preparable])
+      end
       expect(Project.find(project.id)).to eq(project)
     end
 
@@ -508,7 +513,12 @@ describe MultiTenant do
         SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
       sql
 
-      expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)), any_args).and_call_original
+      # Couldn't make the following line pass for some reason, so came up with an uglier alternative
+      # expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)), any_args).and_call_original
+      expect(Project).to receive(:find_by_sql).and_wrap_original do |m, *args|
+        expect(args[0]).to(eq(option1).or(eq(option2)))
+        m.call(args[0], args[1], preparable:args[2][:preparable])
+      end
       expect(Project.find(project2.id)).to eq(project2)
     end
   end
