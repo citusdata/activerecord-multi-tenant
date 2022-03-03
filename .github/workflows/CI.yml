@@ -28,6 +28,30 @@ jobs:
           - active_record_6.1
           - active_record_7.0
         prepared_statements: [true, false]
+        exclude:
+          # activesupport-7.0.0 requires ruby version >= 2.7.0
+          - ruby: '2.5'
+            gemfile: 'rails_7.0'
+          - ruby: '2.5'
+            gemfile: 'active_record_7.0'
+          - ruby: '2.6'
+            gemfile: 'rails_7.0'
+          - ruby: '2.6'
+            gemfile: 'active_record_7.0'
+          # ruby >3 and activesupport 5.2 are not compatible
+          - ruby: '3.0'
+            gemfile: 'rails_5.2'
+          - ruby: '3.0'
+            gemfile: 'active_record_5.2'
+          - ruby: '3.1'
+            gemfile: 'rails_5.2'
+          - ruby: '3.1'
+            gemfile: 'active_record_5.2'
+          # TEMP: nokogiri 1.12.5, which is a dependency of rails/active_record 7, is not compatible with ruby 3.1
+          - ruby: '3.1'
+            gemfile: 'rails_7.0'
+          - ruby: '3.1'
+            gemfile: 'active_record_7.0'
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
