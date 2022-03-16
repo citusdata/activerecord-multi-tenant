@@ -6,15 +6,13 @@ module MultiTenant
       if to_s.underscore.to_sym == tenant_name
         unless MultiTenant.with_write_only_mode_enabled?
           # This is the tenant model itself. Workaround for https://github.com/citusdata/citus/issues/687
-          before_create lambda {
-            self.id ||= if self.class.columns_hash['id'].type == :uuid
-                          SecureRandom.uuid
-                        else
-                          self.class.connection.select_value(
-                                "SELECT nextval('#{[self.class.table_name, self.class.primary_key, 'seq'].join('_')}'::regclass)"
-                              )
-                        end
-          }
+          before_create -> do
+           if self.class.columns_hash[self.class.primary_key].type == :uuid
+             self.id ||= SecureRandom.uuid
+           else
+             self.id ||= self.class.connection.select_value("SELECT nextval('#{self.class.table_name}_#{self.class.primary_key}_seq'::regclass)")
+           end
+          end
         end
       else
         class << self
