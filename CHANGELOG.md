@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0      2022-03-29
+
+* Test Rails 7 & Ruby 3
+* Fix regression in 1.1.1 involving deleted tenants [#123](https://github.com/citusdata/activerecord-multi-tenant/pull/123)
+* Fix incorrect SQL generated when joining two models and one has a default scope [#132](https://github.com/citusdata/activerecord-multi-tenant/pull/132)
+* Update for Rails 5+ removal of type_cast_for_database [#135](https://github.com/citusdata/activerecord-multi-tenant/pull/135)
+
+
 ## 1.1.1      2021-01-15
 
 * Add support for Rails 6.1 [#108](https://github.com/citusdata/activerecord-multi-tenant/pull/108)
