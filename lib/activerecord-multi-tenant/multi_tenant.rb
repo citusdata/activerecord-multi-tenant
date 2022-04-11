@@ -28,8 +28,7 @@ module MultiTenant
   def self.with_lock_workaround_enabled?; @@enable_with_lock_workaround; end
 
   # Registry that maps table names to models (used by the query rewriter)
-  # @deprecated _table_name is no longer used
-  def self.register_multi_tenant_model(_table_name, model_klass)
+  def self.register_multi_tenant_model(model_klass)
     @@multi_tenant_models ||= []
     @@multi_tenant_models.push(model_klass)
 
