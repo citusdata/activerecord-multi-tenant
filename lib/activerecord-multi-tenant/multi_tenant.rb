@@ -28,13 +28,23 @@ module MultiTenant
   def self.with_lock_workaround_enabled?; @@enable_with_lock_workaround; end
 
   # Registry that maps table names to models (used by the query rewriter)
-  def self.register_multi_tenant_model(table_name, model_klass)
-    @@multi_tenant_models ||= {}
-    @@multi_tenant_models[table_name.to_s] = model_klass
+  def self.register_multi_tenant_model(model_klass)
+    @@multi_tenant_models ||= []
+    @@multi_tenant_models.push(model_klass)
+
+    remove_class_variable(:@@multi_tenant_model_table_names) if defined?(@@multi_tenant_model_table_names)
   end
+
   def self.multi_tenant_model_for_table(table_name)
-    @@multi_tenant_models ||= {}
-    @@multi_tenant_models[table_name.to_s]
+    @@multi_tenant_models ||= []
+
+    if !defined?(@@multi_tenant_model_table_names)
+      @@multi_tenant_model_table_names = @@multi_tenant_models.map { |model|
+        [model.table_name, model] if model.table_name
+      }.compact.to_h
+    end
+
+    @@multi_tenant_model_table_names[table_name.to_s]
   end
 
   def self.multi_tenant_model_for_arel(arel)
