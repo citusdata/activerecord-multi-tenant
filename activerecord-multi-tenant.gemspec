@@ -15,8 +15,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://github.com/citusdata/activerecord-multi-tenant'
   s.license       = 'MIT'
 
-  s.add_runtime_dependency('request_store', '>= 1.0.5')
-  s.add_dependency('rails','>= 4.2')
+  s.add_dependency 'rails', '>= 5.2'
 
   s.add_development_dependency 'rspec', '>= 3.0'
   s.add_development_dependency 'rspec-rails'
