@@ -295,7 +295,7 @@ module ActiveRecord
               end
 
               node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if (!node_join.right)
+                if !node_join.right
                   next
                 end
                 relation_right, relation_left = relations_from_node_join(node_join)
