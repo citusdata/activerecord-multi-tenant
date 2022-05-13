@@ -528,13 +528,13 @@ describe MultiTenant do
 
     MultiTenant.with(account) do
       option1 = <<-sql.strip
-        SELECT "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = #{project.id} LIMIT 1
+        SELECT "projects".* FROM "projects" WHERE "projects"."account_id" = #{account.id} AND "projects"."id" = $1 LIMIT $2
       sql
       option2 = <<-sql.strip
-        SELECT "projects".* FROM "projects" WHERE "projects"."id" = #{project.id} AND "projects"."account_id" = #{account.id} LIMIT 1
+        SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 AND "projects"."account_id" = #{account.id} LIMIT $2
       sql
       option3 = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project.id} AND "projects"."account_id" = #{account.id} LIMIT 1
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 AND "projects"."account_id" = #{account.id} LIMIT $2
       sql
 
       # Couldn't make the following line pass for some reason, so came up with an uglier alternative
@@ -548,10 +548,10 @@ describe MultiTenant do
 
     MultiTenant.without do
       option1 = <<-sql.strip
-        SELECT "projects".* FROM "projects" WHERE "projects"."id" = #{project2.id} LIMIT 1
+        SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
       sql
       option2 = <<-sql.strip
-        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = #{project2.id} LIMIT 1
+        SELECT  "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
       sql
 
       # Couldn't make the following line pass for some reason, so came up with an uglier alternative

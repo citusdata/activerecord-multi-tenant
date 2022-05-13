@@ -295,9 +295,12 @@ module ActiveRecord
               end
 
               node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if (!node_join.right)
+                if (!node_join.right ||
+                    (ActiveRecord::VERSION::MAJOR == 5 &&
+                     !node_join.right.expr.right.is_a?(Arel::Attributes::Attribute)))
                   next
                 end
+
                 relation_right, relation_left = relations_from_node_join(node_join)
 
                 next unless relation_right && relation_left
@@ -319,13 +322,13 @@ module ActiveRecord
 
     private
     def relations_from_node_join(node_join)
-      if node_join.right.expr.is_a?(Arel::Nodes::Equality)
+      if ActiveRecord::VERSION::MAJOR == 5 || node_join.right.expr.is_a?(Arel::Nodes::Equality)
         return node_join.right.expr.right.relation, node_join.right.expr.left.relation
       end
 
-      children = [node_join.right.expr.children].flatten
+      children = node_join.right.expr.children
 
-      tenant_applied = children.any?{|c| c.any?(MultiTenant::TenantEnforcementClause) || c.any?(MultiTenant::TenantJoinEnforcementClause)}
+      tenant_applied = children.any?(MultiTenant::TenantEnforcementClause) || children.any?(MultiTenant::TenantJoinEnforcementClause)
       if tenant_applied || children.empty?
         return nil, nil
       end
