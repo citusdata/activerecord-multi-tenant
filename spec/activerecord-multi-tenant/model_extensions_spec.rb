@@ -185,6 +185,16 @@ describe MultiTenant do
       end
     end
 
+    it 'handles belongs_to with optional: true' do
+      MultiTenant.with(account) do
+        sub_task
+      end
+
+      record = sub_task.optional_sub_tasks.create!
+      expect(record.reload.sub_task).to eq(sub_task)
+      expect(record.account_id).to eq(nil)
+    end
+
     it 'handles has_many through' do
       MultiTenant.with(account) do
         expect(project.sub_tasks).to eq [sub_task]
