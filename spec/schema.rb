@@ -34,6 +34,13 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :type, :string
   end
 
+  create_table :optional_sub_tasks, force: true do |t|
+    t.references :account, :integer
+    t.column :sub_task_id, :integer
+    t.column :name, :string
+    t.column :type, :string
+  end
+
   create_table :countries, force: true do |t|
     t.column :name, :string
   end
@@ -134,6 +141,7 @@ class Account < ActiveRecord::Base
   multi_tenant :account
   has_many :projects
   has_one :manager, inverse_of: :account
+  has_many :optional_sub_tasks
 end
 
 class Project < ActiveRecord::Base
@@ -165,6 +173,15 @@ class SubTask < ActiveRecord::Base
   multi_tenant :account
   belongs_to :task
   has_one :project, through: :task
+  has_many :optional_sub_tasks
+end
+
+with_belongs_to_required_by_default do
+  class OptionalSubTask < ActiveRecord::Base
+    multi_tenant :account, optional: true
+    belongs_to :account, optional: true
+    belongs_to :sub_task
+  end
 end
 
 class StiSubTask < SubTask
