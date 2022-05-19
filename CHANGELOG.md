@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0      2022-05-19
+
+* Replace RequestStore with CurrentAttributes [#139](https://github.com/citusdata/activerecord-multi-tenant/pull/139)
+* Support changing table_name after calling multi_tenant [#128](https://github.com/citusdata/activerecord-multi-tenant/pull/128)
+* Allow to use uuid as primary key on partition table [#112](https://github.com/citusdata/activerecord-multi-tenant/pull/112)
+* Support latest Rails 5.2 [#145](https://github.com/citusdata/activerecord-multi-tenant/pull/145)
+* Support optional: true for belongs_to [#147](https://github.com/citusdata/activerecord-multi-tenant/pull/147)
+
+
 ## 1.2.0      2022-03-29
 
 * Test Rails 7 & Ruby 3
