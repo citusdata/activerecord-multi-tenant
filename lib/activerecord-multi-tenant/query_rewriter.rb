@@ -298,7 +298,7 @@ module ActiveRecord
                 if !node_join.right
                   next
                 end
-                relation_right, relation_left = relations_from_node_join(node_join)
+                relation_left, relation_right = relations_from_node_join(node_join)
 
                 next unless relation_right && relation_left
 
