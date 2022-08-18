@@ -305,7 +305,7 @@ module ActiveRecord
                 model_right = MultiTenant.multi_tenant_model_for_table(relation_left.table_name)
                 model_left = MultiTenant.multi_tenant_model_for_table(relation_right.table_name)
                 if model_right && model_left
-                  join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation_left[model_left.partition_key], relation_right)
+                  join_enforcement_clause = MultiTenant::TenantJoinEnforcementClause.new(relation_right[model_right.partition_key], relation_left)
                   node_join.right.expr = node_join.right.expr.and(join_enforcement_clause)
                 end
               end

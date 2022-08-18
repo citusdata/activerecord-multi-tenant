@@ -400,10 +400,10 @@ describe MultiTenant do
 
   it "applies the team_id conditions in the where clause" do
     option1 = <<-sql.strip
-      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."project_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."account_id" = 1
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "tasks"."account_id" = "sub_tasks"."account_id" WHERE "tasks"."project_id" = 1 AND "sub_tasks"."account_id" = 1 AND "tasks"."account_id" = 1
     sql
     option2 = <<-sql.strip
-      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1 AND "tasks"."account_id" = 1
+      SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "tasks"."account_id" = "sub_tasks"."account_id" WHERE "sub_tasks"."account_id" = 1 AND "tasks"."project_id" = 1 AND "tasks"."account_id" = 1
     sql
 
     account1 = Account.create! name: 'Account 1'
@@ -418,7 +418,7 @@ describe MultiTenant do
 
     MultiTenant.without do
       expected_sql = <<-sql
-                        SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "sub_tasks"."account_id" = "tasks"."account_id" WHERE "tasks"."project_id" = 1
+                        SELECT "sub_tasks".* FROM "sub_tasks" INNER JOIN "tasks" ON "sub_tasks"."task_id" = "tasks"."id" AND "tasks"."account_id" = "sub_tasks"."account_id" WHERE "tasks"."project_id" = 1
                      sql
 
       project = Project.first
@@ -456,7 +456,7 @@ describe MultiTenant do
       expect(project.categories).to include(category1)
 
       expected_sql = <<-sql
-                        SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
+                        SELECT "projects".* FROM "projects" INNER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = "project_categories"."account_id" INNER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
                     sql
 
       expect(Project.where(account_id: 1).joins(:categories).to_sql).to eq(expected_sql.strip)
@@ -490,7 +490,7 @@ describe MultiTenant do
 
     MultiTenant.without do
       expected_sql = <<-sql
-                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "project_categories"."account_id" = "projects"."account_id" LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
+                     SELECT "projects"."id" AS t0_r0, "projects"."account_id" AS t0_r1, "projects"."name" AS t0_r2, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1 FROM "projects" LEFT OUTER JOIN "project_categories" ON "project_categories"."project_id" = "projects"."id" AND "projects"."account_id" = "project_categories"."account_id" LEFT OUTER JOIN "categories" ON "categories"."id" = "project_categories"."category_id" WHERE "projects"."account_id" = 1
                      sql
 
       expect(Project.where(account_id: 1).eager_load(:categories).to_sql).to eq(expected_sql.strip)
@@ -522,7 +522,7 @@ describe MultiTenant do
 
     MultiTenant.without do
       expected_sql = <<-sql
-                     SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "projects"."account_id" = "tasks"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
+                     SELECT "tasks".* FROM "tasks" INNER JOIN "projects" ON "projects"."id" = "tasks"."project_id" AND "tasks"."account_id" = "projects"."account_id" LEFT JOIN project_categories pc ON project.category_id = pc.id WHERE "tasks"."account_id" = 1
                      sql
 
       expect(Task.where(account_id: 1).joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql).to eq(expected_sql.strip)
