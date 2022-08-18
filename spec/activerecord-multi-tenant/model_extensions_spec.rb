@@ -70,6 +70,24 @@ describe MultiTenant do
     it { expect(@partition_key_not_model_task.non_model_id).to be 77 }
   end
 
+
+  describe 'Tenant model with a nonstandard class name' do
+    let(:account_klass) do
+      Class.new(ActiveRecord::Base) do
+        self.table_name = 'account'
+        def self.name
+          'UserAccount'
+        end
+
+        multi_tenant(:account)
+      end
+    end
+    it "does not register the tenant model" do
+      expect(MultiTenant).not_to receive(:register_multi_tenant_model)
+      account_klass
+    end
+  end
+
   describe 'Changes table_name after multi_tenant called' do
     before do
       account_klass.has_many(:posts, anonymous_class: post_klass)
