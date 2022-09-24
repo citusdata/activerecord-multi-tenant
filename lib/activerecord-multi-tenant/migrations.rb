@@ -2,12 +2,40 @@ module MultiTenant
   module MigrationExtensions
     def create_distributed_table(table_name, partition_key)
       return unless citus_version.present?
-      execute "SELECT create_distributed_table($$#{table_name}$$, $$#{partition_key}$$)"
+
+      reversible do |dir|
+        dir.up do
+          execute "SELECT create_distributed_table($$#{table_name}$$, $$#{partition_key}$$)"
+        end
+        dir.down do
+          undistribute_table(table_name)
+        end
+      end
     end
 
     def create_reference_table(table_name)
       return unless citus_version.present?
-      execute "SELECT create_reference_table($$#{table_name}$$)"
+
+      reversible do |dir|
+        dir.up do
+          execute "SELECT create_reference_table($$#{table_name}$$)"
+        end
+        dir.down do
+          undistribute_table(table_name)
+        end
+      end
+    end
+
+    def undistribute_table(table_name)
+      return unless citus_version.present?
+
+      execute "SELECT undistribute_table($$#{table_name}$$))"
+    end
+
+    def rebalance_table_shards
+      return unless citus_version.present?
+
+      execute 'SELECT rebalance_table_shards()'
     end
 
     def execute_on_all_nodes(sql)
