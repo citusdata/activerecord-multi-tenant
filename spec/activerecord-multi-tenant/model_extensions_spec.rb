@@ -204,11 +204,7 @@ describe MultiTenant do
     end
 
     it 'handles belongs_to with optional: true' do
-      MultiTenant.with(account) do
-        sub_task
-      end
-
-      record = sub_task.optional_sub_tasks.create!
+      record = OptionalSubTask.create(sub_task_id: sub_task.id)
       expect(record.reload.sub_task).to eq(sub_task)
       expect(record.account_id).to eq(nil)
     end

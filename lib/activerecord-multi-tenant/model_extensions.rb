@@ -129,6 +129,20 @@ end
 
 ActiveSupport.on_load(:active_record) do |base|
   base.extend MultiTenant::ModelExtensionsClassMethods
+
+  # Ensure we have current_tenant_id in where clause when a cached ActiveRecord instance is being reloaded, or update_columns without callbacks is called
+  MultiTenant.wrap_methods(ActiveRecord::Base, 'self', :delete, :reload, :update_columns)
+
+  # Any queuries fired for fetching a singular association have the correct current_tenant_id in WHERE clause
+  # reload is called anytime any record's association is accessed
+  MultiTenant.wrap_methods(ActiveRecord::Associations::Association, 'owner', :reload)
+
+  # For collection associations, we need to wrap multiple methods in returned proxy so that any queries have the correct current_tenant_id in WHERE clause
+  ActiveRecord::Associations::CollectionProxy.alias_method :equals_mt, :== # Hack to prevent syntax error due to invalid method name
+  ActiveRecord::Associations::CollectionProxy.alias_method :append_mt, :<< # Hack to prevent syntax error due to invalid method name
+  MultiTenant.wrap_methods(ActiveRecord::Associations::CollectionProxy, '@association.owner', :find, :last, :take, :build, :create, :create!, :replace, :delete_all, :destroy_all, :delete, :destroy, :calculate, :pluck, :size, :empty?, :include?, :equals_mt, :records, :append_mt, :find_nth_with_limit, :find_nth_from_last, :null_scope?, :find_from_target?, :exec_queries)
+  ActiveRecord::Associations::CollectionProxy.alias_method :==, :equals_mt
+  ActiveRecord::Associations::CollectionProxy.alias_method :<<, :append_mt
 end
 
 class ActiveRecord::Associations::Association

@@ -109,6 +109,23 @@ module MultiTenant
     end
   end
 
+  # Wrap calls to any of `method_names` on an instance Class `klass` with MultiTenant.with when `'owner'` (evaluated in context of the klass instance) is a ActiveRecord model instance that is multi-tenant
+  def self.wrap_methods(klass, owner, *method_names)
+    method_names.each do |method_name|
+      original_method_name = :"_mt_original_#{method_name}"
+      klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        alias_method :#{original_method_name}, :#{method_name}
+        def #{method_name}(*args, &block)
+          if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil?
+            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args) }
+          else
+            #{original_method_name}(*args)
+          end
+        end
+      CODE
+    end
+  end
+
   # Preserve backward compatibility for people using .with_id
   singleton_class.send(:alias_method, :with_id, :with)
 
