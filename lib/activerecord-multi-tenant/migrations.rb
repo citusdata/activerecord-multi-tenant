@@ -56,21 +56,19 @@ module MultiTenant
     end
 
     def citus_version
-      execute("SELECT extversion FROM pg_extension WHERE extname = 'citus'").getvalue(0,0).try(:split, '-').try(:first)
+      execute("SELECT extversion FROM pg_extension WHERE extname = 'citus'").getvalue(0, 0).try(:split, '-').try(:first)
     rescue ArgumentError => e
-      raise unless e.message == "invalid tuple number 0"
+      raise unless e.message == 'invalid tuple number 0'
     end
   end
 end
 
-if defined?(ActiveRecord::Migration)
-  ActiveRecord::Migration.send(:include, MultiTenant::MigrationExtensions)
-end
+ActiveRecord::Migration.include MultiTenant::MigrationExtensions if defined?(ActiveRecord::Migration)
 
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module SchemaStatements
-      alias :orig_create_table :create_table
+      alias orig_create_table create_table
       def create_table(table_name, options = {}, &block)
         ret = orig_create_table(table_name, **options.except(:partition_key), &block)
         if options[:partition_key] && options[:partition_key].to_s != 'id'
@@ -78,6 +76,41 @@ module ActiveRecord
           execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
         end
         ret
+      end
+    end
+  end
+end
+
+module ActiveRecord
+  class SchemaDumper
+    private
+
+    alias initialize_without_citus initialize
+    def initialize(connection, options = {})
+      initialize_without_citus(connection, options)
+
+      @distribution_columns =
+        if ActiveRecord::Migration.citus_version.present?
+          @connection.execute('SELECT logicalrelid::regclass AS table_name, column_to_column_name(logicalrelid, partkey) AS dist_col_name FROM pg_dist_partition').to_h do |v|
+            [v['table_name'], v['dist_col_name']]
+          end
+        else
+          {}
+        end
+    end
+
+    # Support for create_distributed_table & create_reference_table
+    alias table_without_citus table
+    def table(table, stream)
+      table_without_citus(table, stream)
+      table_name = remove_prefix_and_suffix(table)
+      distribution_column = @distribution_columns[table_name]
+      if distribution_column
+        stream.puts "  create_distributed_table(#{table_name.inspect}, #{distribution_column.inspect})"
+        stream.puts
+      elsif @distribution_columns.key?(table_name)
+        stream.puts "  create_reference_table(#{table_name.inspect})"
+        stream.puts
       end
     end
   end
