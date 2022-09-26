@@ -54,6 +54,25 @@ describe MultiTenant, 'Record modifications' do
     end
   end
 
+  it 'should not update other objects with same id when calling object.update_columns' do
+    # When two records with same id but different account_id are updated, it should only update the current one
+    expect(project.account).to eq(account)
+    expect(project2.account).to eq(account2)
+    expect(project.id).to eq(project2.id)
+
+    MultiTenant.without do
+      project2.update_columns(name: 'newthing2')
+      expect(project.reload.name).to eq('something')
+      expect(project2.reload.name).to eq('newthing2')
+    end
+  end
+
+  it 'should return the same object when calling object.reload' do
+    # When two records with same id but different account_id are updated, it should not return the other object
+    expect(project.reload.account_id).to eq(account.id)
+    expect(project2.reload.account_id).to eq(account2.id)
+  end
+
   it 'test delete for reference tables' do
     category1 = Category.create! name: 'Category 1'
     expect(Category.count).to eq(1)

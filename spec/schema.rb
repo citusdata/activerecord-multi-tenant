@@ -179,7 +179,6 @@ end
 with_belongs_to_required_by_default do
   class OptionalSubTask < ActiveRecord::Base
     multi_tenant :account, optional: true
-    belongs_to :account, optional: true
     belongs_to :sub_task
   end
 end
