@@ -33,6 +33,23 @@ module Sidekiq::Middleware::MultiTenant
   end
 end
 
+if defined?(Sidekiq)
+  Sidekiq.configure_server do |config|
+    config.server_middleware do |chain|
+      chain.add Sidekiq::Middleware::MultiTenant::Server
+    end
+    config.client_middleware do |chain|
+      chain.add Sidekiq::Middleware::MultiTenant::Client
+    end
+  end
+
+  Sidekiq.configure_client do |config|
+    config.client_middleware do |chain|
+      chain.add Sidekiq::Middleware::MultiTenant::Client
+    end
+  end
+end
+
 module Sidekiq
   class Client
     def push_bulk_with_tenants(items)
