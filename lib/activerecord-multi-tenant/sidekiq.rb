@@ -33,22 +33,21 @@ module Sidekiq::Middleware::MultiTenant
   end
 end
 
-if defined?(Sidekiq)
-  Sidekiq.configure_server do |config|
-    config.server_middleware do |chain|
-      chain.add Sidekiq::Middleware::MultiTenant::Server
-    end
-    config.client_middleware do |chain|
-      chain.add Sidekiq::Middleware::MultiTenant::Client
-    end
+Sidekiq.configure_server do |config|
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Middleware::MultiTenant::Server
   end
-
-  Sidekiq.configure_client do |config|
-    config.client_middleware do |chain|
-      chain.add Sidekiq::Middleware::MultiTenant::Client
-    end
+  config.client_middleware do |chain|
+    chain.add Sidekiq::Middleware::MultiTenant::Client
   end
 end
+
+Sidekiq.configure_client do |config|
+  config.client_middleware do |chain|
+    chain.add Sidekiq::Middleware::MultiTenant::Client
+  end
+end
+
 
 module Sidekiq
   class Client
