@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0      2022-10-20
+* Fix query building for models with mismatched partition_keys [#150](https://github.com/citusdata/activerecord-multi-tenant/pull/150)
+* Identify tenant even if class name is nonstandard [#152](https://github.com/citusdata/activerecord-multi-tenant/pull/152)
+* Add current_tenant_id to WHERE clauses when calling methods on activerecord instance or its associations [#154](https://github.com/citusdata/activerecord-multi-tenant/pull/154)
+* Make create_distributed_table, create_reference_table reversible & add ruby wrapper for rebalance_table_shards [#155](https://github.com/citusdata/activerecord-multi-tenant/pull/155)
+* Support create_distributed_table, create_reference_table in schema.rb [#156](https://github.com/citusdata/activerecord-multi-tenant/pull/156)
+* Add client and server sidekiq middleware to sidekiq middleware chain [#158](https://github.com/citusdata/activerecord-multi-tenant/pull/158)
+
 ## 2.0.0      2022-05-19
 
 * Replace RequestStore with CurrentAttributes [#139](https://github.com/citusdata/activerecord-multi-tenant/pull/139)
