@@ -1,6 +1,9 @@
 # Changelog
 
-## 2.1.0      2022-10-20
+## 2.1.2      2022-10-26
+* Fixes issue when wraping methods that require a block [#162](https://github.com/citusdata/activerecord-multi-tenant/pull/162)
+
+## 2.1.1      2022-10-20
 * Fix query building for models with mismatched partition_keys [#150](https://github.com/citusdata/activerecord-multi-tenant/pull/150)
 * Identify tenant even if class name is nonstandard [#152](https://github.com/citusdata/activerecord-multi-tenant/pull/152)
 * Add current_tenant_id to WHERE clauses when calling methods on activerecord instance or its associations [#154](https://github.com/citusdata/activerecord-multi-tenant/pull/154)
