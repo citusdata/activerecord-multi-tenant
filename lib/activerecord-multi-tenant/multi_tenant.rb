@@ -117,9 +117,9 @@ module MultiTenant
         alias_method :#{original_method_name}, :#{method_name}
         def #{method_name}(*args, &block)
           if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil?
-            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args) }
+            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args, &block) }
           else
-            #{original_method_name}(*args)
+            #{original_method_name}(*args, &block)
           end
         end
       CODE
