@@ -115,11 +115,11 @@ module MultiTenant
       original_method_name = :"_mt_original_#{method_name}"
       klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
         alias_method :#{original_method_name}, :#{method_name}
-        def #{method_name}(*args, &block)
+        def #{method_name}(...)
           if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil?
-            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args, &block) }
+            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(...) }
           else
-            #{original_method_name}(*args, &block)
+            #{original_method_name}(...)
           end
         end
       CODE
