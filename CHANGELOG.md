@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.3      2022-10-27
+* Error when calling a method that takes keyword arguments with MultiTenant.wrap_methods [#164](https://github.com/citusdata/activerecord-multi-tenant/pull/164)
+
 ## 2.1.2      2022-10-26
 * Fixes issue when wraping methods that require a block [#162](https://github.com/citusdata/activerecord-multi-tenant/pull/162)
 
