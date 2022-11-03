@@ -89,8 +89,14 @@ module ActiveRecord
     def initialize(connection, options = {})
       initialize_without_citus(connection, options)
 
+      citus_version = begin
+        ActiveRecord::Migration.citus_version
+      rescue StandardError
+        # Handle the case where this gem is used with MySQL https://github.com/citusdata/activerecord-multi-tenant/issues/166
+        nil
+      end
       @distribution_columns =
-        if ActiveRecord::Migration.citus_version.present?
+        if citus_version.present?
           @connection.execute('SELECT logicalrelid::regclass AS table_name, column_to_column_name(logicalrelid, partkey) AS dist_col_name FROM pg_dist_partition').to_h do |v|
             [v['table_name'], v['dist_col_name']]
           end
