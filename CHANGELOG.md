@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.4      2022-11-03
+* Fixes #166 where db:schema:dump is broken when using this gem with MySQL [#167](https://github.com/citusdata/activerecord-multi-tenant/pull/167)
+
 ## 2.1.3      2022-10-27
 * Error when calling a method that takes keyword arguments with MultiTenant.wrap_methods [#164](https://github.com/citusdata/activerecord-multi-tenant/pull/164)
 
