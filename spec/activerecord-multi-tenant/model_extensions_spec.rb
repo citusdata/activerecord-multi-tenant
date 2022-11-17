@@ -299,6 +299,55 @@ describe MultiTenant do
     end
   end
 
+  # Joins
+  describe 'joins for models' do
+    context 'for models with where condition in associations' do
+      let(:account) { Account.create!(name: 'Account 1') }
+
+      it 'should add tenant condition to the queries when tenant is set' do
+        expected_join_sql = <<-SQL.strip
+          SELECT "comments".* FROM "comments" INNER JOIN "tasks" ON "tasks"."id" = "comments"."commentable_id" AND "comments"."commentable_type" = 'Task' AND "tasks"."account_id" = 1 WHERE "comments"."account_id" = 1
+        SQL
+
+        MultiTenant.with(account) do
+          expect(Comment.joins(:task).to_sql).to eq(expected_join_sql)
+        end
+      end
+
+      it 'should add tenant condition to the queries when tenant is not set' do
+        MultiTenant.without do
+          expected_join_sql = <<-SQL.strip
+            SELECT "comments".* FROM "comments" INNER JOIN "tasks" ON "tasks"."id" = "comments"."commentable_id" AND "comments"."commentable_type" = 'Task' AND "comments"."account_id" = "tasks"."account_id"
+          SQL
+          expect(Comment.joins(:task).to_sql).to eq(expected_join_sql)
+        end
+      end
+    end
+
+    context 'for models with default associations' do
+      let(:account) { Account.create!(name: 'Account 1') }
+
+      it 'should add tenant condition to the queries when tenant is set' do
+        expected_join_sql = <<-SQL.strip
+          SELECT "projects".* FROM "projects" INNER JOIN "tasks" ON "tasks"."project_id" = "projects"."id" AND "tasks"."account_id" = 1 WHERE "projects"."account_id" = 1
+        SQL
+
+        MultiTenant.with(account) do
+          expect(Project.joins(:tasks).to_sql).to eq(expected_join_sql)
+        end
+      end
+
+      it 'should add tenant condition to the queries when tenant is not set' do
+        MultiTenant.without do
+          expected_join_sql = <<-SQL.strip
+            SELECT "projects".* FROM "projects" INNER JOIN "tasks" ON "tasks"."project_id" = "projects"."id" AND "projects"."account_id" = "tasks"."account_id"
+          SQL
+          expect(Project.joins(:tasks).to_sql).to eq(expected_join_sql)
+        end
+      end
+    end
+  end
+
   # ::with
   describe "::with" do
     it "should set current_tenant to the specified tenant inside the block" do
