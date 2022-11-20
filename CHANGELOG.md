@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.5      2022-11-20
+* Fix `MultiTenant.without` codegen bug in Rails 6.1+ [#168](https://github.com/citusdata/activerecord-multi-tenant/pull/168)
+
 ## 2.1.4      2022-11-03
 * Fixes #166 where db:schema:dump is broken when using this gem with MySQL [#167](https://github.com/citusdata/activerecord-multi-tenant/pull/167)
 
