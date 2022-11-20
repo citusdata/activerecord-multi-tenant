@@ -19,12 +19,10 @@ jobs:
           - '3.0'
           - '3.1'
         gemfile:
-          - rails_5.2.3
           - rails_5.2
           - rails_6.0
           - rails_6.1
           - rails_7.0
-          - active_record_5.2.3
           - active_record_5.2
           - active_record_6.0
           - active_record_6.1
@@ -49,14 +47,6 @@ jobs:
             gemfile: 'rails_5.2'
           - ruby: '3.1'
             gemfile: 'active_record_5.2'
-          - ruby: '3.0'
-            gemfile: 'rails_5.2.3'
-          - ruby: '3.0'
-            gemfile: 'active_record_5.2.3'
-          - ruby: '3.1'
-            gemfile: 'rails_5.2.3'
-          - ruby: '3.1'
-            gemfile: 'active_record_5.2.3'
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile

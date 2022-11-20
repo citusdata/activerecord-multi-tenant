@@ -330,8 +330,9 @@ module ActiveRecord
         return nil, nil
       end
 
-      if children[0].right.respond_to?('relation') && children[0].left.respond_to?('relation')
-        return children[0].right.relation, children[0].left.relation
+      child = children.first.respond_to?(:children) ? children.first.children.first : children.first
+      if child.right.respond_to?(:relation) && child.left.respond_to?(:relation)
+        return child.right.relation, child.left.relation
       end
 
       return nil, nil
