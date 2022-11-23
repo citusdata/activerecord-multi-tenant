@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.6      2022-11-23
+* Fix undefined wrap_methods error & wrap_methods version check [#170](https://github.com/citusdata/activerecord-multi-tenant/pull/170)
+
 ## 2.1.5      2022-11-20
 * Fix `MultiTenant.without` codegen bug in Rails 6.1+ [#168](https://github.com/citusdata/activerecord-multi-tenant/pull/168)
 
