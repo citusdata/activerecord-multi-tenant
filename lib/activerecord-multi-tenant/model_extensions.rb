@@ -1,3 +1,5 @@
+require_relative './multi_tenant'
+
 module MultiTenant
   module ModelExtensionsClassMethods
     DEFAULT_ID_FIELD = 'id'.freeze
