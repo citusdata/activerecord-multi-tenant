@@ -110,7 +110,7 @@ module MultiTenant
   end
 
   # Wrap calls to any of `method_names` on an instance Class `klass` with MultiTenant.with when `'owner'` (evaluated in context of the klass instance) is a ActiveRecord model instance that is multi-tenant
-  if Gem::Version.create(RUBY_VERSION) < Gem::Version.new("2.7.0")
+  if Gem::Version.create(RUBY_VERSION) < Gem::Version.new('3.0.0')
     def self.wrap_methods(klass, owner, *method_names)
       method_names.each do |method_name|
         original_method_name = :"_mt_original_#{method_name}"
