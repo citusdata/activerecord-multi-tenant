@@ -102,7 +102,8 @@ module MultiTenant
         include to_include
 
         around_save -> (record, block) {
-          if persisted? && MultiTenant.current_tenant_id.nil?
+          record_tenant = record.attribute_was(partition_key)
+          if persisted? && MultiTenant.current_tenant_id.nil? && !record_tenant.nil?
             MultiTenant.with(record.public_send(partition_key)) { block.call }
           else
             block.call
@@ -110,7 +111,8 @@ module MultiTenant
         }
 
         around_update -> (record, block) {
-          if MultiTenant.current_tenant_id.nil?
+          record_tenant = record.attribute_was(partition_key)
+          if MultiTenant.current_tenant_id.nil? && !record_tenant.nil?
             MultiTenant.with(record.public_send(partition_key)) { block.call }
           else
             block.call

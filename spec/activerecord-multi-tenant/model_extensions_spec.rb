@@ -209,6 +209,16 @@ describe MultiTenant do
       expect(record.account_id).to eq(nil)
     end
 
+    it 'handles changing tenant from nil to a value' do
+      record = OptionalSubTask.create(sub_task_id: sub_task.id)
+      expect(record.reload.sub_task).to eq(sub_task)
+      expect(record.account_id).to eq(nil)
+
+      record.account = account
+      record.save!
+      expect(record.reload.account_id).to eq(account.id)
+    end
+
     it 'handles has_many through' do
       MultiTenant.with(account) do
         expect(project.sub_tasks).to eq [sub_task]
