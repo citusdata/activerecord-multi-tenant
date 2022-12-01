@@ -1,5 +1,7 @@
 # Changelog
 
+* Handle changing tenant from `nil` to a value [#173](https://github.com/citusdata/activerecord-multi-tenant/pull/173)
+
 ## 2.1.6      2022-11-23
 * Fix undefined wrap_methods error & wrap_methods version check [#170](https://github.com/citusdata/activerecord-multi-tenant/pull/170)
 
