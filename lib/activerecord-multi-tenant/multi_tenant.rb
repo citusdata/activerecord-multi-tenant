@@ -117,7 +117,7 @@ module MultiTenant
         klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
           alias_method :#{original_method_name}, :#{method_name}
           def #{method_name}(*args, &block)
-            if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil?
+            if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
               MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args, &block) }
             else
               #{original_method_name}(*args, &block)
@@ -133,7 +133,7 @@ module MultiTenant
         klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
         alias_method :#{original_method_name}, :#{method_name}
         def #{method_name}(...)
-          if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil?
+          if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
             MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(...) }
           else
             #{original_method_name}(...)
