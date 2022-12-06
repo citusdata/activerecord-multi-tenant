@@ -75,7 +75,6 @@ module MultiTenant
             # Rails 5 `attribute_will_change!` uses the attribute-method-call rather than `read_attribute`
             # and will raise ActiveModel::MissingAttributeError if that column was not selected.
             # This is rescued as NoMethodError and in MRI attribute_was is assigned an arbitrary Object
-            # This is still true after the Rails 5.2 refactor
             was = send("#{partition_key}_was")
             was_nil_or_skipped = was.nil? || was.class == Object
 
