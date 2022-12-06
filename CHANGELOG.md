@@ -1,6 +1,10 @@
 # Changelog
 
+## 2.2.0      2022-12-06
 * Handle changing tenant from `nil` to a value [#173](https://github.com/citusdata/activerecord-multi-tenant/pull/173)
+* Allow Partitioned tables to be created without a primary key [#172](https://github.com/citusdata/activerecord-multi-tenant/pull/172)
+* Only attempt to reload with MultiTenant when parition_key is present [#175](https://github.com/citusdata/activerecord-multi-tenant/pull/175)
+* Remove support for Ruby 2.5 & ActiveRecord 5.2
 
 ## 2.1.6      2022-11-23
 * Fix undefined wrap_methods error & wrap_methods version check [#170](https://github.com/citusdata/activerecord-multi-tenant/pull/170)

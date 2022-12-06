@@ -1,3 +1,3 @@
 module MultiTenant
-  VERSION = '2.1.6'
+  VERSION = '2.2.0'
 end
