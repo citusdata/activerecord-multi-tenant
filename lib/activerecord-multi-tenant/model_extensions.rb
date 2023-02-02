@@ -30,7 +30,7 @@ module MultiTenant
 
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
-            return @primary_key if @primary_key
+            return @primary_key if defined?(PRIMARY_KEY_NOT_SET) ? !PRIMARY_KEY_NOT_SET.equal?(@primary_key) : @primary_key
 
             primary_object_keys = Array.wrap(connection.schema_cache.primary_keys(table_name)) - [partition_key]
 
