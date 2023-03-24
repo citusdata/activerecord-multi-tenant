@@ -34,7 +34,7 @@ jobs:
             gemfile: 'rails_7.0'
           - ruby: '2.6'
             gemfile: 'active_record_7.0'
-    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }} / Citus ${{ matrix.citus_version }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
        PREPARED_STATEMENTS: ${{ matrix.prepared_statements && '1' }}
