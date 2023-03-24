@@ -36,7 +36,7 @@ jobs:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
        PREPARED_STATEMENTS: ${{ matrix.prepared_statements && '1' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           docker-compose up -d
       - uses: ruby/setup-ruby@v1
