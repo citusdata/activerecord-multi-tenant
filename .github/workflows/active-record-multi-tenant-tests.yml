@@ -26,7 +26,7 @@ jobs:
           - active_record_7.0
         citus_version:
           - 10
-           -11
+          - 11
         prepared_statements: [true, false]
         exclude:
           # activesupport-7.0.0 requires ruby version >= 2.7.0
