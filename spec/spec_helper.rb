@@ -48,10 +48,6 @@ end
 MultiTenantTest::Application.config.secret_token = 'x' * 40
 MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 
-def uses_prepared_statements?
-  ActiveRecord::Base.connection.prepared_statements
-end
-
 def with_belongs_to_required_by_default(&block)
   default_value = ActiveRecord::Base.belongs_to_required_by_default
   ActiveRecord::Base.belongs_to_required_by_default = true

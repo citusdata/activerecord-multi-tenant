@@ -26,12 +26,10 @@ jobs:
         citus_version:
           - '10'
           - '11'
-        prepared_statements: [true, false]
         
-    name: Rb:${{ matrix.ruby }}/${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ps') || '' }}/Cts ${{ matrix.citus_version }}
+    name: Rb:${{ matrix.ruby }}/${{ matrix.gemfile }} / Cts ${{ matrix.citus_version }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
-       PREPARED_STATEMENTS: ${{ matrix.prepared_statements && '1' }}
        CITUS_VERSION: ${{ matrix.citus_version }}
     steps:
       - uses: actions/checkout@v3
