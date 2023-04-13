@@ -1,4 +1,0 @@
-Metrics/LineLength:
-  enabled: true
-  config:
-    length: 120
