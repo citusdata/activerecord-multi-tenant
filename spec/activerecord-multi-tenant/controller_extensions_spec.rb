@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe "Controller Extensions", type: :controller do
+describe 'Controller Extensions', type: :controller do
   class Account
     attr_accessor :name
   end
@@ -30,7 +32,6 @@ describe "Controller Extensions", type: :controller do
       expect(MultiTenant.current_tenant.name).to eq 'account1'
     end
   end
-
 
   class APIApplicationController < ActionController::API
     include Rails.application.routes.url_helpers
