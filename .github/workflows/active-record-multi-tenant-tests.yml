@@ -43,7 +43,9 @@ jobs:
           bundler-cache: true
 
       - name: Rubocop static code analysis
-        run: rubocop
+        run: |
+          gem install rubocop
+          rubocop
 
       - name: Execute tests
         run: bundle exec rake spec
