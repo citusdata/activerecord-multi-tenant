@@ -23,13 +23,11 @@ Style/ClassAndModuleChildren:
 Metrics/BlockLength:
   Max: 650
 
-
 Metrics/MethodLength:
   Max: 150
 
 Metrics/ClassLength:
   Max: 200
-
 
 Metrics/ModuleLength:
   Max: 200
