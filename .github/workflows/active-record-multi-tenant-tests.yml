@@ -34,9 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Rubocop static code analysis
-        run: rubocop
-
       - name: Start Citus Database environment
         run: docker-compose up -d
 
@@ -44,6 +41,9 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+
+      - name: Rubocop static code analysis
+        run: rubocop
 
       - name: Execute tests
         run: bundle exec rake spec
