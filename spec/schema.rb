@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Resets the database, except when we are only running a specific spec
 ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   enable_extension_on_all_nodes 'uuid-ossp'
@@ -216,7 +218,7 @@ end
 class Comment < ActiveRecord::Base
   multi_tenant :account
   belongs_to :commentable, polymorphic: true
-  belongs_to :task, -> { where(comments: { commentable_type: 'Task'  }) }, foreign_key: 'commentable_id'
+  belongs_to :task, -> { where(comments: { commentable_type: 'Task' }) }, foreign_key: 'commentable_id'
 end
 
 class Organization < ActiveRecord::Base
@@ -229,7 +231,7 @@ class UuidRecord < ActiveRecord::Base
 end
 
 class Category < ActiveRecord::Base
-  has_many  :project_categories
+  has_many :project_categories
   has_many :projects, through: :project_categories
 end
 
