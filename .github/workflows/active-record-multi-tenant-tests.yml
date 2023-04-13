@@ -42,9 +42,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: Bundle install
-        run: bundle install
-
       - name: Rubocop static code analysis
         run: rubocop
 
