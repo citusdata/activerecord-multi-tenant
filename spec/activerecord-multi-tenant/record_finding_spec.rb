@@ -61,36 +61,36 @@ describe MultiTenant, 'Record finding' do
   end
 
   context 'model with has_many relation through multi-tenant model' do
-    let(:tenant_1) { Account.create! name: 'Tenant 1' }
-    let(:project_1) { tenant_1.projects.create! }
+    let(:tenant1) { Account.create! name: 'Tenant 1' }
+    let(:project1) { tenant1.projects.create! }
 
-    let(:tenant_2) { Account.create! name: 'Tenant 2' }
-    let(:project_2) { tenant_2.projects.create! }
+    let(:tenant2) { Account.create! name: 'Tenant 2' }
+    let(:project2) { tenant2.projects.create! }
 
     let(:category) { Category.create! name: 'Category' }
 
     before do
-      ProjectCategory.create! account: tenant_1, name: '1', project: project_1, category: category
-      ProjectCategory.create! account: tenant_2, name: '2', project: project_2, category: category
+      ProjectCategory.create! account: tenant1, name: '1', project: project1, category: category
+      ProjectCategory.create! account: tenant2, name: '2', project: project2, category: category
     end
 
     it 'can get model without creating query cache' do
-      MultiTenant.with(tenant_1) do
-        found_category = Project.find(project_1.id).categories.to_a.first
+      MultiTenant.with(tenant1) do
+        found_category = Project.find(project1.id).categories.to_a.first
         expect(found_category).to eq(category)
       end
     end
 
     it 'can get model for other tenant' do
-      MultiTenant.with(tenant_2) do
-        found_category = Project.find(project_2.id).categories.to_a.first
+      MultiTenant.with(tenant2) do
+        found_category = Project.find(project2.id).categories.to_a.first
         expect(found_category).to eq(category)
       end
     end
 
     it 'can get model without current_tenant' do
       MultiTenant.without do
-        found_category = Project.find(project_2.id).categories.to_a.first
+        found_category = Project.find(project2.id).categories.to_a.first
         expect(found_category).to eq(category)
       end
     end

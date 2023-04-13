@@ -17,7 +17,7 @@ module MultiTenant
 
   module CopyFromClient
     def copy_from_client(columns, &block)
-      conn         = connection.raw_connection
+      conn = connection.raw_connection
       column_types = columns.map { |c| type_for_attribute(c.to_s) }
       helper = MultiTenant::CopyFromClientHelper.new(conn, column_types)
       conn.copy_data %{COPY #{quoted_table_name}("#{columns.join('","')}") FROM STDIN}, PG::TextEncoder::CopyRow.new do

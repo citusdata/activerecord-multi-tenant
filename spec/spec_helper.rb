@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -9,15 +11,15 @@ require 'activerecord-multi-tenant'
 
 require 'bundler'
 Bundler.require(:default, :development)
+#
+# require 'simplecov'
+# SimpleCov.start
+#
+# require 'codecov'
+# SimpleCov.formatter = SimpleCov::Formatter::Codecov
 
-require 'simplecov'
-SimpleCov.start
-
-require 'codecov'
-SimpleCov.formatter = SimpleCov::Formatter::Codecov
-
-dbconfig = YAML::load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
-ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "debug.log"))
+dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
+ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
 ActiveRecord::Base.establish_connection(dbconfig['test'])
 
 RSpec.configure do |config|
@@ -48,7 +50,7 @@ end
 MultiTenantTest::Application.config.secret_token = 'x' * 40
 MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 
-def with_belongs_to_required_by_default(&block)
+def with_belongs_to_required_by_default(block)
   default_value = ActiveRecord::Base.belongs_to_required_by_default
   ActiveRecord::Base.belongs_to_required_by_default = true
   yield

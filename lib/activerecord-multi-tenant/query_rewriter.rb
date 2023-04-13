@@ -1,5 +1,5 @@
 require 'active_record'
-require_relative "./arel_visitors_depth_first.rb" unless Arel::Visitors.const_defined?(:DepthFirst)
+require_relative './arel_visitors_depth_first.rb' unless Arel::Visitors.const_defined?(:DepthFirst)
 
 module MultiTenant
   class Table
@@ -77,7 +77,9 @@ module MultiTenant
       if o.left.is_a?(Arel::Attributes::Attribute)
         table_name = o.left.relation.table_name
         model = MultiTenant.multi_tenant_model_for_table(table_name)
-        @current_context.visited_handled_relation(o.left.relation) if model.present? && o.left.name.to_s == model.partition_key.to_s
+        if model.present? && o.left.name.to_s == model.partition_key.to_s
+          @current_context.visited_handled_relation(o.left.relation)
+        end
       end
       super(o, *args)
     end
@@ -93,6 +95,7 @@ module MultiTenant
     def visit_Arel_Table(o, _collector = nil)
       @current_context.visited_relation(o) if tenant_relation?(o.table_name)
     end
+
     alias :visit_Arel_Nodes_TableAlias :visit_Arel_Table
 
     def visit_Arel_Nodes_SelectCore(o, *args)
@@ -119,6 +122,7 @@ module MultiTenant
         end
       end
     end
+
     alias :visit_Arel_Nodes_FullOuterJoin :visit_Arel_Nodes_OuterJoin
     alias :visit_Arel_Nodes_RightOuterJoin :visit_Arel_Nodes_OuterJoin
 
@@ -155,13 +159,19 @@ module MultiTenant
 
   class BaseTenantEnforcementClause < Arel::Nodes::Node
     attr_reader :tenant_attribute
+
     def initialize(tenant_attribute)
       @tenant_attribute = tenant_attribute
       @tenant_model = MultiTenant.multi_tenant_model_for_table(tenant_attribute.relation.table_name)
     end
 
-    def to_s; to_sql; end
-    def to_str; to_sql; end
+    def to_s
+      to_sql;
+    end
+
+    def to_str
+      to_sql;
+    end
 
     def to_sql(*)
       collector = Arel::Collectors::SQLString.new
@@ -169,11 +179,11 @@ module MultiTenant
       collector.value
     end
 
-
   end
 
   class TenantEnforcementClause < BaseTenantEnforcementClause
     private
+
     def tenant_arel
       if defined?(Arel::Nodes::Quoted)
         @tenant_attribute.eq(Arel::Nodes::Quoted.new(MultiTenant.current_tenant_id))
@@ -183,9 +193,9 @@ module MultiTenant
     end
   end
 
-
   class TenantJoinEnforcementClause < BaseTenantEnforcementClause
     attr_reader :table_left
+
     def initialize(tenant_attribute, table_left)
       super(tenant_attribute)
       @table_left = table_left
@@ -193,11 +203,11 @@ module MultiTenant
     end
 
     private
+
     def tenant_arel
       @tenant_attribute.eq(@table_left[@model_left.partition_key])
     end
   end
-
 
   module TenantValueVisitor
     def visit_MultiTenant_TenantEnforcementClause(o, collector)
@@ -255,10 +265,11 @@ require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
     alias :build_arel_orig :build_arel
+
     def build_arel(*args)
       arel = build_arel_orig(*args)
 
-      if !MultiTenant.with_write_only_mode_enabled?
+      unless MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
 
         visitor.contexts.each do |context|
@@ -270,7 +281,7 @@ module ActiveRecord
             if MultiTenant.current_tenant_id
               enforcement_clause = MultiTenant::TenantEnforcementClause.new(relation.arel_table[model.partition_key])
               case node
-              when Arel::Nodes::Join #Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
+              when Arel::Nodes::Join # Arel::Nodes::OuterJoin, Arel::Nodes::RightOuterJoin, Arel::Nodes::FullOuterJoin
                 node.right.expr = node.right.expr.and(enforcement_clause)
               when Arel::Nodes::SelectCore
                 if node.wheres.empty?
@@ -283,21 +294,19 @@ module ActiveRecord
                   end
                 end
               else
-                raise "UnknownContext"
+                raise 'UnknownContext'
               end
             end
 
             if node.is_a?(Arel::Nodes::SelectCore) || node.is_a?(Arel::Nodes::Join)
-              if node.is_a?Arel::Nodes::Join
+              if node.is_a? Arel::Nodes::Join
                 node_list = [node]
               else
                 node_list = node.source.right
               end
 
-              node_list.select{ |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
-                if !node_join.right
-                  next
-                end
+              node_list.select { |n| n.is_a? Arel::Nodes::Join }.each do |node_join|
+                next unless node_join.right
                 relation_right, relation_left = relations_from_node_join(node_join)
 
                 next unless relation_right && relation_left
@@ -318,6 +327,7 @@ module ActiveRecord
     end
 
     private
+
     def relations_from_node_join(node_join)
       if node_join.right.expr.is_a?(Arel::Nodes::Equality)
         return node_join.right.expr.right.relation, node_join.right.expr.left.relation
@@ -325,10 +335,11 @@ module ActiveRecord
 
       children = [node_join.right.expr.children].flatten
 
-      tenant_applied = children.any?{|c| c.is_a?(MultiTenant::TenantEnforcementClause) || c.is_a?(MultiTenant::TenantJoinEnforcementClause)}
-      if tenant_applied || children.empty?
-        return nil, nil
+      tenant_applied = children.any? do |c|
+        c.is_a?(MultiTenant::TenantEnforcementClause) || \
+                        c.is_a?(MultiTenant::TenantJoinEnforcementClause)
       end
+      return nil, nil if tenant_applied || children.empty?
 
       child = children.first.respond_to?(:children) ? children.first.children.first : children.first
       if child.right.respond_to?(:relation) && child.left.respond_to?(:relation)

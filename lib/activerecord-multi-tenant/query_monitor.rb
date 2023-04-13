@@ -2,11 +2,20 @@
 module MultiTenant
   # Option to enable query monitor
   @@enable_query_monitor = false
-  def self.enable_query_monitor; @@enable_query_monitor = true; end
-  def self.query_monitor_enabled?; @@enable_query_monitor; end
+
+  def self.enable_query_monitor
+    @@enable_query_monitor = true;
+  end
+
+  def self.query_monitor_enabled?
+    @@enable_query_monitor;
+  end
 
   class QueryMonitor
-    def start(name, id, payload); end
+    def start(name, id, payload)
+      ;
+    end
+
     def finish(name, id, payload)
       return unless MultiTenant.query_monitor_enabled?
       return unless payload[:exception].present? && MultiTenant.current_tenant_id.nil?

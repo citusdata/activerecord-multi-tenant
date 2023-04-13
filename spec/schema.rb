@@ -216,7 +216,7 @@ end
 class Comment < ActiveRecord::Base
   multi_tenant :account
   belongs_to :commentable, polymorphic: true
-  belongs_to :task, -> { where(comments: { commentable_type: 'Task'  }) }, foreign_key: 'commentable_id'
+  belongs_to :task, -> { where(comments: { commentable_type: 'Task' }) }, foreign_key: 'commentable_id'
 end
 
 class Organization < ActiveRecord::Base
@@ -229,7 +229,7 @@ class UuidRecord < ActiveRecord::Base
 end
 
 class Category < ActiveRecord::Base
-  has_many  :project_categories
+  has_many :project_categories
   has_many :projects, through: :project_categories
 end
 

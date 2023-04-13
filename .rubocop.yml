@@ -1,0 +1,21 @@
+# This is an example RuboCop configuration file with some commonly used options.
+
+# Run RuboCop on all Ruby files, except those in `vendor` and `node_modules` directories
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Exclude:
+    - '**/*.rb'
+  Enabled: false
+
+Metrics/BlockLength:
+  Max: 600
+
+
+
