@@ -1,29 +1,34 @@
-$:.push File.expand_path('../lib', __FILE__)
+$LOAD_PATH.push File.expand_path('lib', __dir__)
 require 'activerecord-multi-tenant/version'
 
-Gem::Specification.new do |s|
-  s.name        = 'activerecord-multi-tenant'
-  s.version     = MultiTenant::VERSION
-  s.summary     = 'ActiveRecord/Rails integration for multi-tenant databases, in particular the Citus extension for PostgreSQL'
-  s.description = ''
-  s.authors     = ['Citus Data']
-  s.email       = 'engage@citusdata.com'
+Gem::Specification.new do |spec|
+  spec.name = 'activerecord-multi-tenant'
+  spec.version = MultiTenant::VERSION
+  spec.summary = 'ActiveRecord/Rails integration for multi-tenant databases, '\
+            'in particular the Citus extension for PostgreSQL'
+  spec.description = ''
+  spec.authors = ['Citus Data']
+  spec.email = 'engage@citusdata.com'
+  spec.required_ruby_version = '>= 3.0.0'
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {spec}/*`.split("\n")
-  s.require_paths = ['lib']
-  s.homepage      = 'https://github.com/citusdata/activerecord-multi-tenant'
-  s.license       = 'MIT'
+  spec.files = `git ls-files`.split("\n")
+  spec.test_files = `git ls-files -- {spec}/*`.split("\n")
+  spec.require_paths = ['lib']
+  spec.homepage = 'https://github.com/citusdata/activerecord-multi-tenant'
+  spec.license = 'MIT'
 
-  s.add_dependency 'rails', '>= 6'
+  spec.add_dependency 'rails', '>= 6'
 
-  s.add_development_dependency 'rspec', '>= 3.0'
-  s.add_development_dependency 'rspec-rails'
-  s.add_development_dependency 'pg'
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'sidekiq'
-  s.add_development_dependency 'thor'
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'pry-byebug'
-  s.add_development_dependency 'codecov'
+  spec.add_development_dependency 'anbt-sql-formatter'
+  spec.add_development_dependency 'codecov'
+  spec.add_development_dependency 'pg'
+  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry-byebug'
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec', '>= 3.0'
+  spec.add_development_dependency 'rspec-rails'
+  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'sidekiq'
+
+  spec.add_development_dependency 'thor'
 end

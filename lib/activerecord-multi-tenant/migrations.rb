@@ -46,7 +46,8 @@ module MultiTenant
         execute "SELECT citus_run_on_all_workers($$#{sql}$$)" # initial citus_tools.sql with different names
       when nil
         # Do nothing, this is regular Postgres
-      else # 6.1 and newer
+      else
+        # 6.1 and newer
         execute "SELECT run_command_on_workers($$#{sql}$$)"
       end
     end
@@ -69,6 +70,7 @@ module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module SchemaStatements
       alias orig_create_table create_table
+
       def create_table(table_name, options = {}, &block)
         ret = orig_create_table(table_name, **options.except(:partition_key), &block)
         if options[:id] != false && options[:partition_key] && options[:partition_key].to_s != 'id'
@@ -86,18 +88,25 @@ module ActiveRecord
     private
 
     alias initialize_without_citus initialize
+
     def initialize(connection, options = {})
       initialize_without_citus(connection, options)
 
-      citus_version = begin
-        ActiveRecord::Migration.citus_version
-      rescue StandardError
-        # Handle the case where this gem is used with MySQL https://github.com/citusdata/activerecord-multi-tenant/issues/166
-        nil
-      end
+      citus_version =
+        begin
+          ActiveRecord::Migration.citus_version
+        rescue StandardError
+          # Handle the case where this gem is used with MySQL https://github.com/citusdata/activerecord-multi-tenant/issues/166
+          nil
+        end
       @distribution_columns =
         if citus_version.present?
-          @connection.execute('SELECT logicalrelid::regclass AS table_name, column_to_column_name(logicalrelid, partkey) AS dist_col_name FROM pg_dist_partition').to_h do |v|
+          query_to_execute = <<-SQL.strip
+            SELECT logicalrelid::regclass AS table_name,
+                   column_to_column_name(logicalrelid, partkey) AS dist_col_name
+            FROM pg_dist_partition
+          SQL
+          @connection.execute(query_to_execute).to_h do |v|
             [v['table_name'], v['dist_col_name']]
           end
         else
@@ -107,6 +116,7 @@ module ActiveRecord
 
     # Support for create_distributed_table & create_reference_table
     alias table_without_citus table
+
     def table(table, stream)
       table_without_citus(table, stream)
       table_name = remove_prefix_and_suffix(table)

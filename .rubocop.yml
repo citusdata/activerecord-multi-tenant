@@ -1,0 +1,46 @@
+# This is an example RuboCop configuration file with some commonly used options.
+
+# Run RuboCop on all Ruby files, except those in `vendor` and `node_modules` directories
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Exclude:
+    - '**/*.rb'
+  Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Metrics/BlockLength:
+  Max: 650
+
+Metrics/MethodLength:
+  Max: 150
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/ModuleLength:
+  Max: 200
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/BlockNesting:
+  Enabled: false
+

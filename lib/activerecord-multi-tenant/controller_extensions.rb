@@ -1,16 +1,18 @@
+# frozen_string_literal: true
+
 module MultiTenant
   module ControllerExtensions
     def set_current_tenant_through_filter
-      self.class_eval do
-        if respond_to?(:helper_method)
-          helper_method :current_tenant
-        end
+      class_eval do
+        helper_method :current_tenant if respond_to?(:helper_method)
 
         private
 
+        # rubocop:disable Naming/AccessorMethodName
         def set_current_tenant(current_tenant_object)
           MultiTenant.current_tenant = current_tenant_object
         end
+        # rubocop:enable Naming/AccessorMethodName
 
         def current_tenant
           MultiTenant.current_tenant

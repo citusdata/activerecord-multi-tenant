@@ -33,14 +33,22 @@ jobs:
        CITUS_VERSION: ${{ matrix.citus_version }}
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          docker-compose up -d
+
+      - name: Start Citus Database environment
+        run: docker-compose up -d
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: |
-          bundle exec rake spec
+
+      - name: Rubocop static code analysis
+        run: |
+          gem install rubocop
+          rubocop
+
+      - name: Execute tests
+        run: bundle exec rake spec
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
