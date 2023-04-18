@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'active_record/railtie'
 require 'action_controller/railtie'
@@ -16,9 +14,9 @@ Bundler.require(:default, :development)
 if ENV['CI'] == 'true'
   puts 'Enabling simplecov to upload code coverage results to codecov.io'
   require 'simplecov'
-  SimpleCov.start
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+  SimpleCov.start 'rails'
+  require 'simplecov-cobertura'
+  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 end
 
 dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))

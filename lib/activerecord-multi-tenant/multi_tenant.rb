@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support/current_attributes'
 
 module MultiTenant
@@ -5,6 +7,7 @@ module MultiTenant
     attribute :tenant
   end
 
+  # Checks whether the tenant is defined as model class
   def self.tenant_klass_defined?(tenant_name)
     !!tenant_name.to_s.classify.safe_constantize
   end
@@ -54,6 +57,7 @@ module MultiTenant
     # rubocop:enable Style/ClassVars
   end
 
+  # TODO: Could not understand why this is needed
   def self.multi_tenant_model_for_arel(arel)
     return nil unless arel.respond_to?(:ast)
 
@@ -96,6 +100,8 @@ module MultiTenant
     self.current_tenant = klass.find(MultiTenant.current_tenant_id)
   end
 
+  # Calls `block` with `tenant` set as the current tenant
+  # Afterwards, the current tenant is reset to the previous value
   def self.with(tenant, &block)
     return block.call if current_tenant == tenant
 
@@ -108,6 +114,8 @@ module MultiTenant
     end
   end
 
+  # Calls `block` with `tenant` set as nil
+  # Afterwards, the current tenant is reset to the previous value
   def self.without(&block)
     return block.call if current_tenant.nil?
 
@@ -126,11 +134,15 @@ module MultiTenant
     def self.wrap_methods(klass, owner, *method_names)
       method_names.each do |method_name|
         original_method_name = :"_mt_original_#{method_name}"
-        klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        klass.class_eval <<~CODE, __FILE__, __LINE__ + 1
           alias_method :#{original_method_name}, :#{method_name}
           def #{method_name}(*args, &block)
-            if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
-              MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args, &block) }
+            if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? &&\
+              #{owner}.persisted? && \
+              MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) \
+              && #{owner}.attributes.include?(#{owner}.class.partition_key)
+              MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key))#{' '}
+              { #{original_method_name}(*args, &block) }
             else
               #{original_method_name}(*args, &block)
             end
@@ -145,7 +157,9 @@ module MultiTenant
         klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
         alias_method :#{original_method_name}, :#{method_name}
         def #{method_name}(...)
-          if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
+          if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && \
+            MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) &&\
+            #{owner}.attributes.include?(#{owner}.class.partition_key)
             MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(...) }
           else
             #{original_method_name}(...)

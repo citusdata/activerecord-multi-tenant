@@ -3,7 +3,7 @@
 module MultiTenant
   class ArelVisitorsDepthFirst < Arel::Visitors::Visitor
     def initialize(block = nil)
-      @block = block || proc
+      @block = block || proc {}
       super()
     end
 
