@@ -1,12 +1,27 @@
 name: Active Record Multi-Tenant Tests
 
+env:
+  CI: true
 on:
   push:
     branches:
-      - master
-  pull_request:
+      - "**"
 
 jobs:
+
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+      - uses: actions/checkout@v3
+      - name: Rubocop static code analysis
+        run: |
+          gem install rubocop
+          rubocop
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -41,11 +56,6 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-
-      - name: Rubocop static code analysis
-        run: |
-          gem install rubocop
-          rubocop
 
       - name: Execute tests
         run: bundle exec rake spec

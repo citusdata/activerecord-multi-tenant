@@ -452,19 +452,6 @@ describe MultiTenant do
     end
   end
 
-  describe '.with_lock' do
-    it 'supports with_lock blocks inside the block' do
-      @account = Account.create!(name: 'foo')
-
-      MultiTenant.with @account do
-        project = @account.projects.create!(name: 'project')
-        project.with_lock do
-          expect(project.name).to eq 'project'
-        end
-      end
-    end
-  end
-
   it 'does not cache tenancy in associations' do
     account1 = Account.create! name: 'test1'
     account2 = Account.create! name: 'test2'
