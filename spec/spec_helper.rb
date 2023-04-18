@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'
