@@ -33,17 +33,6 @@ module MultiTenant
     @@enable_write_only_mode ||= false
   end
 
-  # Workaroud to make "with_lock" work until https://github.com/citusdata/citus/issues/1236 is fixed
-  @@enable_with_lock_workaround = false
-
-  def self.enable_with_lock_workaround
-    @@enable_with_lock_workaround = true
-  end
-
-  def self.with_lock_workaround_enabled?
-    @@enable_with_lock_workaround
-  end
-
   # Registry that maps table names to models (used by the query rewriter)
   def self.register_multi_tenant_model(model_klass)
     @@multi_tenant_models ||= []

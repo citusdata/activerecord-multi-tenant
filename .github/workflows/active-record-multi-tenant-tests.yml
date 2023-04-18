@@ -1,5 +1,7 @@
 name: Active Record Multi-Tenant Tests
 
+env:
+  CI: true
 on:
   push:
     branches:

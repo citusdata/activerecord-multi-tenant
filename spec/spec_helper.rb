@@ -12,10 +12,16 @@ require 'activerecord_multi_tenant'
 require 'bundler'
 Bundler.require(:default, :development)
 
-require 'simplecov'
-SimpleCov.start
-require 'codecov'
-SimpleCov.formatter = SimpleCov::Formatter::Codecov
+# Codecov is enabled when CI is set to true
+if ENV['CI'] == 'true'
+  puts 'Enabling simplecov to upload code coverage results to codecov.io'
+  require 'simplecov'
+  SimpleCov.start
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
+
 
 dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))

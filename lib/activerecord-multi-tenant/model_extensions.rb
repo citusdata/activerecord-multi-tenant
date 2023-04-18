@@ -166,6 +166,7 @@ ActiveSupport.on_load(:active_record) do |base|
   ActiveRecord::Associations::CollectionProxy.alias_method :<<, :append_mt
 end
 
+# skips statement caching for classes that is Multi-tenant or has a multi-tenant relation
 class ActiveRecord::Associations::Association
   alias skip_statement_cache_orig skip_statement_cache?
 
