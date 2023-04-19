@@ -14,8 +14,8 @@ if ENV['CI'] == 'true'
   puts 'Enabling simplecov to upload code coverage results to codecov.io'
   require 'simplecov'
   SimpleCov.start 'rails'
-  require 'simplecov-cobertura'
-  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
