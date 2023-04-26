@@ -81,8 +81,8 @@ module MultiTenant
         }
 
         # Below block adds the following methods to the model that calls it.
-        # partition_key= - returns the partition key for the model.Above in the class getter was defined.
-        # There is additional check here to assure that the tenant id is not changed once set
+        # partition_key= - returns the partition key for the model.class << self 'partition' method defined above
+        # is the getter method. Here, there is additional check to assure that the tenant id is not changed once set
         # tenant_name- returns the name of the tenant model. Its setter and getter methods defined separately
         # Getter checks for the tenant association and if it is not loaded, returns the current tenant id set
         # in the MultiTenant module
