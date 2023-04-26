@@ -35,7 +35,8 @@ module Sidekiq::Middleware::MultiTenant
   end
 end
 
-# Configure Sidekiq to use the multi-tenant client and server middleware to add (client/server)/process(server) tenant information.
+# Configure Sidekiq to use the multi-tenant client and server middleware to add (client/server)/process(server)
+# tenant information.
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
     chain.add Sidekiq::Middleware::MultiTenant::Server
@@ -56,7 +57,6 @@ end
 # setting the multi-tenant information for each job.
 module Sidekiq
   class Client
-
     # Allows the caller to enqueue multiple Sidekiq jobs with
     # tenant information in a single call. It ensures that each job is processed
     # within the correct tenant context and returns an array of job IDs for the enqueued jobs
