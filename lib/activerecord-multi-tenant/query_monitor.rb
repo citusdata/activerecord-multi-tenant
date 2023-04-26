@@ -1,4 +1,7 @@
 # Add generic warning when queries fail and there is no tenant set
+# To handle this case, a QueryMonitor hook is created and registered
+# to sql.active_record. This hook will log a warning when a query fails
+# This hook is executed after the query is executed.
 module MultiTenant
   # rubocop:disable Style/ClassVars
   # Option to enable query monitor
@@ -13,7 +16,8 @@ module MultiTenant
   end
 
   # rubocop:enable Style/ClassVars
-
+  # QueryMonitor class to log a warning when a query fails and there is no tenant set
+  # start and finish methods are required to be register sql.active_record hook
   class QueryMonitor
     def start(_name, _id, _payload) end
 
@@ -26,5 +30,5 @@ module MultiTenant
     end
   end
 end
-
+# Actual code to register the hook.
 ActiveSupport::Notifications.subscribe('sql.active_record', MultiTenant::QueryMonitor.new)

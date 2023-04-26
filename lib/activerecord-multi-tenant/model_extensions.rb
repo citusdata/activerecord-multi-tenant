@@ -1,9 +1,18 @@
 require_relative './multi_tenant'
 
 module MultiTenant
+  # Extension to the model to allow scoping of models to the current tenant. This is done by adding
+  # the multitenant method to the models that need to be scoped. This method is called in the
+  # model declaration.
+  # Adds scoped_by_tenant? partition_key, primary_key and inherited methods to the model
   module ModelExtensionsClassMethods
     DEFAULT_ID_FIELD = 'id'.freeze
-
+    # executes when multi_tenant method is called in the model. This method adds the following
+    # methods to the model that calls it.
+    # scoped_by_tenant? - returns true if the model is scoped by tenant
+    # partition_key - returns the partition key for the model
+    # primary_key - returns the primary key for the model
+    #
     def multi_tenant(tenant_name, options = {})
       if to_s.underscore.to_sym == tenant_name || (!table_name.nil? && table_name.singularize.to_sym == tenant_name)
         unless MultiTenant.with_write_only_mode_enabled?
@@ -71,6 +80,12 @@ module MultiTenant
           end
         }
 
+        # Below block adds the following methods to the model that calls it.
+        # partition_key= - returns the partition key for the model.Above in the class getter was defined.
+        # There is additional check here to assure that the tenant id is not changed once set
+        # tenant_name- returns the name of the tenant model. Its setter and getter methods defined seperately
+        # Getter checks for the tenant association and if it is not loaded, returns the current tenant id set
+        # in the MultiTenant module
         to_include = Module.new do
           define_method "#{partition_key}=" do |tenant_id|
             write_attribute(partition_key.to_s, tenant_id)
@@ -110,6 +125,9 @@ module MultiTenant
         end
         include to_include
 
+        # Below blocks sets tenant_id for the current session with the tenant_id of the record
+        # If the tenant is not set for the session.After the save operation current session tenant is set to nil
+        # If tenant is set for the session, save operation is performed as it is
         around_save lambda { |record, block|
           record_tenant = record.attribute_was(partition_key)
           if persisted? && MultiTenant.current_tenant_id.nil? && !record_tenant.nil?
@@ -140,6 +158,9 @@ module MultiTenant
   end
 end
 
+# Below code block is executed on Model, Associations and CollectionProxy objects
+# when ActiveRecord is loaded and decorates defined methods with MultiTenant.with function.
+# Additionally, adds aliases for some operators.
 ActiveSupport.on_load(:active_record) do |base|
   base.extend MultiTenant::ModelExtensionsClassMethods
 

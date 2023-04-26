@@ -1,5 +1,6 @@
 # Truncates only the tables that have been modified, according to sequence
 # values
+# Faster alternative to DatabaseCleaner.clean_with(:truncation, pre_count: true)
 module MultiTenant
   module FastTruncate
     def self.run(exclude: ['schema_migrations'])

@@ -1,6 +1,7 @@
 require 'active_record'
 require_relative './arel_visitors_depth_first' unless Arel::Visitors.const_defined?(:DepthFirst)
 
+# Iterates AST and adds tenant enforcement clauses to all relations
 module MultiTenant
   class Table
     attr_reader :arel_table
