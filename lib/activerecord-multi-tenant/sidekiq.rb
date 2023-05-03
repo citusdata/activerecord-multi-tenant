@@ -1,7 +1,6 @@
 require 'sidekiq/client'
 
 # Adds methods to handle tenant information both in the client and server.
-#
 module Sidekiq::Middleware::MultiTenant
   # Get the current tenant and store in the message to be sent to Sidekiq.
   class Client

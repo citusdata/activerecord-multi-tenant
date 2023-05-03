@@ -83,7 +83,7 @@ module MultiTenant
         # Below block adds the following methods to the model that calls it.
         # partition_key= - returns the partition key for the model.Above in the class getter was defined.
         # There is additional check here to assure that the tenant id is not changed once set
-        # tenant_name- returns the name of the tenant model. Its setter and getter methods defined seperately
+        # tenant_name- returns the name of the tenant model. Its setter and getter methods defined separately
         # Getter checks for the tenant association and if it is not loaded, returns the current tenant id set
         # in the MultiTenant module
         to_include = Module.new do
@@ -126,7 +126,7 @@ module MultiTenant
         include to_include
 
         # Below blocks sets tenant_id for the current session with the tenant_id of the record
-        # If the tenant is not set for the session.After the save operation current session tenant is set to nil
+        # If the tenant is not set for the `session.After` the save operation current session tenant is set to nil
         # If tenant is set for the session, save operation is performed as it is
         around_save lambda { |record, block|
           record_tenant = record.attribute_was(partition_key)

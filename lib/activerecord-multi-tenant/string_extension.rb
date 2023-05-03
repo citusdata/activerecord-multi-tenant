@@ -3,7 +3,7 @@
 require 'anbt-sql-formatter/formatter'
 
 # Formatter for SQL queries. This is used to make the queries more readable in the tests
-# When comparing SQL queries in tests,we use formatter for both sides of the equation.
+# When comparing SQL queries in tests, use formatter for both sides of the equation.
 class String
   def pretty_format_sql
     rule = AnbtSql::Rule.new
