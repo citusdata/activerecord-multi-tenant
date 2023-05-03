@@ -162,7 +162,7 @@ module MultiTenant
   # Preserve backward compatibility for people using .with_id
   singleton_class.send(:alias_method, :with_id, :with)
 
-  # This exception is raised when a there is  an attempt is made to change tenant
+  # This exception is raised when a there is an attempt to change tenant
   class TenantIsImmutable < StandardError
   end
 end
