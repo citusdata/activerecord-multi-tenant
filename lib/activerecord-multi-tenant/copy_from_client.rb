@@ -1,4 +1,7 @@
 module MultiTenant
+  # Designed to be mixed into an ActiveRecord model to provide
+  # a copy_from_client method that allows for efficient bulk insertion of
+  # data into a PostgreSQL database using the COPY command
   class CopyFromClientHelper
     attr_reader :count
 
@@ -28,6 +31,7 @@ module MultiTenant
   end
 end
 
+# Add copy_from_client to ActiveRecord::Base
 ActiveSupport.on_load(:active_record) do |base|
   base.extend(MultiTenant::CopyFromClient)
 end

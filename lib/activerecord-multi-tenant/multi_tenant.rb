@@ -122,6 +122,9 @@ module MultiTenant
 
   # Wrap calls to any of `method_names` on an instance Class `klass` with MultiTenant.with
   # when `'owner'` (evaluated in context of the klass instance) is a ActiveRecord model instance that is multi-tenant
+  # Instruments the methods provided with previously set Multitenant parameters
+  # In Ruby 2 using splat (*) operator with `&block` is not supported, so we need to use `method(...)` syntax
+  # TODO: Could not understand the use of owner here. Need to check
   if Gem::Version.create(RUBY_VERSION) < Gem::Version.new('3.0.0')
     def self.wrap_methods(klass, owner, *method_names)
       method_names.each do |method_name|
@@ -159,6 +162,7 @@ module MultiTenant
   # Preserve backward compatibility for people using .with_id
   singleton_class.send(:alias_method, :with_id, :with)
 
+  # This exception is raised when a there is an attempt to change tenant
   class TenantIsImmutable < StandardError
   end
 end
