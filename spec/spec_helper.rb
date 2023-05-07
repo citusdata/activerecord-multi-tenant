@@ -22,8 +22,8 @@ if ENV['CI'] == 'true'
 end
 
 dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
-ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
-ActiveRecord::Base.establish_connection(dbconfig['test'])
+ApplicationRecord.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
+ApplicationRecord.establish_connection(dbconfig['test'])
 
 RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = true
@@ -53,11 +53,11 @@ MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 # rubocop:disable Lint/UnusedMethodArgument
 # changing the name of the parameter breaks tests
 def with_belongs_to_required_by_default(&block)
-  default_value = ActiveRecord::Base.belongs_to_required_by_default
-  ActiveRecord::Base.belongs_to_required_by_default = true
+  default_value = ApplicationRecord.belongs_to_required_by_default
+  ApplicationRecord.belongs_to_required_by_default = true
   yield
 ensure
-  ActiveRecord::Base.belongs_to_required_by_default = default_value
+  ApplicationRecord.belongs_to_required_by_default = default_value
 end
 # rubocop:enable Lint/UnusedMethodArgument
 require 'schema'

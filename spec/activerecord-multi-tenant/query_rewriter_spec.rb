@@ -95,7 +95,7 @@ describe 'Query Rewriter' do
   context 'when update without arel' do
     it 'can call method' do
       expect do
-        ActiveRecord::Base.connection.update('SELECT 1')
+        ApplicationRecord.connection.update('SELECT 1')
       end.not_to raise_error
     end
   end
