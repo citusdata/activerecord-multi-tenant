@@ -11,4 +11,3 @@ require_relative 'activerecord-multi-tenant/query_rewriter'
 require_relative 'activerecord-multi-tenant/query_monitor'
 require_relative 'activerecord-multi-tenant/version'
 require_relative 'activerecord-multi-tenant/string_extension'
-
