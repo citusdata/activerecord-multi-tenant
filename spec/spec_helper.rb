@@ -11,6 +11,7 @@ require 'activerecord_multi_tenant'
 
 require 'bundler'
 Bundler.require(:default, :development)
+require_relative './support/format_sql'
 
 # Codecov is enabled when CI is set to true
 if ENV['CI'] == 'true'
