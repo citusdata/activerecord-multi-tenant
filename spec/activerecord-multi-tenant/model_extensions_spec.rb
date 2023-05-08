@@ -327,7 +327,7 @@ describe MultiTenant do
         SQL
 
         MultiTenant.with(account) do
-          expect(Comment.joins(:task).to_sql.pretty_format_sql).to eq(expected_join_sql.pretty_format_sql)
+          expect(format_sql(Comment.joins(:task).to_sql)).to eq(format_sql(expected_join_sql))
         end
       end
 
@@ -339,7 +339,7 @@ describe MultiTenant do
             INNER JOIN "tasks" ON "tasks"."id" = "comments"."commentable_id"#{' '}
             AND "comments"."commentable_type" = 'Task' AND "comments"."account_id" = "tasks"."account_id"
           SQL
-          expect(Comment.joins(:task).to_sql.pretty_format_sql).to eq(expected_join_sql.pretty_format_sql)
+          expect(format_sql(Comment.joins(:task).to_sql)).to eq(format_sql(expected_join_sql))
         end
       end
     end
@@ -357,7 +357,7 @@ describe MultiTenant do
         SQL
 
         MultiTenant.with(account) do
-          expect(Project.joins(:tasks).to_sql.pretty_format_sql).to eq(expected_join_sql.pretty_format_sql)
+          expect(format_sql(Project.joins(:tasks).to_sql)).to eq(format_sql(expected_join_sql))
         end
       end
 
@@ -369,7 +369,7 @@ describe MultiTenant do
             INNER JOIN "tasks" ON "tasks"."project_id" = "projects"."id"
             AND "projects"."account_id" = "tasks"."account_id"
           SQL
-          expect(Project.joins(:tasks).to_sql.pretty_format_sql).to eq(expected_join_sql.pretty_format_sql)
+          expect(format_sql(Project.joins(:tasks).to_sql)).to eq(format_sql(expected_join_sql))
         end
       end
     end
@@ -494,8 +494,8 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       task1 = Task.create! name: 'Task 1', project: project1
       subtask1 = SubTask.create! task: task1
-      expect(project1.sub_tasks.to_sql.pretty_format_sql)
-        .to eq(option1.pretty_format_sql).or(eq(option2.pretty_format_sql))
+      expect(format_sql(project1.sub_tasks.to_sql))
+        .to eq(format_sql(option1)).or(eq(format_sql(option2)))
       expect(project1.sub_tasks).to include(subtask1)
     end
 
@@ -509,7 +509,7 @@ describe MultiTenant do
       SQL
 
       project = Project.first
-      expect(project.sub_tasks.to_sql.pretty_format_sql).to eq(expected_sql.strip.pretty_format_sql)
+      expect(format_sql(project.sub_tasks.to_sql)).to eq(format_sql(expected_sql.strip))
     end
   end
 
@@ -534,8 +534,8 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
-      expect(project1.categories.to_sql.pretty_format_sql)
-        .to eq(option1.pretty_format_sql).or(eq(option2.pretty_format_sql))
+      expect(format_sql(project1.categories.to_sql))
+        .to eq(format_sql(option1)).or(eq(format_sql(option2)))
       expect(project1.categories).to include(category1)
       expect(project1.project_categories).to include(projectcategory)
     end
@@ -549,8 +549,8 @@ describe MultiTenant do
       SQL
 
       project = Project.first
-      expect(project.categories.to_sql.pretty_format_sql)
-        .to eq(expected_sql.strip.pretty_format_sql)
+      expect(format_sql(project.categories.to_sql))
+        .to eq(format_sql(expected_sql.strip))
       expect(project.categories).to include(category1)
 
       expected_sql = <<-SQL
@@ -561,9 +561,8 @@ describe MultiTenant do
         WHERE "projects"."account_id" = 1
       SQL
 
-      expect(Project.where(account_id: 1).joins(:categories)
-                    .to_sql.pretty_format_sql)
-        .to eq(expected_sql.strip.pretty_format_sql)
+      expect(format_sql(Project.where(account_id: 1).joins(:categories).to_sql))
+        .to eq(format_sql(expected_sql.strip))
       project = Project.where(account_id: 1).joins(:categories).first
       expect(project.categories).to include(category1)
     end
@@ -599,8 +598,8 @@ describe MultiTenant do
       project1 = Project.create! name: 'Project 1'
       projectcategory = ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
-      expect(Project.eager_load(:categories).to_sql.pretty_format_sql)
-        .to eq(option1.pretty_format_sql).or(eq(option2.pretty_format_sql))
+      expect(format_sql(Project.eager_load(:categories).to_sql))
+        .to eq(format_sql(option1)).or(eq(format_sql(option2)))
 
       project = Project.eager_load(:categories).first
       expect(project.categories).to include(category1)
@@ -618,8 +617,8 @@ describe MultiTenant do
         WHERE "projects"."account_id" = 1
       SQL
 
-      expect(Project.where(account_id: 1).eager_load(:categories).to_sql.pretty_format_sql)
-        .to eq(expected_sql.strip.pretty_format_sql)
+      expect(format_sql(Project.where(account_id: 1).eager_load(:categories).to_sql))
+        .to eq(format_sql(expected_sql.strip))
 
       project = Project.where(account_id: 1).eager_load(:categories).first
       expect(project.categories).to include(category1)
@@ -649,9 +648,11 @@ describe MultiTenant do
       ProjectCategory.create! name: 'project cat 1', project: project1, category: category1
 
       project1.tasks.create! name: 'baz'
-      expect(Task.joins(:project)
-                 .joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql.pretty_format_sql)
-        .to eq(option1.pretty_format_sql).or(eq(option2.pretty_format_sql))
+      expect(
+        format_sql(
+          Task.joins(:project).joins('LEFT JOIN project_categories pc ON project.category_id = pc.id').to_sql
+        )
+      ).to eq(format_sql(option1)).or(eq(format_sql(option2)))
     end
 
     MultiTenant.without do
@@ -663,9 +664,9 @@ describe MultiTenant do
         WHERE "tasks"."account_id" = 1
       SQL
 
-      expect(Task.where(account_id: 1).joins(:project)
+      expect(format_sql(Task.where(account_id: 1).joins(:project)
                  .joins('LEFT JOIN project_categories pc ON project.category_id = pc.id')
-                 .to_sql.pretty_format_sql).to eq(expected_sql.strip.pretty_format_sql)
+                 .to_sql)).to eq(format_sql(expected_sql.strip))
     end
   end
 
@@ -693,8 +694,8 @@ describe MultiTenant do
       # expect(Project).to receive(:find_by_sql).with(eq(option1).
       # or(eq(option2)).or(eq(option3)), any_args).and_call_original
       expect(Project).to receive(:find_by_sql).and_wrap_original do |m, *args|
-        expect(args[0].pretty_format_sql).to(eq(option1.pretty_format_sql)
-                                               .or(eq(option2.pretty_format_sql)).or(eq(option3.pretty_format_sql)))
+        expect(format_sql(args[0])).to(eq(format_sql(option1))
+                                               .or(eq(format_sql(option2))).or(eq(format_sql(option3))))
         m.call(args[0], args[1], preparable: args[2][:preparable])
       end
       expect(Project.find(project.id)).to eq(project)
@@ -713,7 +714,7 @@ describe MultiTenant do
       # Couldn't make the following line pass for some reason, so came up with an uglier alternative
       # expect(Project).to receive(:find_by_sql).with(eq(option1).or(eq(option2)), any_args).and_call_original
       expect(Project).to receive(:find_by_sql).and_wrap_original do |m, *args|
-        expect(args[0].pretty_format_sql).to(eq(option1.pretty_format_sql).or(eq(option2.pretty_format_sql)))
+        expect(format_sql(args[0])).to(eq(format_sql(option1)).or(eq(format_sql(option2))))
         m.call(args[0], args[1], preparable: args[2][:preparable])
       end
       expect(Project.find(project2.id)).to eq(project2)
