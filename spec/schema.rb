@@ -139,14 +139,14 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_reference_table :categories
 end
 
-class Account < ActiveRecord::Base
+class Account < ApplicationRecord
   multi_tenant :account
   has_many :projects
   has_one :manager, inverse_of: :account
   has_many :optional_sub_tasks
 end
 
-class Project < ActiveRecord::Base
+class Project < ApplicationRecord
   multi_tenant :account
   has_one :manager
   has_many :tasks
@@ -158,12 +158,12 @@ class Project < ActiveRecord::Base
   validates_uniqueness_of :name, scope: [:account]
 end
 
-class Manager < ActiveRecord::Base
+class Manager < ApplicationRecord
   multi_tenant :account
   belongs_to :project
 end
 
-class Task < ActiveRecord::Base
+class Task < ApplicationRecord
   multi_tenant :account
   belongs_to :project
   has_many :sub_tasks
@@ -171,7 +171,7 @@ class Task < ActiveRecord::Base
   validates_uniqueness_of :name
 end
 
-class SubTask < ActiveRecord::Base
+class SubTask < ApplicationRecord
   multi_tenant :account
   belongs_to :task
   has_one :project, through: :task
@@ -179,7 +179,7 @@ class SubTask < ActiveRecord::Base
 end
 
 with_belongs_to_required_by_default do
-  class OptionalSubTask < ActiveRecord::Base
+  class OptionalSubTask < ApplicationRecord
     multi_tenant :account, optional: true
     belongs_to :sub_task
   end
@@ -188,26 +188,26 @@ end
 class StiSubTask < SubTask
 end
 
-class UnscopedModel < ActiveRecord::Base
+class UnscopedModel < ApplicationRecord
   validates_uniqueness_of :name
 end
 
-class AliasedTask < ActiveRecord::Base
+class AliasedTask < ApplicationRecord
   multi_tenant :account
   belongs_to :project_alias, class_name: 'Project'
 end
 
-class CustomPartitionKeyTask < ActiveRecord::Base
+class CustomPartitionKeyTask < ApplicationRecord
   multi_tenant :account, partition_key: 'accountID'
 
   validates_uniqueness_of :name, scope: [:account]
 end
 
-class PartitionKeyNotModelTask < ActiveRecord::Base
+class PartitionKeyNotModelTask < ApplicationRecord
   multi_tenant :non_model
 end
 
-class AbstractTask < ActiveRecord::Base
+class AbstractTask < ApplicationRecord
   self.abstract_class = true
   multi_tenant :non_model
 end
@@ -215,44 +215,44 @@ end
 class SubclassTask < AbstractTask
 end
 
-class Comment < ActiveRecord::Base
+class Comment < ApplicationRecord
   multi_tenant :account
   belongs_to :commentable, polymorphic: true
   belongs_to :task, -> { where(comments: { commentable_type: 'Task' }) }, foreign_key: 'commentable_id'
 end
 
-class Organization < ActiveRecord::Base
+class Organization < ApplicationRecord
   multi_tenant :organization
   has_many :uuid_records
 end
 
-class UuidRecord < ActiveRecord::Base
+class UuidRecord < ApplicationRecord
   multi_tenant :organization
 end
 
-class Category < ActiveRecord::Base
+class Category < ApplicationRecord
   has_many :project_categories
   has_many :projects, through: :project_categories
 end
 
-class ProjectCategory < ActiveRecord::Base
+class ProjectCategory < ApplicationRecord
   multi_tenant :account
   belongs_to :project
   belongs_to :category
   belongs_to :account
 end
 
-class AllowedPlace < ActiveRecord::Base
+class AllowedPlace < ApplicationRecord
   multi_tenant :account
 end
 
-class Domain < ActiveRecord::Base
+class Domain < ApplicationRecord
   multi_tenant :account
   has_many :pages
   default_scope { where(deleted: false) }
 end
 
-class Page < ActiveRecord::Base
+class Page < ApplicationRecord
   multi_tenant :account
   belongs_to :domain
 end

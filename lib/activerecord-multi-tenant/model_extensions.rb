@@ -166,7 +166,7 @@ ActiveSupport.on_load(:active_record) do |base|
 
   # Ensure we have current_tenant_id in where clause when a cached ActiveRecord instance is being reloaded,
   # or update_columns without callbacks is called
-  MultiTenant.wrap_methods(ActiveRecord::Base, 'self', :delete, :reload, :update_columns)
+  MultiTenant.wrap_methods(ApplicationRecord, 'self', :delete, :reload, :update_columns)
 
   # Any queuries fired for fetching a singular association have the correct current_tenant_id in WHERE clause
   # reload is called anytime any record's association is accessed
