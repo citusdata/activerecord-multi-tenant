@@ -27,14 +27,14 @@ It is required that you add `multi_tenant` definitions to your model in order to
 In the example of an analytics application, sharding on `customer_id`, annotate your models like this:
 
 ```ruby
-class PageView < ApplicationRecord
+class PageView < ActiveRecord::Base
   multi_tenant :customer
   belongs_to :site
 
   # ...
 end
 
-class Site < ApplicationRecord
+class Site < ActiveRecord::Base
   multi_tenant :customer
   has_many :page_views
 

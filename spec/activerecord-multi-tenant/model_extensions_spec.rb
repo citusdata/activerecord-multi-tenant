@@ -74,7 +74,7 @@ describe MultiTenant do
 
   describe 'Tenant model with a nonstandard class name' do
     let(:account_klass) do
-      Class.new(ApplicationRecord) do
+      Class.new(ActiveRecord::Base) do
         self.table_name = 'account'
 
         def self.name
@@ -114,7 +114,7 @@ describe MultiTenant do
     end
 
     let(:post_klass) do
-      Class.new(ApplicationRecord) do
+      Class.new(ActiveRecord::Base) do
         self.table_name = 'unknown'
 
         multi_tenant(:account)

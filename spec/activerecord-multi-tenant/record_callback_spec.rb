@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class ProjectWithCallbacks < ApplicationRecord
+class ProjectWithCallbacks < ActiveRecord::Base
   self.table_name = :projects
 
   multi_tenant :account

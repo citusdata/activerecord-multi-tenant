@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'activerecord-multi-tenant/application_record'
 require_relative 'activerecord-multi-tenant/controller_extensions' if Object.const_defined?(:ActionController)
 require_relative 'activerecord-multi-tenant/copy_from_client'
 require_relative 'activerecord-multi-tenant/fast_truncate'

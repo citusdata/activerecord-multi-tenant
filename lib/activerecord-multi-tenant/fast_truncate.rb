@@ -5,7 +5,7 @@ module MultiTenant
   module FastTruncate
     def self.run(exclude: ['schema_migrations'])
       # This is a slightly faster version of DatabaseCleaner.clean_with(:truncation, pre_count: true)
-      ApplicationRecord.connection.execute format(%(
+      ActiveRecord::Base.connection.execute format(%(
       DO LANGUAGE plpgsql $$
       DECLARE
         t record;
