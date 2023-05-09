@@ -31,7 +31,7 @@ module MultiTenant
   end
 end
 
-# Add copy_from_client to ApplicationRecord
+# Add copy_from_client to ActiveRecord::Base
 ActiveSupport.on_load(:active_record) do |base|
   base.extend(MultiTenant::CopyFromClient)
 end

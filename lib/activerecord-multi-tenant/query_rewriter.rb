@@ -380,4 +380,4 @@ module MultiTenantFindBy
   end
 end
 
-ApplicationRecord.singleton_class.prepend(MultiTenantFindBy)
+ActiveRecord::Base.singleton_class.prepend(MultiTenantFindBy)
