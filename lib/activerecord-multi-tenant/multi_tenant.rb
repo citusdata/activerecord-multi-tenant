@@ -63,9 +63,9 @@ module MultiTenant
     return nil unless arel.respond_to?(:ast)
 
     if arel.ast.relation.is_a? Arel::Nodes::JoinSource
-      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.left.table_name)
+      MultiTenant.multi_tenant_model_for_table(TableNode.table_name(arel.ast.relation.left))
     else
-      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+      MultiTenant.multi_tenant_model_for_table(TableNode.table_name(arel.ast.relation))
     end
   end
 
