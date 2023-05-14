@@ -29,6 +29,18 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :completed, :boolean
   end
 
+  create_table :managers_tasks, force: true, partition_key: :account_id do |t|
+    t.column :account_id, :integer
+    t.column :manager_id, :integer
+    t.column :task_id, :integer
+  end
+
+
+  create_table :managers_projects, force: true do |t|
+    t.column :project_id, :integer
+    t.column :manager_id, :integer
+  end
+
   create_table :sub_tasks, force: true, partition_key: :account_id do |t|
     t.column :account_id, :integer
     t.column :name, :string
@@ -154,6 +166,7 @@ class Project < ActiveRecord::Base
 
   has_many :project_categories
   has_many :categories, through: :project_categories
+  has_and_belongs_to_many :managers
 
   validates_uniqueness_of :name, scope: [:account]
 end
@@ -161,12 +174,14 @@ end
 class Manager < ActiveRecord::Base
   multi_tenant :account
   belongs_to :project
+  has_and_belongs_to_many :tasks, tenant_column: :account_id, tenant_enabled: true
 end
 
 class Task < ActiveRecord::Base
   multi_tenant :account
   belongs_to :project
   has_many :sub_tasks
+  has_and_belongs_to_many :managers, tenant_column: :account_id, tenant_enabled: true
 
   validates_uniqueness_of :name
 end

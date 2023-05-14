@@ -165,4 +165,7 @@ module MultiTenant
   # This exception is raised when a there is an attempt to change tenant
   class TenantIsImmutable < StandardError
   end
+
+  class MissingTenantError < StandardError
+  end
 end
