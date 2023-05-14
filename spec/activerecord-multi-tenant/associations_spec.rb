@@ -9,7 +9,7 @@ describe MultiTenant, 'Association methods' do
   let(:task1) { Task.create! name: 'task1', project: project1, account: account1 }
   let(:task2) { Task.create! name: 'task2', project: project2, account: account2, id: task1.id }
   let(:manager1) { Manager.create! name: 'manager1', account: account1, tasks: [task1] }
-  let(:project3) { Project.create! name: 'something3', account: account1 , managers: [manager1]}
+  let(:project3) { Project.create! name: 'something3', account: account1, managers: [manager1] }
 
   context 'include the tenant_id in queries and' do
     it 'creates a task with correct account_id' do

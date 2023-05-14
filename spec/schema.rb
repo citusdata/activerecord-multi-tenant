@@ -35,7 +35,6 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :task_id, :integer
   end
 
-
   create_table :managers_projects, force: true do |t|
     t.column :project_id, :integer
     t.column :manager_id, :integer

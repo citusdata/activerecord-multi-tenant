@@ -3,12 +3,13 @@
 module ActiveRecord
   module Associations
     module ClassMethods
+      # rubocop:disable Naming/PredicateName
       def has_and_belongs_to_many_with_tenant(name, options = {}, &extension)
+        # rubocop:enable Naming/PredicateName
         has_and_belongs_to_many_without_tenant(name, **options, &extension)
 
         middle_reflection = _reflections[name.to_s].through_reflection
         join_model = middle_reflection.klass
-        join_object = join_model
 
         # get tenant_enabled from options and if it is not set, set it to false
         tenant_enabled = options[:tenant_enabled] || false
