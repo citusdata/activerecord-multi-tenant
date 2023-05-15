@@ -14,9 +14,16 @@ module ActiveRecord
         # get tenant_enabled from options and if it is not set, set it to false
         tenant_enabled = options[:tenant_enabled] || false
 
+        return unless tenant_enabled
+
+        tenant_class_name = options[:tenant_class_name]
+        tenant_column = options[:tenant_column]
+
+        match = tenant_column.match(/(\w+)_id/)
+        tenant_field_name = match[1] if match
+
         join_model.class_eval do
-          puts "Default tenant class: #{MultiTenant.default_tenant_class}"
-          belongs_to :tenant, class_name: Account.name
+          belongs_to tenant_field_name.to_sym, class_name: tenant_class_name
           before_create :tenant_set
 
           private
@@ -43,7 +50,7 @@ module ActiveRecord
             if tenant_enabled
               raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
 
-              send("#{options[:tenant_column]}=", MultiTenant.current_tenant_id)
+              send("#{tenant_column}=", MultiTenant.current_tenant_id)
             end
           end
         end
