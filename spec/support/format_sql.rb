@@ -2,10 +2,8 @@
 
 require 'anbt-sql-formatter/formatter'
 
-# Formatter for SQL queries. This is used to make the queries more readable in the tests
-# When comparing SQL queries in tests, use formatter for both sides of the equation.
-class String
-  def pretty_format_sql
+module SQLFormatter
+  def format_sql(sql)
     rule = AnbtSql::Rule.new
     rule.keyword = AnbtSql::Rule::KEYWORD_UPPER_CASE
     %w[count sum substr date].each do |func_name|
@@ -13,6 +11,10 @@ class String
     end
     rule.indent_string = '    '
     formatter = AnbtSql::Formatter.new(rule)
-    formatter.format(dup)
+    formatter.format(sql.dup)
   end
+end
+
+RSpec.configure do |config|
+  config.include SQLFormatter
 end
