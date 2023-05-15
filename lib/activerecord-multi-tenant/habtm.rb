@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# This module extension is a monkey patch to the ActiveRecord::Associations::ClassMethods module.
+# It overrides the has_and_belongs_to_many method to add the tenant_id to the join table if the
+# tenant_enabled option is set to true.
+
 module ActiveRecord
   module Associations
     module ClassMethods
@@ -20,7 +24,7 @@ module ActiveRecord
         tenant_column = options[:tenant_column]
 
         match = tenant_column.match(/(\w+)_id/)
-        tenant_field_name = match[1] if match
+        tenant_field_name = match ? match[1] : 'tenant'
 
         join_model.class_eval do
           belongs_to tenant_field_name.to_sym, class_name: tenant_class_name
@@ -28,25 +32,8 @@ module ActiveRecord
 
           private
 
+          # This method sets the tenant_id on the join table and executes before creation of the join table record.
           define_method :tenant_set do
-            # puts "Class: #{self.class}"
-            # puts "MultiTenant.current_tenant_id: #{MultiTenant.current_tenant_id}"
-            # puts "Tenant column: #{options[:tenant_column]}"
-            # puts "Middle reflection: #{middle_reflection.name}"
-            # puts "Join model: #{join_model}"
-            # puts "Join model Left: #{join_model.left_model}"
-            #
-            # # self.instance_variables.each do |var|
-            # #   puts "#{var}: #{self.instance_variable_get(var)}"
-            # # end
-            # #
-            # join_object.methods.each do |method|
-            #   puts "Method: #{method}"
-            # end
-            #
-            # self.class.constants.each do |constant|
-            #   puts "Constant: #{constant}, Value: #{self.class.const_get(constant)}"
-            # end
             if tenant_enabled
               raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
 
