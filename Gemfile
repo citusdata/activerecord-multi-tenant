@@ -2,5 +2,6 @@ source 'https://rubygems.org'
 
 gemspec
 gem 'appraisal'
-gem 'codecov', require: false, group: 'test'
 gem 'rubocop', require: false, group: 'test'
+gem 'simplecov'
+gem 'simplecov-cobertura'

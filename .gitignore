@@ -5,3 +5,6 @@ pkg/
 Gemfile.lock
 *.gemfile.lock
 .idea/
+.vagrant/
+Vagrantfile
+coverage/
