@@ -5,6 +5,8 @@ AllCops:
   Exclude:
     - 'vendor/**/*'
     - 'node_modules/**/*'
+    - 'Vagrantfile'
+  TargetRubyVersion: 3.0
 
 Style/FrozenStringLiteralComment:
   Enabled: false
