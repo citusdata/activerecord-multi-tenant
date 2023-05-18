@@ -3,6 +3,26 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
+# Codecov is enabled when CI is set to true
+if ENV['CI'] == 'true'
+  puts 'Enabling Simplecov to upload code coverage results to codecov.io'
+  require 'simplecov'
+  SimpleCov.start 'rails' do
+    add_filter '/test/' # Exclude test directory from coverage
+    add_filter '/spec/' # Exclude spec directory from coverage
+    add_filter '/config/' # Exclude config directory from coverage
+
+    # Add any additional filters or exclusions if needed
+    # add_filter '/other_directory/'
+
+    add_group 'Lib', '/lib' # Include the lib directory for coverage
+    puts "Tracked files: #{SimpleCov.tracked_files}"
+  end
+
+  require 'simplecov-cobertura'
+  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+end
+
 require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'
@@ -12,15 +32,6 @@ require 'activerecord_multi_tenant'
 require 'bundler'
 Bundler.require(:default, :development)
 require_relative './support/format_sql'
-
-# Codecov is enabled when CI is set to true
-if ENV['CI'] == 'true'
-  puts 'Enabling simplecov to upload code coverage results to codecov.io'
-  require 'simplecov'
-  SimpleCov.start
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
-end
 
 dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
