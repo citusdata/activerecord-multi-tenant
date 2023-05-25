@@ -3,12 +3,12 @@
 Getting Started
 ===============
 
-This section will guide you through the process of installing and setting up ``activerecord-multitenant`` in your Rails application.
+This section will guide you through the process of installing and setting up ``activerecord-multi-tenant`` in your Rails application.
 
 Installation
 ------------
 
-To install ``activerecord-multitenant``, add the following line to your application's Gemfile:
+To install ``activerecord-multi-tenant``, add the following line to your application's Gemfile:
 
 .. code-block:: ruby
 
@@ -52,13 +52,9 @@ In this example, the ``PageView`` model is scoped to the ``Customer`` model, mea
 Dependencies
 ------------
 
-``activerecord-multitenant`` requires:
+``activerecord-multi-tenant`` requires:
 
 - Ruby version 3.0.0 or later
 - Rails version 6.0.0 or later
 
 Please ensure that your application meets these requirements before installing the gem.
-
----
-
-Remember, this is just a draft, and you can modify or expand it according to your project's specific needs. The code snippets and version requirements are placeholders and should be replaced with the actual code and requirements for your project.
