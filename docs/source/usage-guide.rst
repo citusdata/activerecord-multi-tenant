@@ -12,48 +12,48 @@ To use ``activerecord-multi-tenant``, you need to declare the tenant model in yo
 
 .. code-block:: ruby
 
-   class User < ActiveRecord::Base
-     multi_tenant :company
-   end
+    class PageView < ActiveRecord::Base
+      multi_tenant :customer
+      belongs_to :site
 
-In this example, the ``User`` model is scoped to the ``Company`` model. This means that each user belongs to a specific company.
+      # ...
+    end
 
-Multitenancy Concepts and Terminology
--------------------------------------
+    class Site < ActiveRecord::Base
+      multi_tenant :customer
+      has_many :page_views
 
-Multitenancy is a software architecture in which a single instance of software serves multiple tenants. A tenant is a group of users who share a common access with specific privileges to the software instance.
+      # ...
+    end
 
-In the context of ``activerecord-multi-tenant``, a tenant is typically represented by a model in your Rails application (e.g., ``Company``), and other models (e.g., ``User``) are scoped to this tenant model.
+In this example, the ``PageView`` and ``Site`` models are scoped to the ``Customer`` model. This means that each user belongs to a specific customer.
 
-Configuration Options
----------------------
 
-``activerecord-multi-tenant`` provides several configuration options to customize its behavior:
-
-- ``default_tenant``: Sets the default tenant for your application.
-- ``ignore_tenant``: Ignores the tenant scope for specific queries.
-
-Here's an example of how to use these options:
+Then wrap all code that runs queries/modifications in blocks like this:
 
 .. code-block:: ruby
 
-   ActiveRecord::Multitenant.default_tenant = Company.first
-   User.ignore_tenant do
-     # This query will ignore the tenant scope
-     @users = User.all
-   end
+    customer = Customer.find(session[:current_customer_id])
+    # ...
+    MultiTenant.with(customer) do
+      site = Site.find(params[:site_id])
+      site.update! last_accessed_at: Time.now
+      site.page_views.count
+    end
 
-Using Multitenancy with ActiveRecord Models
--------------------------------------------
-
-When you've declared a tenant model using the ``multitenant`` method, you can scope your queries to the current tenant:
+Alternatively, if you don't want to use a block, you can set the current tenant explicitly:
 
 .. code-block:: ruby
 
-   # Set the current tenant
-   ActiveRecord::Multitenant.current_tenant = Company.first
+    customer = Customer.find(session[:current_customer_id])
+    MultiTenant.current_tenant = customer
 
-   # This query will be scoped to the current tenant
-   @users = User.all
 
-Remember to always set the current tenant before executing queries in a multitenant context.
+Multi-tenancy Concepts and Terminology
+--------------------------------------
+
+Multi-tenancy is a software architecture in which a single instance of software serves multiple tenants. A tenant is a group of users who share a common access with specific privileges to the software instance.
+
+In the context of ``activerecord-multi-tenant``, a tenant is typically represented by a model in your Rails application (e.g., ``Customer``), and other models (e.g., ``PageView``) are scoped to this tenant model.
+
+

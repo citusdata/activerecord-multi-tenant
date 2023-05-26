@@ -1,7 +1,3 @@
-Sure, here's the "Contributing" part of the documentation in reStructuredText (rst) format:
-
----
-
 .. _contributing:
 
 Contributing
@@ -12,7 +8,7 @@ We welcome contributions to ``activerecord-multi-tenant``! This section provides
 Overview of the Development Process
 -----------------------------------
 
-``activerecord-multi-tenant`` is developed using a standard fork and pull request model. The `activerecord-multi-tenant GitHub repository <https://github.com/your-github-account/activerecord-multi-tenant>`_ is the starting point for code contributions.
+``activerecord-multi-tenant`` is developed using a standard fork and pull request model. The `activerecord-multi-tenant GitHub repository <https://github.com/citusdata/activerecord-multi-tenant>`_ is the starting point for code contributions.
 
 Guidelines for Contributing
 ---------------------------
@@ -23,7 +19,7 @@ Guidelines for Contributing
 
    .. code-block:: bash
 
-      $ git clone https://github.com/your-github-account/activerecord-multi-tenant.git
+      $ git clone https://github.com/citusdata/activerecord-multi-tenant.git
       $ cd activerecord-multi-tenant
       $ git remote add upstream https://github.com/your-github-account/activerecord-multi-tenant.git
 
@@ -62,4 +58,4 @@ To set up a development environment for ``activerecord-multi-tenant``, follow th
 
    .. code-block:: bash
 
-      $ bundle exec rspec
+      $ bundle exec rake spec

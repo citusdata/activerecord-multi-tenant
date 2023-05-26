@@ -3,7 +3,7 @@
 Introduction
 ============
 
-Welcome to the official documentation for ``activerecord-multi-tenant``, a powerful and flexible gem for adding multitenancy support to your Rails applications using ActiveRecord.
+Welcome to the official documentation for ``activerecord-multi-tenant``, a powerful and flexible gem for adding multi-tenancy support to your Rails applications using ActiveRecord.
 
 Overview
 --------
@@ -13,7 +13,7 @@ Overview
 Purpose
 -------
 
-The purpose of this documentation is to provide a comprehensive guide to using ``activerecord-multi-tenant``. Whether you're new to multitenancy or an experienced developer looking to integrate ``activerecord-multi-tenant`` into your existing Rails application, this documentation aims to provide the information you need.
+The purpose of this documentation is to provide a comprehensive guide to using ``activerecord-multi-tenant``. Whether you're new to multi-tenancy or an experienced developer looking to integrate ``activerecord-multi-tenant`` into your existing Rails application, this documentation aims to provide the information you need.
 
 Benefits of Using ``activerecord-multi-tenant``
 ------------------------------------------------
@@ -28,6 +28,6 @@ With ``activerecord-multi-tenant``, you can:
 Target Audience
 ---------------
 
-This documentation is intended for developers who are familiar with Ruby on Rails and ActiveRecord. Knowledge of multitenancy concepts is beneficial but not required, as we will cover these topics in the following sections.
+This documentation is intended for developers who are familiar with Ruby on Rails and ActiveRecord. Knowledge of multi-tenancy concepts is beneficial but not required, as we will cover these topics in the following sections.
 
 We hope you find this documentation helpful as you explore the capabilities of ``activerecord-multi-tenant``. Let's get started!

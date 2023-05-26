@@ -23,13 +23,13 @@ describe MultiTenant, 'Association methods' do
 
     it 'check has_many_belongs_to' do
       MultiTenant.with(account1) do
-        expect(manager1.tasks.first.account_id).to eq(task1.id) # has_many
+        expect(manager1.tasks.first.account_id).to eq(task1.account_id) # has_many
       end
     end
 
     it 'check has_many_belongs_to without tenant in the intermediate table' do
       MultiTenant.with(account1) do
-        expect(manager1.tasks.first.account_id).to eq(task1.id) # has_many
+        expect(manager1.tasks.first.account_id).to eq(task1.account_id) # has_many
       end
     end
 

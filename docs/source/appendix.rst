@@ -8,8 +8,10 @@ This section provides additional resources and acknowledgments related to ``acti
 Glossary of Terms and Abbreviations
 -----------------------------------
 
-- **Multitenancy:** A software architecture in which a single instance of software serves multiple tenants.
+- **Multi-tenancy:** A software architecture in which a single instance of software serves multiple tenants.
 - **Tenant:** A group of users who share a common access with specific privileges to the software instance.
+- **Tenant ID:** A unique identifier for a tenant.
+
 
 References to External Resources
 --------------------------------
@@ -21,3 +23,4 @@ Acknowledgments and Credits
 ---------------------------
 
 We would like to thank the Ruby on Rails community for their contributions to open source, which have made projects like ``activerecord-multi-tenant`` possible.
+This gem was initially based on `acts_as_tenant <https://github.com/ErwinM/acts_as_tenant>`, and still shares some code. We thank the authors for their efforts.

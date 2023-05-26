@@ -11,7 +11,7 @@ Welcome to ActiveRecord Multi-tenant's documentation!
 |Latest Documentation Status| |Build Status| |Coverage Status| |RubyGems Version|
 
 .. |Latest Documentation Status| image:: https://readthedocs.org/projects/django-multitenant/badge/?version=latest
-   :target: https://django-multitenant.readthedocs.io/en/latest/?badge=latest
+   :target: https://activerecord-multi-tenant.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. |Build Status| image:: https://github.com/citusdata/activerecord-multi-tenant/actions/workflows/active-record-multi-tenant-tests.yml/badge.svg
@@ -28,7 +28,7 @@ Welcome to ActiveRecord Multi-tenant's documentation!
 activerecord-multi-tenant Documentation
 ========================================
 
-Welcome to the official documentation for ``activerecord-multi-tenant``, a powerful and flexible gem for adding multitenancy support to your Rails applications using ActiveRecord.
+Welcome to the official documentation for ``activerecord-multi-tenant``, a powerful and flexible gem for adding multi-tenancy support to your Rails applications using ActiveRecord.
 
 .. toctree::
    :maxdepth: 2
@@ -44,7 +44,8 @@ Welcome to the official documentation for ``activerecord-multi-tenant``, a power
    changelog
    community-and-support
    appendix
+   license
 
 This documentation provides a comprehensive guide to using ``activerecord-multi-tenant``, including installation and configuration instructions, usage examples, API reference, troubleshooting tips, and more.
 
-Whether you're new to multitenancy or an experienced developer looking to integrate ``activerecord-multi-tenant`` into your existing Rails application, this documentation aims to provide the information you need.
+Whether you're new to multi-tenancy or an experienced developer looking to integrate ``activerecord-multi-tenant`` into your existing Rails application, this documentation aims to provide the information you need.

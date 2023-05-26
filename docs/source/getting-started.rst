@@ -26,29 +26,6 @@ Or install it yourself as:
 
    $ gem install activerecord-multi-tenant
 
-Configuration
--------------
-
-After installing the gem, you need to configure it to work with your application. Here's a basic example of how to set up a multitenant model:
-
-.. code-block:: ruby
-
-    class PageView < ActiveRecord::Base
-      multi_tenant :customer
-      belongs_to :site
-
-      # ...
-    end
-
-    class Site < ActiveRecord::Base
-      multi_tenant :customer
-      has_many :page_views
-
-      # ...
-    end
-
-In this example, the ``PageView`` model is scoped to the ``Customer`` model, meaning that each page view belongs to a specific customer.
-
 Dependencies
 ------------
 
