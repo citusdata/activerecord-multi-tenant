@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Module: MultiTenant
+  
+    &mdash; Documentation by YARD 0.9.34
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "MultiTenant";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (M)</a> &raquo;
+    
+    
+    <span class="title">MultiTenant</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Module: MultiTenant
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/activerecord-multi-tenant/fast_truncate.rb<span class="defines">,<br />
+  lib/activerecord-multi-tenant/version.rb,<br /> lib/activerecord-multi-tenant/migrations.rb,<br /> lib/activerecord-multi-tenant/multi_tenant.rb,<br /> lib/activerecord-multi-tenant/query_monitor.rb,<br /> lib/activerecord-multi-tenant/query_rewriter.rb,<br /> lib/activerecord-multi-tenant/copy_from_client.rb,<br /> lib/activerecord-multi-tenant/model_extensions.rb,<br /> lib/activerecord-multi-tenant/controller_extensions.rb,<br /> lib/activerecord-multi-tenant/arel_visitors_depth_first.rb</span>
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    
+<p>Extension to the controller to allow setting the current tenant set_current_tenant and current_tenant methods are introduced to set and get the current tenant in the controllers that uses the MultiTenant module.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="MultiTenant/ControllerExtensions.html" title="MultiTenant::ControllerExtensions (module)">ControllerExtensions</a></span>, <span class='object_link'><a href="MultiTenant/CopyFromClient.html" title="MultiTenant::CopyFromClient (module)">CopyFromClient</a></span>, <span class='object_link'><a href="MultiTenant/DatabaseStatements.html" title="MultiTenant::DatabaseStatements (module)">DatabaseStatements</a></span>, <span class='object_link'><a href="MultiTenant/FastTruncate.html" title="MultiTenant::FastTruncate (module)">FastTruncate</a></span>, <span class='object_link'><a href="MultiTenant/MigrationExtensions.html" title="MultiTenant::MigrationExtensions (module)">MigrationExtensions</a></span>, <span class='object_link'><a href="MultiTenant/ModelExtensionsClassMethods.html" title="MultiTenant::ModelExtensionsClassMethods (module)">ModelExtensionsClassMethods</a></span>, <span class='object_link'><a href="MultiTenant/TenantValueVisitor.html" title="MultiTenant::TenantValueVisitor (module)">TenantValueVisitor</a></span>
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="MultiTenant/ArelTenantVisitor.html" title="MultiTenant::ArelTenantVisitor (class)">ArelTenantVisitor</a></span>, <span class='object_link'><a href="MultiTenant/ArelVisitorsDepthFirst.html" title="MultiTenant::ArelVisitorsDepthFirst (class)">ArelVisitorsDepthFirst</a></span>, <span class='object_link'><a href="MultiTenant/BaseTenantEnforcementClause.html" title="MultiTenant::BaseTenantEnforcementClause (class)">BaseTenantEnforcementClause</a></span>, <span class='object_link'><a href="MultiTenant/Context.html" title="MultiTenant::Context (class)">Context</a></span>, <span class='object_link'><a href="MultiTenant/CopyFromClientHelper.html" title="MultiTenant::CopyFromClientHelper (class)">CopyFromClientHelper</a></span>, <span class='object_link'><a href="MultiTenant/Current.html" title="MultiTenant::Current (class)">Current</a></span>, <span class='object_link'><a href="MultiTenant/MissingTenantError.html" title="MultiTenant::MissingTenantError (class)">MissingTenantError</a></span>, <span class='object_link'><a href="MultiTenant/QueryMonitor.html" title="MultiTenant::QueryMonitor (class)">QueryMonitor</a></span>, <span class='object_link'><a href="MultiTenant/Table.html" title="MultiTenant::Table (class)">Table</a></span>, <span class='object_link'><a href="MultiTenant/TenantEnforcementClause.html" title="MultiTenant::TenantEnforcementClause (class)">TenantEnforcementClause</a></span>, <span class='object_link'><a href="MultiTenant/TenantIsImmutable.html" title="MultiTenant::TenantIsImmutable (class)">TenantIsImmutable</a></span>, <span class='object_link'><a href="MultiTenant/TenantJoinEnforcementClause.html" title="MultiTenant::TenantJoinEnforcementClause (class)">TenantJoinEnforcementClause</a></span>
+    
+  
+</p>
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="VERSION-constant" class="">VERSION =
+          
+        </dt>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>2.2.0</span><span class='tstring_end'>&#39;</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="enable_query_monitor-classvariable" class="">@@enable_query_monitor =
+          <div class="docstring">
+  <div class="discussion">
+    
+<p>rubocop:disable Style/ClassVars Option to enable query monitor</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='kw'>false</span></pre></dd>
+      
+    </dl>
+  
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current_tenant-class_method" title="current_tenant (class method)">.<strong>current_tenant</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current_tenant=-class_method" title="current_tenant= (class method)">.<strong>current_tenant=</strong>(tenant)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current_tenant_class-class_method" title="current_tenant_class (class method)">.<strong>current_tenant_class</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current_tenant_id-class_method" title="current_tenant_id (class method)">.<strong>current_tenant_id</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#current_tenant_is_id%3F-class_method" title="current_tenant_is_id? (class method)">.<strong>current_tenant_is_id?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#default_tenant_class-class_method" title="default_tenant_class (class method)">.<strong>default_tenant_class</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#default_tenant_class=-class_method" title="default_tenant_class= (class method)">.<strong>default_tenant_class=</strong>(tenant_class)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>rubocop:disable Style/ClassVars In some cases we only have an ID - if defined we’ll return the default tenant class in such cases.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#enable_query_monitor-class_method" title="enable_query_monitor (class method)">.<strong>enable_query_monitor</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#enable_write_only_mode-class_method" title="enable_write_only_mode (class method)">.<strong>enable_write_only_mode</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Write-only Mode - this only adds the tenant_id to new records, but doesn’t require its presence for SELECTs/UPDATEs/DELETEs.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#load_current_tenant!-class_method" title="load_current_tenant! (class method)">.<strong>load_current_tenant!</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#multi_tenant_model_for_arel-class_method" title="multi_tenant_model_for_arel (class method)">.<strong>multi_tenant_model_for_arel</strong>(arel)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#multi_tenant_model_for_table-class_method" title="multi_tenant_model_for_table (class method)">.<strong>multi_tenant_model_for_table</strong>(table_name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#partition_key-class_method" title="partition_key (class method)">.<strong>partition_key</strong>(tenant_name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#query_monitor_enabled%3F-class_method" title="query_monitor_enabled? (class method)">.<strong>query_monitor_enabled?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#register_multi_tenant_model-class_method" title="register_multi_tenant_model (class method)">.<strong>register_multi_tenant_model</strong>(model_klass)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Registry that maps table names to models (used by the query rewriter).</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#tenant_klass_defined%3F-class_method" title="tenant_klass_defined? (class method)">.<strong>tenant_klass_defined?</strong>(tenant_name)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#with-class_method" title="with (class method)">.<strong>with</strong>(tenant, &amp;block)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#with_write_only_mode_enabled%3F-class_method" title="with_write_only_mode_enabled? (class method)">.<strong>with_write_only_mode_enabled?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#without-class_method" title="without (class method)">.<strong>without</strong>(&amp;block)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#wrap_methods-class_method" title="wrap_methods (class method)">.<strong>wrap_methods</strong>(klass, owner, *method_names)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="current_tenant-class_method">
+  
+    .<strong>current_tenant</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+71
+72
+73</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 71</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span>
+  <span class='const'><span class='object_link'><a href="MultiTenant/Current.html" title="MultiTenant::Current (class)">Current</a></span></span><span class='period'>.</span><span class='id identifier rubyid_tenant'>tenant</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="current_tenant=-class_method">
+  
+    .<strong>current_tenant=</strong>(tenant)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+67
+68
+69</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 67</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant='>current_tenant=</span><span class='lparen'>(</span><span class='id identifier rubyid_tenant'>tenant</span><span class='rparen'>)</span>
+  <span class='const'><span class='object_link'><a href="MultiTenant/Current.html" title="MultiTenant::Current (class)">Current</a></span></span><span class='period'>.</span><span class='id identifier rubyid_tenant'>tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_tenant'>tenant</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="current_tenant_class-class_method">
+  
+    .<strong>current_tenant_class</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+83
+84
+85
+86
+87
+88
+89</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 83</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant_class'>current_tenant_class</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_current_tenant_is_id?'>current_tenant_is_id?</span>
+    <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_default_tenant_class'><span class='object_link'><a href="#default_tenant_class-class_method" title="MultiTenant.default_tenant_class (method)">default_tenant_class</a></span></span> <span class='op'>||</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Only have tenant id, and no default tenant class set</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span>
+    <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'><span class='object_link'><a href="#current_tenant-class_method" title="MultiTenant.current_tenant (method)">current_tenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="current_tenant_id-class_method">
+  
+    .<strong>current_tenant_id</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+75
+76
+77</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 75</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant_id'>current_tenant_id</span>
+  <span class='id identifier rubyid_current_tenant_is_id?'>current_tenant_is_id?</span> <span class='op'>?</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>:</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span><span class='period'>.</span><span class='id identifier rubyid_try'>try</span><span class='lparen'>(</span><span class='symbol'>:id</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="current_tenant_is_id?-class_method">
+  
+    .<strong>current_tenant_is_id?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+79
+80
+81</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 79</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant_is_id?'>current_tenant_is_id?</span>
+  <span class='id identifier rubyid_current_tenant'>current_tenant</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>String</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Integer</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="default_tenant_class-class_method">
+  
+    .<strong>default_tenant_class</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+22
+23
+24</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 22</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_default_tenant_class'>default_tenant_class</span>
+  <span class='cvar'>@@default_tenant_class</span> <span class='op'>||=</span> <span class='kw'>nil</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="default_tenant_class=-class_method">
+  
+    .<strong>default_tenant_class=</strong>(tenant_class)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>rubocop:disable Style/ClassVars In some cases we only have an ID - if defined we’ll return the default tenant class in such cases</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+18
+19
+20</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 18</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_default_tenant_class='>default_tenant_class=</span><span class='lparen'>(</span><span class='id identifier rubyid_tenant_class'>tenant_class</span><span class='rparen'>)</span>
+  <span class='cvar'>@@default_tenant_class</span> <span class='op'>=</span> <span class='id identifier rubyid_tenant_class'>tenant_class</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="enable_query_monitor-class_method">
+  
+    .<strong>enable_query_monitor</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+10
+11
+12</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/query_monitor.rb', line 10</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_enable_query_monitor'>enable_query_monitor</span>
+  <span class='cvar'>@@enable_query_monitor</span> <span class='op'>=</span> <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="enable_write_only_mode-class_method">
+  
+    .<strong>enable_write_only_mode</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Write-only Mode - this only adds the tenant_id to new records, but doesn’t require its presence for SELECTs/UPDATEs/DELETEs</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+28
+29
+30</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 28</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_enable_write_only_mode'>enable_write_only_mode</span>
+  <span class='cvar'>@@enable_write_only_mode</span> <span class='op'>=</span> <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="load_current_tenant!-class_method">
+  
+    .<strong>load_current_tenant!</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+91
+92
+93
+94
+95
+96
+97</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 91</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_load_current_tenant!'>load_current_tenant!</span>
+  <span class='kw'>return</span> <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'><span class='object_link'><a href="#current_tenant-class_method" title="MultiTenant.current_tenant (method)">current_tenant</a></span></span> <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'><span class='object_link'><a href="#current_tenant-class_method" title="MultiTenant.current_tenant (method)">current_tenant</a></span></span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_current_tenant_is_id?'>current_tenant_is_id?</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>MultiTenant.current_tenant must be set to load</span><span class='tstring_end'>&#39;</span></span> <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'><span class='object_link'><a href="#current_tenant-class_method" title="MultiTenant.current_tenant (method)">current_tenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='id identifier rubyid_klass'>klass</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_default_tenant_class'><span class='object_link'><a href="#default_tenant_class-class_method" title="MultiTenant.default_tenant_class (method)">default_tenant_class</a></span></span> <span class='op'>||</span> <span class='id identifier rubyid_raise'>raise</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Only have tenant id, and no default tenant class set</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_klass'>klass</span><span class='period'>.</span><span class='id identifier rubyid_find'>find</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_current_tenant_id'><span class='object_link'><a href="#current_tenant_id-class_method" title="MultiTenant.current_tenant_id (method)">current_tenant_id</a></span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="multi_tenant_model_for_arel-class_method">
+  
+    .<strong>multi_tenant_model_for_arel</strong>(arel)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+57
+58
+59
+60
+61
+62
+63
+64
+65</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 57</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_multi_tenant_model_for_arel'>multi_tenant_model_for_arel</span><span class='lparen'>(</span><span class='id identifier rubyid_arel'>arel</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='kw'>nil</span> <span class='kw'>unless</span> <span class='id identifier rubyid_arel'>arel</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:ast</span><span class='rparen'>)</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_arel'>arel</span><span class='period'>.</span><span class='id identifier rubyid_ast'>ast</span><span class='period'>.</span><span class='id identifier rubyid_relation'>relation</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span> <span class='const'>Arel</span><span class='op'>::</span><span class='const'>Nodes</span><span class='op'>::</span><span class='const'>JoinSource</span>
+    <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_multi_tenant_model_for_table'><span class='object_link'><a href="#multi_tenant_model_for_table-class_method" title="MultiTenant.multi_tenant_model_for_table (method)">multi_tenant_model_for_table</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_arel'>arel</span><span class='period'>.</span><span class='id identifier rubyid_ast'>ast</span><span class='period'>.</span><span class='id identifier rubyid_relation'>relation</span><span class='period'>.</span><span class='id identifier rubyid_left'>left</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span><span class='rparen'>)</span>
+  <span class='kw'>else</span>
+    <span class='const'><span class='object_link'><a href="" title="MultiTenant (module)">MultiTenant</a></span></span><span class='period'>.</span><span class='id identifier rubyid_multi_tenant_model_for_table'><span class='object_link'><a href="#multi_tenant_model_for_table-class_method" title="MultiTenant.multi_tenant_model_for_table (method)">multi_tenant_model_for_table</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_arel'>arel</span><span class='period'>.</span><span class='id identifier rubyid_ast'>ast</span><span class='period'>.</span><span class='id identifier rubyid_relation'>relation</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="multi_tenant_model_for_table-class_method">
+  
+    .<strong>multi_tenant_model_for_table</strong>(table_name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 44</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_multi_tenant_model_for_table'>multi_tenant_model_for_table</span><span class='lparen'>(</span><span class='id identifier rubyid_table_name'>table_name</span><span class='rparen'>)</span>
+  <span class='cvar'>@@multi_tenant_models</span> <span class='op'>||=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+
+  <span class='kw'>unless</span> <span class='kw'>defined?</span><span class='lparen'>(</span><span class='cvar'>@@multi_tenant_model_table_names</span><span class='rparen'>)</span>
+    <span class='cvar'>@@multi_tenant_model_table_names</span> <span class='op'>=</span> <span class='cvar'>@@multi_tenant_models</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_model'>model</span><span class='op'>|</span>
+      <span class='lbracket'>[</span><span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span>
+    <span class='kw'>end</span><span class='period'>.</span><span class='id identifier rubyid_compact'>compact</span><span class='period'>.</span><span class='id identifier rubyid_to_h'>to_h</span>
+  <span class='kw'>end</span>
+
+  <span class='cvar'>@@multi_tenant_model_table_names</span><span class='lbracket'>[</span><span class='id identifier rubyid_table_name'>table_name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rbracket'>]</span>
+  <span class='comment'># rubocop:enable Style/ClassVars
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="partition_key-class_method">
+  
+    .<strong>partition_key</strong>(tenant_name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+12
+13
+14</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 12</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_partition_key'>partition_key</span><span class='lparen'>(</span><span class='id identifier rubyid_tenant_name'>tenant_name</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tenant_name'>tenant_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>_id</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="query_monitor_enabled?-class_method">
+  
+    .<strong>query_monitor_enabled?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+14
+15
+16</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/query_monitor.rb', line 14</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_query_monitor_enabled?'>query_monitor_enabled?</span>
+  <span class='cvar'>@@enable_query_monitor</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="register_multi_tenant_model-class_method">
+  
+    .<strong>register_multi_tenant_model</strong>(model_klass)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Registry that maps table names to models (used by the query rewriter)</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+37
+38
+39
+40
+41
+42</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 37</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_register_multi_tenant_model'>register_multi_tenant_model</span><span class='lparen'>(</span><span class='id identifier rubyid_model_klass'>model_klass</span><span class='rparen'>)</span>
+  <span class='cvar'>@@multi_tenant_models</span> <span class='op'>||=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+  <span class='cvar'>@@multi_tenant_models</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_model_klass'>model_klass</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_remove_class_variable'>remove_class_variable</span><span class='lparen'>(</span><span class='symbol'>:@@multi_tenant_model_table_names</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='kw'>defined?</span><span class='lparen'>(</span><span class='cvar'>@@multi_tenant_model_table_names</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="tenant_klass_defined?-class_method">
+  
+    .<strong>tenant_klass_defined?</strong>(tenant_name)  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+8
+9
+10</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 8</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_tenant_klass_defined?'>tenant_klass_defined?</span><span class='lparen'>(</span><span class='id identifier rubyid_tenant_name'>tenant_name</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='op'>!</span><span class='id identifier rubyid_tenant_name'>tenant_name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_classify'>classify</span><span class='period'>.</span><span class='id identifier rubyid_safe_constantize'>safe_constantize</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="with-class_method">
+  
+    .<strong>with</strong>(tenant, &amp;block)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 99</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_with'>with</span><span class='lparen'>(</span><span class='id identifier rubyid_tenant'>tenant</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_block'>block</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span> <span class='kw'>if</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>==</span> <span class='id identifier rubyid_tenant'>tenant</span>
+
+  <span class='id identifier rubyid_old_tenant'>old_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span>
+  <span class='kw'>begin</span>
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_tenant'>tenant</span>
+    <span class='id identifier rubyid_block'>block</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span>
+  <span class='kw'>ensure</span>
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_old_tenant'>old_tenant</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="with_write_only_mode_enabled?-class_method">
+  
+    .<strong>with_write_only_mode_enabled?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+32
+33
+34</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 32</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_with_write_only_mode_enabled?'>with_write_only_mode_enabled?</span>
+  <span class='cvar'>@@enable_write_only_mode</span> <span class='op'>||=</span> <span class='kw'>false</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="without-class_method">
+  
+    .<strong>without</strong>(&amp;block)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 111</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_without'>without</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_block'>block</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span> <span class='kw'>if</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='id identifier rubyid_old_tenant'>old_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_current_tenant'>current_tenant</span>
+  <span class='kw'>begin</span>
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>=</span> <span class='kw'>nil</span>
+    <span class='id identifier rubyid_block'>block</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span>
+  <span class='kw'>ensure</span>
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_current_tenant'>current_tenant</span> <span class='op'>=</span> <span class='id identifier rubyid_old_tenant'>old_tenant</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="wrap_methods-class_method">
+  
+    .<strong>wrap_methods</strong>(klass, owner, *method_names)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/activerecord-multi-tenant/multi_tenant.rb', line 129</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_wrap_methods'>wrap_methods</span><span class='lparen'>(</span><span class='id identifier rubyid_klass'>klass</span><span class='comma'>,</span> <span class='id identifier rubyid_owner'>owner</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_method_names'>method_names</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_method_names'>method_names</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_method_name'>method_name</span><span class='op'>|</span>
+    <span class='id identifier rubyid_original_method_name'>original_method_name</span> <span class='op'>=</span> <span class='symbol'>:&quot;_mt_original_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_method_name'>method_name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+    <span class='id identifier rubyid_klass'>klass</span><span class='period'>.</span><span class='id identifier rubyid_class_eval'>class_eval</span> <span class='heredoc_beg'>&lt;&lt;-CODE</span><span class='comma'>,</span> <span class='kw'>__FILE__</span><span class='comma'>,</span> <span class='kw'>__LINE__</span> <span class='op'>+</span> <span class='int'>1</span>
+<span class='tstring_content'>      alias_method :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_original_method_name'>original_method_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>, :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_method_name'>method_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>
+      def </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_method_name'>method_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>(*args, &amp;block)
+        if MultiTenant.multi_tenant_model_for_table(</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.class.table_name).present? &amp;&amp; </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.persisted? &amp;&amp; MultiTenant.current_tenant_id.nil? &amp;&amp; </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.class.respond_to?(:partition_key) &amp;&amp; </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.attributes.include?(</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.class.partition_key)
+          MultiTenant.with(</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.public_send(</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_owner'>owner</span><span class='embexpr_end'>}</span><span class='tstring_content'>.class.partition_key)) { </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_original_method_name'>original_method_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>(*args, &amp;block) }
+        else
+          </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_original_method_name'>original_method_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>(*args, &amp;block)
+        end
+      end
+</span><span class='heredoc_end'>    CODE
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Sat May 27 10:16:24 2023 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.34 (ruby-3.2.2).
+</div>
+
+    </div>
+  </body>
+</html>
