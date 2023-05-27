@@ -8,3 +8,5 @@ Gemfile.lock
 .vagrant/
 Vagrantfile
 coverage/
+docs/build/
+.yardoc/
