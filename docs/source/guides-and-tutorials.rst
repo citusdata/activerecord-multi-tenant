@@ -17,14 +17,14 @@ To set up multi-tenancy in a new Rails project, follow these steps:
    .. code-block:: ruby
 
       class User < ActiveRecord::Base
-        multitenant :company
+        multi_tenant :company
       end
 
 3. Set the current tenant before executing queries:
 
    .. code-block:: ruby
 
-      ActiveRecord::Multitenant.current_tenant = Company.first
+      ActiveRecord::MultiTenant.current_tenant = Company.first
       @users = User.all
 
 Migrating an Existing Project to Use ``activerecord-multi-tenant``
@@ -69,7 +69,7 @@ The gem will automatically scope the associations to the current tenant.:
    end
 
 Using ``has_and_belongs_to_many`` Associations
----------------------------------------------
+-----------------------------------------------
 
 When using ``has_and_belongs_to_many`` associations, you need to specify the tenant column and tenant class name to
 scope the association to the current tenant. If you set the ``tenant_enabled`` option to ``false``, the gem will
@@ -100,7 +100,7 @@ not scope the association to the current tenant.
     end
 
 Using ``activerecord-multi-tenant`` with Controllers
-----------------------------------------------------
+-----------------------------------------------------
 
 When using ``activerecord-multi-tenant`` with controllers, you need to set the current tenant in the controller
 before executing queries. You can do this by overriding the ``set_current_tenant`` method in your controller:

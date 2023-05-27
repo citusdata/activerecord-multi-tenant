@@ -14,7 +14,15 @@ help:
 
 .PHONY: help Makefile
 
+# New target that executes the bash script before calling the original target
+build-docs: pre-build   # Change 'html' to the target you want to execute
+
+pre-build:
+	# Execute your bash script here
+	bash api-reference.sh
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
+html:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
