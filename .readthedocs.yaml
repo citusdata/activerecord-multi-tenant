@@ -4,6 +4,8 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.11"
+  before_build:
+    - cp -r docs/_static/api-reference output/html/_static/api-reference
 
 # Build from the docs/ directory with Sphinx
 sphinx:
