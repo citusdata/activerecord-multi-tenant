@@ -59,3 +59,12 @@ To set up a development environment for ``activerecord-multi-tenant``, follow th
    .. code-block:: bash
 
       $ bundle exec rake spec
+
+4. Compile documentation for the project:
+
+   .. code-block:: bash
+
+      $ cd docs
+      $ make pre-build
+      $ make html
+
