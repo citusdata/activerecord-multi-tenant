@@ -1,4 +1,4 @@
-# activerecord-multi-tenant [ ![](https://img.shields.io/gem/v/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant) [ ![](https://img.shields.io/gem/dt/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant)
+# activerecord-multi-tenant [ ![](https://img.shields.io/gem/v/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant) [ ![](https://img.shields.io/gem/dt/activerecord-multi-tenant.svg)](https://rubygems.org/gems/activerecord-multi-tenant) [![Documentation Status](https://readthedocs.org/projects/activerecord-multi-tenant/badge/?version=latest)](https://activerecord-multi-tenant.readthedocs.io/en/latest/?badge=latest)
 
 Introduction Post: https://www.citusdata.com/blog/2017/01/05/easily-scale-out-multi-tenant-apps/
 
