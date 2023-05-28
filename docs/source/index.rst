@@ -10,9 +10,6 @@ Welcome to ActiveRecord Multi-tenant's documentation!
 
 |Latest Documentation Status| |Build Status| |Coverage Status| |RubyGems Version|
 
-.. |Latest Documentation Status| image:: https://readthedocs.org/projects/django-multitenant/badge/?version=latest
-   :target: https://activerecord-multi-tenant.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
 
 .. |Build Status| image:: https://github.com/citusdata/activerecord-multi-tenant/actions/workflows/active-record-multi-tenant-tests.yml/badge.svg
    :target: https://github.com/citusdata/activerecord-multi-tenant/actions/workflows/active-record-multi-tenant-tests.yml
@@ -22,8 +19,17 @@ Welcome to ActiveRecord Multi-tenant's documentation!
    :target: https://codecov.io/gh/citusdata/activerecord-multi-tenant
    :alt: Coverage Status
 
-.. |RubyGems Version| image:: https://badge.fury.io/rb/activerecord-multi-tenant.svg
-   :target: https://badge.fury.io/rb/activerecord-multi-tenant
+.. |RubyGems Version| image:: https://img.shields.io/gem/v/activerecord-multi-tenant.svg
+   :target: https://rubygems.org/gems/activerecord-multi-tenant
+
+.. |Gem Downloads| image:: https://img.shields.io/gem/dt/activerecord-multi-tenant.svg
+    :target: https://rubygems.org/gems/activerecord-multi-tenant
+    :alt: Gem Downloads
+
+.. |Latest Documentation Status| image:: https://readthedocs.org/projects/django-multitenant/badge/?version=latest
+   :target: https://activerecord-multi-tenant.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 
 activerecord-multi-tenant Documentation
 ========================================
