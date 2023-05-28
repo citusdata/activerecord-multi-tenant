@@ -6,10 +6,7 @@
 Welcome to ActiveRecord Multi-tenant's documentation!
 ======================================================
 
-[TODO: Change documentation link to actual documentation link]
-
-|Latest Documentation Status| |Build Status| |Coverage Status| |RubyGems Version|
-
+|Build Status| |Coverage Status| |RubyGems Version| |Gem Downloads| |Latest Documentation Status|
 
 .. |Build Status| image:: https://github.com/citusdata/activerecord-multi-tenant/actions/workflows/active-record-multi-tenant-tests.yml/badge.svg
    :target: https://github.com/citusdata/activerecord-multi-tenant/actions/workflows/active-record-multi-tenant-tests.yml
