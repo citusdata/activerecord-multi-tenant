@@ -131,6 +131,13 @@ describe MultiTenant do
     it { expect(@posts).to eq([@post1]) }
   end
 
+  describe 'inspect method filters senstive column values' do
+    it 'filters senstive value' do
+      account = Account.new(name: 'foo', password: 'baz')
+      expect(account.inspect).to eq '#<Account id: nil, name: nil, subdomain: nil, domain: nil, password: [FILTERED]>'
+    end
+  end
+
   # Scoping models
   describe 'Project.all should be scoped to the current tenant if set' do
     before do

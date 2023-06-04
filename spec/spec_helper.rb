@@ -27,7 +27,20 @@ require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'
 
+module MultiTenantTest
+  class Application < Rails::Application; end
+end
+
+# NOTE: Specifies columns which shouldn't be exposed while calling #inspect.
+ActiveSupport.on_load(:active_record) do
+  self.filter_attributes += MultiTenantTest::Application.config.filter_parameters
+end
+
 require 'activerecord_multi_tenant'
+
+MultiTenantTest::Application.config.secret_token = 'x' * 40
+MultiTenantTest::Application.config.secret_key_base = 'y' * 40
+MultiTenantTest::Application.config.filter_parameters = [:password]
 
 require 'bundler'
 Bundler.require(:default, :development)
@@ -54,13 +67,6 @@ RSpec.configure do |config|
     MultiTenant::FastTruncate.run
   end
 end
-
-module MultiTenantTest
-  class Application < Rails::Application; end
-end
-
-MultiTenantTest::Application.config.secret_token = 'x' * 40
-MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 
 # rubocop:disable Lint/UnusedMethodArgument
 # changing the name of the parameter breaks tests
