@@ -38,8 +38,6 @@ end
 
 require 'activerecord_multi_tenant'
 
-MultiTenantTest::Application.config.secret_token = 'x' * 40
-MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 MultiTenantTest::Application.config.filter_parameters = [:password]
 
 require 'bundler'
