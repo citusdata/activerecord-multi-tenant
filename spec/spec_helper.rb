@@ -31,13 +31,18 @@ module MultiTenantTest
   class Application < Rails::Application; end
 end
 
-# NOTE: Specifies columns which shouldn't be exposed while calling #inspect.
+# Specifies columns which shouldn't be exposed while calling #inspect.
 ActiveSupport.on_load(:active_record) do
   self.filter_attributes += MultiTenantTest::Application.config.filter_parameters
 end
 
 require 'activerecord_multi_tenant'
 
+# It's necessary for testing the filtering of senstive column values in ActiveRecord.
+# Refer to "describe 'inspect method filters senstive column values'"
+#
+# To verify that ActiveSupport.on_load(:active_record) is not being unnecessarily invoked,
+# this line should be placed after "require 'activerecord_multi_tenant'" and before ActiveRecord::Base is called.
 MultiTenantTest::Application.config.filter_parameters = [:password]
 
 require 'bundler'
