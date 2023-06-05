@@ -370,7 +370,6 @@ module ActiveRecord
   end
 end
 
-require 'active_record/base'
 module MultiTenantFindBy
   def cached_find_by_statement(key, &block)
     return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
@@ -380,4 +379,6 @@ module MultiTenantFindBy
   end
 end
 
-ActiveRecord::Base.singleton_class.prepend(MultiTenantFindBy)
+ActiveSupport.on_load(:active_record) do |base|
+  base.singleton_class.prepend(MultiTenantFindBy)
+end

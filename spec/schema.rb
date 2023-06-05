@@ -9,6 +9,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
     t.column :subdomain, :string
     t.column :domain, :string
+    t.column :password, :string
   end
 
   create_table :projects, force: true, partition_key: :account_id do |t|
