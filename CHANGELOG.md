@@ -1,4 +1,10 @@
 # Changelog
+## 2.3.0      2023-06-05
+* Adds has_and_belongs_to_many feature with tenant (#193)
+* Removes eol ruby versions 
+* Adds documentation in ReadTheDocs platform (#196)
+* Organizes badges in documentation and README.md (#197) 
+* Wrap ActiveRecord::Base with ActiveSupport.on_load (#199)
 
 ## 2.2.0      2022-12-06
 * Handle changing tenant from `nil` to a value [#173](https://github.com/citusdata/activerecord-multi-tenant/pull/173)

@@ -18,6 +18,7 @@ if ENV['CI'] == 'true'
     add_group 'Lib', '/lib' # Include the lib directory for coverage
     puts "Tracked files: #{SimpleCov.tracked_files}"
   end
+  SimpleCov.minimum_coverage 80
 
   require 'simplecov-cobertura'
   SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
