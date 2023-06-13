@@ -7,10 +7,10 @@ module MultiTenant
 
   def self.tenant_klass_defined?(tenant_name, options = {})
     class_name = if options[:class_name].present?
-      options[:class_name]
-    else
-      tenant_name.to_s.classify
-    end
+                   options[:class_name]
+                 else
+                   tenant_name.to_s.classify
+                 end
     !!class_name.safe_constantize
   end
 
