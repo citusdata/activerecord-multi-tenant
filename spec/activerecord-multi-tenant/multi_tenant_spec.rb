@@ -64,4 +64,24 @@ RSpec.describe MultiTenant do
       end
     end
   end
+
+  describe '.tenant_klass_defined?' do
+    let(:sample_tenant_class) { Struct.new('SampleTenant') }
+
+    context 'without options' do
+      tenant_name = :sample_tenant
+      expect(MultiTenant.tenant_klass_defined?(tenant_name)).to eq(true)
+
+      invalid_tenant_name = :tenant
+      expect(MultiTenant.tenant_klass_defined?(invalid_tenant_name)).to eq(false)
+    end
+
+    context 'with options' do
+      tenant_name = :tenant
+      options = {
+        class_name: 'SampleTenant'
+      }
+      expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+    end
+  end
 end
