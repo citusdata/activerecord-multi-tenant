@@ -66,22 +66,30 @@ RSpec.describe MultiTenant do
   end
 
   describe '.tenant_klass_defined?' do
-    let(:sample_tenant_class) { Struct.new('SampleTenant') }
+    before(:all) do
+      class SampleTenant; end
+    end
 
     context 'without options' do
-      tenant_name = :sample_tenant
-      expect(MultiTenant.tenant_klass_defined?(tenant_name)).to eq(true)
+      it 'return true with valid tenant_name' do
+        tenant_name = :sample_tenant
+        expect(MultiTenant.tenant_klass_defined?(tenant_name)).to eq(true)
+      end
 
-      invalid_tenant_name = :tenant
-      expect(MultiTenant.tenant_klass_defined?(invalid_tenant_name)).to eq(false)
+      it 'return false with invalid_tenant_name tenant_name' do
+        invalid_tenant_name = :tenant
+        expect(MultiTenant.tenant_klass_defined?(invalid_tenant_name)).to eq(false)
+      end
     end
 
     context 'with options' do
-      tenant_name = :tenant
-      options = {
-        class_name: 'SampleTenant'
-      }
-      expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+      it 'return true with valid class_name' do
+        tenant_name = :tenant
+        options = {
+          class_name: 'SampleTenant'
+        }
+        expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+      end
     end
   end
 end
