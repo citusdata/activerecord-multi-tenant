@@ -76,7 +76,7 @@ RSpec.describe MultiTenant do
         expect(MultiTenant.tenant_klass_defined?(tenant_name)).to eq(true)
       end
 
-      it 'return false with invalid_tenant_name tenant_name' do
+      it 'return false with invalid_tenant_name' do
         invalid_tenant_name = :tenant
         expect(MultiTenant.tenant_klass_defined?(invalid_tenant_name)).to eq(false)
       end
