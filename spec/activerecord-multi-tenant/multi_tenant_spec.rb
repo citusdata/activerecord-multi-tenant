@@ -83,12 +83,26 @@ RSpec.describe MultiTenant do
     end
 
     context 'with options' do
-      it 'return true with valid class_name' do
-        tenant_name = :tenant
-        options = {
-          class_name: 'SampleTenant'
-        }
-        expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+      context 'and valid class_name' do
+        it 'return true' do
+          tenant_name = :tenant
+          options = {
+            class_name: 'SampleTenant'
+          }
+          expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+        end
+
+        it 'return true when tenant class is nested' do
+          module SampleModule
+            class SampleNestedTenant; end
+          end
+
+          tenant_name = :tenant
+          options = {
+            class_name: 'SampleModule::SampleNestedTenant'
+          }
+          expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+        end
       end
     end
   end
