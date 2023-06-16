@@ -103,6 +103,7 @@ RSpec.describe MultiTenant do
               multi_tenant :tenant
             end
             # another file
+            
             class AnotherTenant < ActiveRecord::Base
             end
           end
