@@ -102,12 +102,13 @@ RSpec.describe MultiTenant do
             class SampleNestedTenant < ActiveRecord::Base
               multi_tenant :tenant
             end
-            # another file
+            # rubocop:disable Layout/TrailingWhitespace
+            # Trailing whitespace is intentionally left here
             
             class AnotherTenant < ActiveRecord::Base
             end
+            # rubocop:enable Layout/TrailingWhitespace
           end
-
           tenant_name = :tenant
           options = {
             class_name: 'SampleModule::SampleNestedTenant'
