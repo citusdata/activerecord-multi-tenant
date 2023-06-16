@@ -67,7 +67,7 @@ RSpec.describe MultiTenant do
 
   describe '.tenant_klass_defined?' do
     before(:all) do
-      class SampleTenant; end
+      class SampleTenant < ActiveRecord::Base; end
     end
 
     context 'without options' do
@@ -94,7 +94,10 @@ RSpec.describe MultiTenant do
 
         it 'return true when tenant class is nested' do
           module SampleModule
-            class SampleNestedTenant; end
+            class SampleNestedTenant < ActiveRecord::Base
+              multi_tenant :tenant
+            end
+            class AnotherTenant < ActiveRecord::Base; end
           end
 
           tenant_name = :tenant
