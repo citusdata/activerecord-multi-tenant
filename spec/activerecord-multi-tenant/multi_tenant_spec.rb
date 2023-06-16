@@ -66,14 +66,15 @@ RSpec.describe MultiTenant do
   end
 
   describe '.tenant_klass_defined?' do
-    before(:all) do
-      class SampleTenant < ActiveRecord::Base; end
-    end
-
     context 'without options' do
+      before(:all) do
+        class SampleTenant < ActiveRecord::Base
+          multi_tenant :sample_tenant
+        end
+      end
+
       it 'return true with valid tenant_name' do
-        tenant_name = :sample_tenant
-        expect(MultiTenant.tenant_klass_defined?(tenant_name)).to eq(true)
+        expect(MultiTenant.tenant_klass_defined?(:sample_tenant)).to eq(true)
       end
 
       it 'return false with invalid_tenant_name' do
@@ -85,6 +86,10 @@ RSpec.describe MultiTenant do
     context 'with options' do
       context 'and valid class_name' do
         it 'return true' do
+          class SampleTenant < ActiveRecord::Base
+            multi_tenant :tenant
+          end
+
           tenant_name = :tenant
           options = {
             class_name: 'SampleTenant'
