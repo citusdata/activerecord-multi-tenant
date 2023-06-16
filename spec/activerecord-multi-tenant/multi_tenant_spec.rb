@@ -102,7 +102,6 @@ RSpec.describe MultiTenant do
             class SampleNestedTenant < ActiveRecord::Base
               multi_tenant :tenant
             end
-            
             class AnotherTenant < ActiveRecord::Base
             end
           end
