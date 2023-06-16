@@ -5,8 +5,13 @@ module MultiTenant
     attribute :tenant
   end
 
-  def self.tenant_klass_defined?(tenant_name)
-    !!tenant_name.to_s.classify.safe_constantize
+  def self.tenant_klass_defined?(tenant_name, options = {})
+    class_name = if options[:class_name].present?
+                   options[:class_name]
+                 else
+                   tenant_name.to_s.classify
+                 end
+    !!class_name.safe_constantize
   end
 
   def self.partition_key(tenant_name)

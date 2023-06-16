@@ -64,4 +64,58 @@ RSpec.describe MultiTenant do
       end
     end
   end
+
+  describe '.tenant_klass_defined?' do
+    context 'without options' do
+      before(:all) do
+        class SampleTenant < ActiveRecord::Base
+          multi_tenant :sample_tenant
+        end
+      end
+
+      it 'return true with valid tenant_name' do
+        expect(MultiTenant.tenant_klass_defined?(:sample_tenant)).to eq(true)
+      end
+
+      it 'return false with invalid_tenant_name' do
+        invalid_tenant_name = :tenant
+        expect(MultiTenant.tenant_klass_defined?(invalid_tenant_name)).to eq(false)
+      end
+    end
+
+    context 'with options' do
+      context 'and valid class_name' do
+        it 'return true' do
+          class SampleTenant < ActiveRecord::Base
+            multi_tenant :tenant
+          end
+
+          tenant_name = :tenant
+          options = {
+            class_name: 'SampleTenant'
+          }
+          expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+        end
+
+        it 'return true when tenant class is nested' do
+          module SampleModule
+            class SampleNestedTenant < ActiveRecord::Base
+              multi_tenant :tenant
+            end
+            # rubocop:disable Layout/TrailingWhitespace
+            # Trailing whitespace is intentionally left here
+            
+            class AnotherTenant < ActiveRecord::Base
+            end
+            # rubocop:enable Layout/TrailingWhitespace
+          end
+          tenant_name = :tenant
+          options = {
+            class_name: 'SampleModule::SampleNestedTenant'
+          }
+          expect(MultiTenant.tenant_klass_defined?(tenant_name, options)).to eq(true)
+        end
+      end
+    end
+  end
 end
