@@ -103,7 +103,8 @@ RSpec.describe MultiTenant do
               multi_tenant :tenant
             end
             
-            class AnotherTenant < ActiveRecord::Base; end
+            class AnotherTenant < ActiveRecord::Base
+            end
           end
 
           tenant_name = :tenant
