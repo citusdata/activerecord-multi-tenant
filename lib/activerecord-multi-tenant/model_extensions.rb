@@ -40,6 +40,8 @@ module MultiTenant
                                         .try(:instance_variable_get, :@partition_key)
           end
 
+          attr_reader :partition_namespace
+
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
             if defined?(PRIMARY_KEY_NOT_SET) ? !PRIMARY_KEY_NOT_SET.equal?(@primary_key) : @primary_key
@@ -65,6 +67,8 @@ module MultiTenant
 
         @partition_key = options[:partition_key] || MultiTenant.partition_key(tenant_name)
         partition_key = @partition_key
+
+        @partition_namespace = options[:namespace] || :default
 
         # Create an implicit belongs_to association only if tenant class exists
         if MultiTenant.tenant_klass_defined?(tenant_name, options)

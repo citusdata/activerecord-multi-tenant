@@ -2,7 +2,7 @@ require 'active_support/current_attributes'
 
 module MultiTenant
   class Current < ::ActiveSupport::CurrentAttributes
-    attribute :tenant
+    attribute :namespaced_tenants
   end
 
   def self.tenant_klass_defined?(tenant_name, options = {})
@@ -70,58 +70,75 @@ module MultiTenant
   end
 
   def self.current_tenant=(tenant)
-    Current.tenant = tenant
+    set_current_tenant(:default, tenant)
   end
 
-  def self.current_tenant
-    Current.tenant
+  def self.set_current_tenant(namespace, tenant)
+    Current.namespaced_tenants ||= {}
+    Current.namespaced_tenants[namespace] = tenant
   end
 
-  def self.current_tenant_id
-    current_tenant_is_id? ? current_tenant : current_tenant.try(:id)
+  def self.current_tenant(namespace: :default)
+    (Current.namespaced_tenants || {})[namespace]
   end
 
-  def self.current_tenant_is_id?
-    current_tenant.is_a?(String) || current_tenant.is_a?(Integer)
+  def self.current_tenant_id(namespace: :default)
+    tenant = current_tenant(namespace: namespace)
+    current_tenant_is_id?(namespace: namespace) ? tenant : tenant.try(:id)
   end
 
-  def self.current_tenant_class
-    if current_tenant_is_id?
+  def self.current_tenant_is_id?(namespace: :default)
+    tenant = current_tenant(namespace: namespace)
+    tenant.is_a?(String) || tenant.is_a?(Integer)
+  end
+
+  def self.current_tenant_class(namespace: :default)
+    if current_tenant_is_id?(namespace)
       MultiTenant.default_tenant_class || raise('Only have tenant id, and no default tenant class set')
-    elsif current_tenant
-      MultiTenant.current_tenant.class.name
+    elsif current_tenant(namespace)
+      MultiTenant.current_tenant(namespace).class.name
     end
   end
 
-  def self.load_current_tenant!
-    return MultiTenant.current_tenant if MultiTenant.current_tenant && !current_tenant_is_id?
-    raise 'MultiTenant.current_tenant must be set to load' if MultiTenant.current_tenant.nil?
+  def self.load_current_tenant!(namespace: :default)
+    tenant = MultiTenant.current_tenant(namespace: namespace)
+    return tenant if tenant && !current_tenant_is_id?(namespace: namespace)
+    raise 'MultiTenant.current_tenant must be set to load' if tenant.nil?
 
     klass = MultiTenant.default_tenant_class || raise('Only have tenant id, and no default tenant class set')
-    self.current_tenant = klass.find(MultiTenant.current_tenant_id)
+    tenant_id = MultiTenant.current_tenant_id(namespace: namespace)
+    set_current_tenant(namespace, klass.find(tenant_id))
   end
 
   def self.with(tenant, &block)
-    return block.call if current_tenant == tenant
+    namespace = :default
+    if tenant.is_a?(Hash)
+      raise 'must set at least one namespace' if tenant.empty?
+      raise 'can only set one namespace at a time' if tenant.length > 1
 
-    old_tenant = current_tenant
+      namespace, tenant = tenant.first
+    end
+
+    return block.call if current_tenant(namespace: namespace) == tenant
+
+    old_tenant = current_tenant(namespace: namespace)
     begin
-      self.current_tenant = tenant
+      set_current_tenant(namespace, tenant)
       block.call
     ensure
-      self.current_tenant = old_tenant
+      set_current_tenant(namespace, old_tenant)
     end
   end
 
-  def self.without(&block)
-    return block.call if current_tenant.nil?
+  def self.without(namespace: :default, &block)
+    return block.call if current_tenant(namespace: namespace).nil?
 
-    old_tenant = current_tenant
+    old_tenant = current_tenant(namespace: namespace)
     begin
-      self.current_tenant = nil
+      set_current_tenant(namespace, nil)
       block.call
     ensure
-      self.current_tenant = old_tenant
+      set_current_tenant(namespace, old_tenant)
     end
   end
 

@@ -74,6 +74,11 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
   end
 
+  create_table :custom_partition_namespace_tasks, force: true, partition_key: :account_id do |t|
+    t.column :account_id, :integer
+    t.column :name, :string
+  end
+
   create_table :comments, force: true, partition_key: :account_id do |t|
     t.column :account_id, :integer
     t.column :commentable_id, :integer
@@ -139,6 +144,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_distributed_table :sub_tasks, :account_id
   create_distributed_table :aliased_tasks, :account_id
   create_distributed_table :custom_partition_key_tasks, :accountID
+  create_distributed_table :custom_partition_namespace_tasks, :account_id
   create_distributed_table :comments, :account_id
   create_distributed_table :partition_key_not_model_tasks, :non_model_id
   create_distributed_table :subclass_tasks, :non_model_id
@@ -217,6 +223,10 @@ class CustomPartitionKeyTask < ActiveRecord::Base
   multi_tenant :account, partition_key: 'accountID'
 
   validates_uniqueness_of :name, scope: [:account]
+end
+
+class CustomPartitionNamespaceTask < ActiveRecord::Base
+  multi_tenant :account, namespace: :custom_namespace
 end
 
 class PartitionKeyNotModelTask < ActiveRecord::Base

@@ -63,6 +63,16 @@ describe MultiTenant do
     it { expect(@custom_partition_key_task.account).to eq(@account) }
   end
 
+  describe 'Handles custom partition_namespace on tenant model' do
+    before do
+      @account = Account.create! name: 'foo'
+      MultiTenant.set_current_tenant(:custom_namespace, @account)
+      @custom_partition_namespace_task = CustomPartitionNamespaceTask.create! name: 'foo'
+    end
+
+    it { expect(@custom_partition_namespace_task.account).to eq(@account) }
+  end
+
   describe 'Tenant model not defined' do
     before do
       MultiTenant.current_tenant = 77

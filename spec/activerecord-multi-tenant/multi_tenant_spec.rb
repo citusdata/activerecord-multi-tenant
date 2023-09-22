@@ -3,6 +3,50 @@
 require 'spec_helper'
 
 RSpec.describe MultiTenant do
+  describe '.with' do
+    it 'sets the tenant in the default namespace' do
+      MultiTenant.with(1) do
+        expect(MultiTenant.current_tenant).to eq(1)
+      end
+    end
+
+    it 'sets the tenant in the namespace given' do
+      MultiTenant.with(namespace: 1) do
+        expect(MultiTenant.current_tenant).to be_nil
+        expect(MultiTenant.current_tenant(namespace: :namespace)).to eq(1)
+      end
+    end
+
+    it 'raises if there was an empty hash' do
+      expect do
+        MultiTenant.with({}) {}
+      end.to raise_error(StandardError, 'must set at least one namespace')
+    end
+
+    it 'raises if there are multiple namespaces' do
+      expect do
+        MultiTenant.with(first: 1, second: 2) {}
+      end.to raise_error(StandardError, 'can only set one namespace at a time')
+    end
+  end
+
+  describe '.without' do
+    it 'sets the tenant to nil in the default namespace' do
+      MultiTenant.without do
+        expect(MultiTenant.current_tenant).to be_nil
+      end
+    end
+
+    it 'sets the tenant to nil in the namespace given' do
+      MultiTenant.with(1) do
+        MultiTenant.without(namespace: :namespace) do
+          expect(MultiTenant.current_tenant(namespace: :namespace)).to be_nil
+          expect(MultiTenant.current_tenant).to eq(1)
+        end
+      end
+    end
+  end
+
   describe '.load_current_tenant!' do
     let(:fake_tenant) { OpenStruct.new(id: 1) }
     let(:mock_klass) { double(find: fake_tenant) }

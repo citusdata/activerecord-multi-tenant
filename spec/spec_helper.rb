@@ -55,6 +55,9 @@ ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.
 ActiveRecord::Base.establish_connection(dbconfig['test'])
 
 RSpec.configure do |config|
+  config.expect_with :rspec do |c|
+    c.max_formatted_output_length = nil
+  end
   config.infer_base_class_for_anonymous_controllers = true
   config.use_transactional_fixtures = false
   config.filter_run_excluding type: :controller unless Object.const_defined?(:ActionController)
