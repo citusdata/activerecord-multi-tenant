@@ -59,6 +59,7 @@ jobs:
         citus_version:
           - '10'
           - '11'
+          - '12'
 
     name: Ruby ${{ matrix.ruby }}/${{ matrix.gemfile }} / Citus ${{ matrix.citus_version }}
     env:
