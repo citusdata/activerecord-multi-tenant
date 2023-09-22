@@ -1,4 +1,11 @@
 # Changelog
+
+## 2.4.0      2023-06-05
+* Adds citus 12 to test matrix (#210)
+* Adds Support for rails 7.1 (#208)
+* Fix missing scope in habtm.rb (#207)
+* Update logic inside the tenant_klass_defined? method (#202)
+
 ## 2.3.0      2023-06-05
 * Adds has_and_belongs_to_many feature with tenant (#193)
 * Removes eol ruby versions 
