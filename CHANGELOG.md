@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.4.0      2023-06-05
+## 2.4.0      2023-09-22
 * Adds citus 12 to test matrix (#210)
 * Adds Support for rails 7.1 (#208)
 * Fix missing scope in habtm.rb (#207)
