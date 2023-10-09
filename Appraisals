@@ -11,7 +11,7 @@ appraise 'rails-7.0' do
 end
 
 appraise 'rails-7.1' do
-  gem 'rails', '~> 7.1.0.beta1'
+  gem 'rails', '~> 7.1.0'
 end
 
 appraise 'active-record-6.0' do
@@ -27,5 +27,5 @@ appraise 'active-record-7.0' do
 end
 
 appraise 'active-record-7.1' do
-  gem 'activerecord', '~> 7.1.0.beta1'
+  gem 'activerecord', '~> 7.1.0'
 end
