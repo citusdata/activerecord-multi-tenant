@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MultiTenant
   module MigrationExtensions
     def create_distributed_table(table_name, partition_key)

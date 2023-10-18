@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Truncates only the tables that have been modified, according to sequence
 # values
 # Faster alternative to DatabaseCleaner.clean_with(:truncation, pre_count: true)

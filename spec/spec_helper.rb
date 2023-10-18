@@ -48,9 +48,9 @@ MultiTenantTest::Application.config.filter_parameters = [:password]
 
 require 'bundler'
 Bundler.require(:default, :development)
-require_relative './support/format_sql'
+require_relative 'support/format_sql'
 
-dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
+dbconfig = YAML.safe_load_file(File.join(File.dirname(__FILE__), 'database.yml'))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
 ActiveRecord::Base.establish_connection(dbconfig['test'])
 
