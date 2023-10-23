@@ -1,4 +1,6 @@
-require_relative './multi_tenant'
+# frozen_string_literal: true
+
+require_relative 'multi_tenant'
 
 module MultiTenant
   # Extension to the model to allow scoping of models to the current tenant. This is done by adding
@@ -6,7 +8,7 @@ module MultiTenant
   # model declaration.
   # Adds scoped_by_tenant? partition_key, primary_key and inherited methods to the model
   module ModelExtensionsClassMethods
-    DEFAULT_ID_FIELD = 'id'.freeze
+    DEFAULT_ID_FIELD = 'id'
     # executes when multi_tenant method is called in the model. This method adds the following
     # methods to the model that calls it.
     # scoped_by_tenant? - returns true if the model is scoped by tenant
@@ -188,17 +190,21 @@ ActiveSupport.on_load(:active_record) do |base|
 end
 
 # skips statement caching for classes that is Multi-tenant or has a multi-tenant relation
-class ActiveRecord::Associations::Association
-  alias skip_statement_cache_orig skip_statement_cache?
+module ActiveRecord
+  module Associations
+    class Association
+      alias skip_statement_cache_orig skip_statement_cache?
 
-  def skip_statement_cache?(*scope)
-    return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
+      def skip_statement_cache?(*scope)
+        return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
 
-    if reflection.through_reflection
-      through_klass = reflection.through_reflection.klass
-      return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
+        if reflection.through_reflection
+          through_klass = reflection.through_reflection.klass
+          return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
+        end
+
+        skip_statement_cache_orig(*scope)
+      end
     end
-
-    skip_statement_cache_orig(*scope)
   end
 end

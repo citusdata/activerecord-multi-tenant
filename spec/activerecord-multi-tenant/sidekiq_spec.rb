@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'sidekiq/client'
 require 'activerecord-multi-tenant/sidekiq'

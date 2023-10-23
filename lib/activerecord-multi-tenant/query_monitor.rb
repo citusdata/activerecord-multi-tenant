@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Add generic warning when queries fail and there is no tenant set
 # To handle this case, a QueryMonitor hook is created and registered
 # to sql.active_record. This hook will log a warning when a query fails

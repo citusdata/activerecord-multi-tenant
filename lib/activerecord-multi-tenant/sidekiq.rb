@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sidekiq/client'
 
 # Adds methods to handle tenant information both in the client and server.

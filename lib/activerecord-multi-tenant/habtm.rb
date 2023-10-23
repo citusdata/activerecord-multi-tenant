@@ -34,11 +34,10 @@ module ActiveRecord
 
           # This method sets the tenant_id on the join table and executes before creation of the join table record.
           define_method :tenant_set do
-            if tenant_enabled
-              raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
+            return unless tenant_enabled
+            raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
 
-              send("#{tenant_column}=", MultiTenant.current_tenant_id)
-            end
+            send("#{tenant_column}=", MultiTenant.current_tenant_id)
           end
         end
       end

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe MultiTenant do
   describe '.load_current_tenant!' do
-    let(:fake_tenant) { OpenStruct.new(id: 1) }
+    let(:fake_tenant) { double(id: 1) }
     let(:mock_klass) { double(find: fake_tenant) }
 
     before do
