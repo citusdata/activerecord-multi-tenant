@@ -284,13 +284,10 @@ ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(MultiTenant::DatabaseS
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 
-require 'active_record/relation'
-module ActiveRecord
-  module QueryMethods
-    alias build_arel_orig build_arel
-
-    def build_arel(*args)
-      arel = build_arel_orig(*args)
+module MultiTenant
+  module QueryMethodsExtensions
+    def build_arel(*)
+      arel = super
 
       unless MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
@@ -373,6 +370,9 @@ module ActiveRecord
     end
   end
 end
+
+require 'active_record/relation'
+ActiveRecord::QueryMethods.prepend(MultiTenant::QueryMethodsExtensions)
 
 module MultiTenantFindBy
   def cached_find_by_statement(key, &block)
