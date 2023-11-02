@@ -118,4 +118,32 @@ RSpec.describe MultiTenant do
       end
     end
   end
+
+  describe '.wrap_methods' do
+    context 'when method is already prepended' do
+      it 'is not an stack error' do
+        klass = Class.new do
+          def hello
+            'hello'
+          end
+        end
+
+        klass.prepend(Module.new do
+          def hello
+            "#{super} world"
+          end
+
+          def owner
+            Class.new(ActiveRecord::Base) do
+              self.table_name = 'accounts'
+            end.new
+          end
+        end)
+
+        MultiTenant.wrap_methods(klass, :owner, :hello)
+
+        expect(klass.new.hello).to eq('hello world')
+      end
+    end
+  end
 end

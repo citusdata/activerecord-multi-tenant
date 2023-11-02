@@ -190,21 +190,19 @@ ActiveSupport.on_load(:active_record) do |base|
 end
 
 # skips statement caching for classes that is Multi-tenant or has a multi-tenant relation
-module ActiveRecord
-  module Associations
-    class Association
-      alias skip_statement_cache_orig skip_statement_cache?
+module MultiTenant
+  module AssociationExtensions
+    def skip_statement_cache?(*scope)
+      return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
 
-      def skip_statement_cache?(*scope)
-        return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
-
-        if reflection.through_reflection
-          through_klass = reflection.through_reflection.klass
-          return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
-        end
-
-        skip_statement_cache_orig(*scope)
+      if reflection.through_reflection
+        through_klass = reflection.through_reflection.klass
+        return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
       end
+
+      super(*scope)
     end
   end
 end
+
+ActiveRecord::Associations::Association.prepend(MultiTenant::AssociationExtensions)

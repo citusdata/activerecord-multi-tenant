@@ -68,22 +68,19 @@ end
 
 ActiveRecord::Migration.include MultiTenant::MigrationExtensions if defined?(ActiveRecord::Migration)
 
-module ActiveRecord
-  module ConnectionAdapters # :nodoc:
-    module SchemaStatements
-      alias orig_create_table create_table
-
-      def create_table(table_name, options = {}, &block)
-        ret = orig_create_table(table_name, **options.except(:partition_key), &block)
-        if options[:id] != false && options[:partition_key] && options[:partition_key].to_s != 'id'
-          execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{table_name}_pkey"
-          execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
-        end
-        ret
+module MultiTenant
+  module SchemaStatementsExtensions
+    def create_table(table_name, options = {}, &block)
+      ret = super(table_name, **options.except(:partition_key), &block)
+      if options[:id] != false && options[:partition_key] && options[:partition_key].to_s != 'id'
+        execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{table_name}_pkey"
+        execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
       end
+      ret
     end
   end
 end
+ActiveRecord::ConnectionAdapters::SchemaStatements.prepend(MultiTenant::SchemaStatementsExtensions)
 
 module ActiveRecord
   class SchemaDumper
