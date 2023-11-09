@@ -52,7 +52,8 @@ module MultiTenant
 
             @primary_key = if primary_object_keys.size == 1
                              primary_object_keys.first
-                           elsif connection.schema_cache.columns_hash(table_name).include? DEFAULT_ID_FIELD
+                           elsif table_name &&
+                                 connection.schema_cache.columns_hash(table_name).include?(DEFAULT_ID_FIELD)
                              DEFAULT_ID_FIELD
                            end
           end
