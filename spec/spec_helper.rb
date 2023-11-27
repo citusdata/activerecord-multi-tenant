@@ -18,6 +18,7 @@ if ENV['CI'] == 'true'
     add_group 'Lib', '/lib' # Include the lib directory for coverage
     puts "Tracked files: #{SimpleCov.tracked_files}"
   end
+  SimpleCov.minimum_coverage 80
 
   require 'simplecov-cobertura'
   SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
@@ -27,13 +28,29 @@ require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'
 
+module MultiTenantTest
+  class Application < Rails::Application; end
+end
+
+# Specifies columns which shouldn't be exposed while calling #inspect.
+ActiveSupport.on_load(:active_record) do
+  self.filter_attributes += MultiTenantTest::Application.config.filter_parameters
+end
+
 require 'activerecord_multi_tenant'
+
+# It's necessary for testing the filtering of senstive column values in ActiveRecord.
+# Refer to "describe 'inspect method filters senstive column values'"
+#
+# To verify that ActiveSupport.on_load(:active_record) is not being unnecessarily invoked,
+# this line should be placed after "require 'activerecord_multi_tenant'" and before ActiveRecord::Base is called.
+MultiTenantTest::Application.config.filter_parameters = [:password]
 
 require 'bundler'
 Bundler.require(:default, :development)
-require_relative './support/format_sql'
+require_relative 'support/format_sql'
 
-dbconfig = YAML.safe_load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
+dbconfig = YAML.safe_load_file(File.join(File.dirname(__FILE__), 'database.yml'))
 ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
 ActiveRecord::Base.establish_connection(dbconfig['test'])
 
@@ -54,13 +71,6 @@ RSpec.configure do |config|
     MultiTenant::FastTruncate.run
   end
 end
-
-module MultiTenantTest
-  class Application < Rails::Application; end
-end
-
-MultiTenantTest::Application.config.secret_token = 'x' * 40
-MultiTenantTest::Application.config.secret_key_base = 'y' * 40
 
 # rubocop:disable Lint/UnusedMethodArgument
 # changing the name of the parameter breaks tests

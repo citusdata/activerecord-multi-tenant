@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support/current_attributes'
 
 module MultiTenant
@@ -5,8 +7,13 @@ module MultiTenant
     attribute :tenant
   end
 
-  def self.tenant_klass_defined?(tenant_name)
-    !!tenant_name.to_s.classify.safe_constantize
+  def self.tenant_klass_defined?(tenant_name, options = {})
+    class_name = if options[:class_name].present?
+                   options[:class_name]
+                 else
+                   tenant_name.to_s.classify
+                 end
+    !!class_name.safe_constantize
   end
 
   def self.partition_key(tenant_name)
@@ -58,9 +65,9 @@ module MultiTenant
     return nil unless arel.respond_to?(:ast)
 
     if arel.ast.relation.is_a? Arel::Nodes::JoinSource
-      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.left.table_name)
+      MultiTenant.multi_tenant_model_for_table(TableNode.table_name(arel.ast.relation.left))
     else
-      MultiTenant.multi_tenant_model_for_table(arel.ast.relation.table_name)
+      MultiTenant.multi_tenant_model_for_table(TableNode.table_name(arel.ast.relation))
     end
   end
 
@@ -123,39 +130,21 @@ module MultiTenant
   # Wrap calls to any of `method_names` on an instance Class `klass` with MultiTenant.with
   # when `'owner'` (evaluated in context of the klass instance) is a ActiveRecord model instance that is multi-tenant
   # Instruments the methods provided with previously set Multitenant parameters
-  # In Ruby 2 using splat (*) operator with `&block` is not supported, so we need to use `method(...)` syntax
   # TODO: Could not understand the use of owner here. Need to check
-  if Gem::Version.create(RUBY_VERSION) < Gem::Version.new('3.0.0')
-    def self.wrap_methods(klass, owner, *method_names)
-      method_names.each do |method_name|
-        original_method_name = :"_mt_original_#{method_name}"
-        klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
-          alias_method :#{original_method_name}, :#{method_name}
-          def #{method_name}(*args, &block)
-            if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
-              MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(*args, &block) }
-            else
-              #{original_method_name}(*args, &block)
-            end
-          end
-        CODE
-      end
-    end
-  else
-    def self.wrap_methods(klass, owner, *method_names)
-      method_names.each do |method_name|
-        original_method_name = :"_mt_original_#{method_name}"
-        klass.class_eval <<-CODE, __FILE__, __LINE__ + 1
-        alias_method :#{original_method_name}, :#{method_name}
+  def self.wrap_methods(klass, owner, *method_names)
+    mod = Module.new
+    klass.prepend(mod)
+
+    method_names.each do |method_name|
+      mod.module_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{method_name}(...)
           if MultiTenant.multi_tenant_model_for_table(#{owner}.class.table_name).present? && #{owner}.persisted? && MultiTenant.current_tenant_id.nil? && #{owner}.class.respond_to?(:partition_key) && #{owner}.attributes.include?(#{owner}.class.partition_key)
-            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { #{original_method_name}(...) }
+            MultiTenant.with(#{owner}.public_send(#{owner}.class.partition_key)) { super }
           else
-            #{original_method_name}(...)
+            super
           end
         end
-        CODE
-      end
+      CODE
     end
   end
 

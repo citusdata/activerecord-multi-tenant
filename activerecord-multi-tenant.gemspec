@@ -1,18 +1,20 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.push File.expand_path('lib', __dir__)
 require 'activerecord-multi-tenant/version'
 
 Gem::Specification.new do |spec|
   spec.name = 'activerecord-multi-tenant'
   spec.version = MultiTenant::VERSION
-  spec.summary = 'ActiveRecord/Rails integration for multi-tenant databases, '\
-            'in particular the Citus extension for PostgreSQL'
+  spec.summary = 'ActiveRecord/Rails integration for multi-tenant databases, ' \
+                 'in particular the Citus extension for PostgreSQL'
   spec.description = ''
   spec.authors = ['Citus Data']
   spec.email = 'engage@citusdata.com'
   spec.required_ruby_version = '>= 3.0.0'
+  spec.metadata = { 'rubygems_mfa_required' => 'true' }
 
   spec.files = `git ls-files`.split("\n")
-  spec.test_files = `git ls-files -- {spec}/*`.split("\n")
   spec.require_paths = ['lib']
   spec.homepage = 'https://github.com/citusdata/activerecord-multi-tenant'
   spec.license = 'MIT'

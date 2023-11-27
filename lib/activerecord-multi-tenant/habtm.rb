@@ -8,9 +8,9 @@ module ActiveRecord
   module Associations
     module ClassMethods
       # rubocop:disable Naming/PredicateName
-      def has_and_belongs_to_many_with_tenant(name, options = {}, &extension)
+      def has_and_belongs_to_many_with_tenant(name, scope = nil, **options, &extension)
         # rubocop:enable Naming/PredicateName
-        has_and_belongs_to_many_without_tenant(name, **options, &extension)
+        has_and_belongs_to_many_without_tenant(name, scope, **options, &extension)
 
         middle_reflection = _reflections[name.to_s].through_reflection
         join_model = middle_reflection.klass
@@ -34,11 +34,10 @@ module ActiveRecord
 
           # This method sets the tenant_id on the join table and executes before creation of the join table record.
           define_method :tenant_set do
-            if tenant_enabled
-              raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
+            return unless tenant_enabled
+            raise MultiTenant::MissingTenantError, 'Tenant Id is not set' unless MultiTenant.current_tenant_id
 
-              send("#{tenant_column}=", MultiTenant.current_tenant_id)
-            end
+            send("#{tenant_column}=", MultiTenant.current_tenant_id)
           end
         end
       end
