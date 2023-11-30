@@ -57,7 +57,6 @@ describe 'Query Rewriter' do
     end
 
     it 'delete_all the records' do
-
       expected_query = <<-SQL.strip
           DELETE FROM "projects" WHERE "projects"."id" IN
             (SELECT "projects"."id" FROM "projects"
@@ -65,6 +64,7 @@ describe 'Query Rewriter' do
                                     and "managers"."account_id" = :account_id
                 WHERE "projects"."account_id" = :account_id
                                     )
+                                    AND "projects"."account_id" = :account_id
       SQL
 
       expect do
@@ -73,7 +73,7 @@ describe 'Query Rewriter' do
         end
       end.to change { Project.count }.from(3).to(1)
       query_index = 0
-      @queries.each_with_index do |actual_query, index|
+      @queries.each_with_index do |actual_query, _index|
         next unless actual_query.include?('DELETE FROM ')
 
         expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
