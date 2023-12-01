@@ -72,12 +72,11 @@ describe 'Query Rewriter' do
           Project.joins(:manager).delete_all
         end
       end.to change { Project.count }.from(3).to(1)
-      query_index = 0
-      @queries.each_with_index do |actual_query, _index|
+
+      @queries.each do |actual_query|
         next unless actual_query.include?('DELETE FROM ')
 
         expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
-        query_index += 1
       end
     end
 
