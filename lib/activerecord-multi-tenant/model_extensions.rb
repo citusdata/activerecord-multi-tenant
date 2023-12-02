@@ -78,7 +78,7 @@ module MultiTenant
         after_initialize proc { |record|
           if MultiTenant.current_tenant_id &&
              (!record.attribute_present?(partition_key) || record.public_send(partition_key.to_sym).nil?)
-            record.public_send("#{partition_key}=".to_sym, MultiTenant.current_tenant_id)
+            record.public_send(:"#{partition_key}=", MultiTenant.current_tenant_id)
           end
         }
 
