@@ -1,4 +1,6 @@
-require_relative './multi_tenant'
+# frozen_string_literal: true
+
+require_relative 'multi_tenant'
 
 module MultiTenant
   # Extension to the model to allow scoping of models to the current tenant. This is done by adding
@@ -6,7 +8,7 @@ module MultiTenant
   # model declaration.
   # Adds scoped_by_tenant? partition_key, primary_key and inherited methods to the model
   module ModelExtensionsClassMethods
-    DEFAULT_ID_FIELD = 'id'.freeze
+    DEFAULT_ID_FIELD = 'id'
     # executes when multi_tenant method is called in the model. This method adds the following
     # methods to the model that calls it.
     # scoped_by_tenant? - returns true if the model is scoped by tenant
@@ -67,7 +69,7 @@ module MultiTenant
         partition_key = @partition_key
 
         # Create an implicit belongs_to association only if tenant class exists
-        if MultiTenant.tenant_klass_defined?(tenant_name)
+        if MultiTenant.tenant_klass_defined?(tenant_name, options)
           belongs_to tenant_name, **options.slice(:class_name, :inverse_of, :optional)
                                            .merge(foreign_key: options[:partition_key])
         end
@@ -76,7 +78,7 @@ module MultiTenant
         after_initialize proc { |record|
           if MultiTenant.current_tenant_id &&
              (!record.attribute_present?(partition_key) || record.public_send(partition_key.to_sym).nil?)
-            record.public_send("#{partition_key}=".to_sym, MultiTenant.current_tenant_id)
+            record.public_send(:"#{partition_key}=", MultiTenant.current_tenant_id)
           end
         }
 
@@ -103,7 +105,7 @@ module MultiTenant
             tenant_id
           end
 
-          if MultiTenant.tenant_klass_defined?(tenant_name)
+          if MultiTenant.tenant_klass_defined?(tenant_name, options)
             define_method "#{tenant_name}=" do |model|
               super(model)
               if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
@@ -188,17 +190,19 @@ ActiveSupport.on_load(:active_record) do |base|
 end
 
 # skips statement caching for classes that is Multi-tenant or has a multi-tenant relation
-class ActiveRecord::Associations::Association
-  alias skip_statement_cache_orig skip_statement_cache?
+module MultiTenant
+  module AssociationExtensions
+    def skip_statement_cache?(*scope)
+      return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
 
-  def skip_statement_cache?(*scope)
-    return true if klass.respond_to?(:scoped_by_tenant?) && klass.scoped_by_tenant?
+      if reflection.through_reflection
+        through_klass = reflection.through_reflection.klass
+        return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
+      end
 
-    if reflection.through_reflection
-      through_klass = reflection.through_reflection.klass
-      return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
+      super(*scope)
     end
-
-    skip_statement_cache_orig(*scope)
   end
 end
+
+ActiveRecord::Associations::Association.prepend(MultiTenant::AssociationExtensions)

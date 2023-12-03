@@ -7,8 +7,19 @@ AllCops:
     - 'node_modules/**/*'
     - 'Vagrantfile'
   TargetRubyVersion: 3.0
+  SuggestExtensions: false
+  NewCops: enable
 
-Style/FrozenStringLiteralComment:
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
+
+Lint/EmptyBlock:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
   Enabled: false
 
 Style/Documentation:
@@ -16,10 +27,7 @@ Style/Documentation:
     - '**/*.rb'
   Enabled: false
 
-Lint/ConstantDefinitionInBlock:
-  Enabled: false
-
-Style/ClassAndModuleChildren:
+Style/DocumentDynamicEvalDefinition:
   Enabled: false
 
 Metrics/BlockLength:

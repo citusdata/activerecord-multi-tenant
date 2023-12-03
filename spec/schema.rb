@@ -9,6 +9,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
     t.column :subdomain, :string
     t.column :domain, :string
+    t.column :password, :string
   end
 
   create_table :projects, force: true, partition_key: :account_id do |t|
@@ -173,8 +174,8 @@ end
 class Manager < ActiveRecord::Base
   multi_tenant :account
   belongs_to :project
-  has_and_belongs_to_many :tasks, { tenant_column: :account_id, tenant_enabled: true,
-                                    tenant_class_name: 'Account' }
+  has_and_belongs_to_many :tasks, tenant_column: :account_id, tenant_enabled: true,
+                                  tenant_class_name: 'Account'
 end
 
 class Task < ActiveRecord::Base
