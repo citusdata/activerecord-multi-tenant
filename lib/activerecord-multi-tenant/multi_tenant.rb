@@ -17,7 +17,7 @@ module MultiTenant
   end
 
   def self.partition_key(tenant_name)
-    "#{tenant_name}_id"
+    "#{tenant_name.to_s.underscore}_id"
   end
 
   # rubocop:disable Style/ClassVars
