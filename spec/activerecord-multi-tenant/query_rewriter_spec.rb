@@ -45,12 +45,39 @@ describe 'Query Rewriter' do
     let!(:manager1) { Manager.create(name: 'Manager 1', project: project1, account: account) }
     let!(:manager2) { Manager.create(name: 'Manager 2', project: project2, account: account) }
 
+    before(:each) do
+      @queries = []
+      ActiveSupport::Notifications.subscribe('sql.active_record') do |_name, _started, _finished, _unique_id, payload|
+        @queries << payload[:sql]
+      end
+    end
+
+    after(:each) do
+      ActiveSupport::Notifications.unsubscribe('sql.active_record')
+    end
+
     it 'delete_all the records' do
+      expected_query = <<-SQL.strip
+          DELETE FROM "projects" WHERE "projects"."id" IN
+            (SELECT "projects"."id" FROM "projects"
+                INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+                                    and "managers"."account_id" = :account_id
+                WHERE "projects"."account_id" = :account_id
+                                    )
+                                    AND "projects"."account_id" = :account_id
+      SQL
+
       expect do
         MultiTenant.with(account) do
           Project.joins(:manager).delete_all
         end
       end.to change { Project.count }.from(3).to(1)
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('DELETE FROM ')
+
+        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+      end
     end
 
     it 'delete_all the records without a current tenant' do
