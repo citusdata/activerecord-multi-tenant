@@ -3,6 +3,13 @@
 require 'spec_helper'
 
 describe 'Query Rewriter' do
+  before(:each) do
+    @queries = []
+    ActiveSupport::Notifications.subscribe('sql.active_record') do |_name, _started, _finished, _unique_id, payload|
+      @queries << payload[:sql]
+    end
+  end
+
   context 'when bulk updating' do
     let!(:account) { Account.create!(name: 'Test Account') }
     let!(:project) { Project.create(name: 'Project 1', account: account) }
@@ -34,6 +41,67 @@ describe 'Query Rewriter' do
       expect do
         project.update(name: 'New Name')
       end.to change { project.reload.name }.from('Project 1').to('New Name')
+    end
+
+    it 'update_all the records with expected query' do
+      expected_query = <<-SQL.strip
+          UPDATE "projects" SET "name" = 'New Name' WHERE "projects"."id" IN
+            (SELECT "projects"."id" FROM "projects"
+                INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+                                    and "managers"."account_id" = :account_id
+                WHERE "projects"."account_id" = :account_id
+                                    )
+                                    AND "projects"."account_id" = :account_id
+      SQL
+
+      expect do
+        MultiTenant.with(account) do
+          Project.joins(:manager).update_all(name: 'New Name')
+        end
+      end.to change { project.reload.name }.from('Project 1').to('New Name')
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+      end
+    end
+
+    it 'updates a limited number of records with expected query' do
+      # create 2 more projects
+      Project.create(name: 'project2', account: account)
+      Project.create(name: 'project3', account: account)
+      new_name = 'New Name'
+      limit = 2
+      expected_query = <<-SQL
+        UPDATE
+          "projects"
+        SET
+          "name" = 'New Name'
+        WHERE
+          "projects"."id" IN (
+            SELECT
+              "projects"."id"
+            FROM
+              "projects"
+            WHERE
+              "projects"."account_id" = #{account.id} LIMIT #{limit}
+          )
+          AND "projects"."account_id" = #{account.id}
+      SQL
+
+      expect do
+        MultiTenant.with(account) do
+          Project.limit(limit).update_all(name: new_name)
+        end
+      end.to change { Project.where(name: new_name).count }.from(0).to(limit)
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        expect(format_sql(actual_query.gsub('$1',
+                                            limit.to_s)).strip).to eq(format_sql(expected_query).strip)
+      end
     end
   end
 
@@ -100,6 +168,40 @@ describe 'Query Rewriter' do
         project1.delete
         Project.delete(project2.id)
       end.to change { Project.count }.from(3).to(1)
+    end
+
+    it 'deletes a limited number of records with expected query' do
+      # create 2 more projects
+      Project.create(name: 'project2', account: account)
+      Project.create(name: 'project3', account: account)
+      limit = 2
+      expected_query = <<-SQL
+        DELETE FROM
+          "projects"
+        WHERE
+          "projects"."id" IN (
+            SELECT
+              "projects"."id"
+            FROM
+              "projects"
+            WHERE
+              "projects"."account_id" = #{account.id} LIMIT #{limit}
+          )
+          AND "projects"."account_id" = #{account.id}
+      SQL
+
+      expect do
+        MultiTenant.with(account) do
+          Project.limit(limit).delete_all
+        end
+      end.to change { Project.count }.by(-limit)
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('DELETE FROM "projects"')
+
+        expect(format_sql(actual_query.gsub('$1',
+                                            limit.to_s)).strip).to eq(format_sql(expected_query).strip)
+      end
     end
 
     it 'destroy the record' do
