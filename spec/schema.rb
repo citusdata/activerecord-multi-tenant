@@ -220,12 +220,12 @@ class CustomPartitionKeyTask < ActiveRecord::Base
 end
 
 class PartitionKeyNotModelTask < ActiveRecord::Base
-  multi_tenant :non_model
+  multi_tenant :non_model, skip_reflection: true
 end
 
 class AbstractTask < ActiveRecord::Base
   self.abstract_class = true
-  multi_tenant :non_model
+  multi_tenant :non_model, skip_reflection: true
 end
 
 class SubclassTask < AbstractTask

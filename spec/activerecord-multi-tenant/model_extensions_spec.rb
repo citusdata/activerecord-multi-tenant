@@ -72,6 +72,45 @@ describe MultiTenant do
     it { expect(@partition_key_not_model_task.non_model_id).to be 77 }
   end
 
+  context 'Tenant model is defined in autoload' do
+    around do |example|
+      Object.autoload(:LazyTenant, "#{dir}/lazy_tenant")
+      example.run
+    ensure
+      Object.send(:remove_const, :LazyTenant)
+    end
+
+    let(:dir) do
+      Dir.mktmpdir
+    end
+
+    it "doesn't load constant" do
+      File.write("#{dir}/lazy_tenant.rb", <<~RUBY)
+        class LazyTenant < ActiveRecord::Base
+        end
+      RUBY
+
+      klass = Class.new(ActiveRecord::Base) do
+        self.table_name = Project.table_name
+
+        def self.name
+          'Dummy'
+        end
+      end
+
+      expect do
+        klass.multi_tenant(:lazy_tenant, partition_key: 'account_id')
+      end.to_not change {
+        [
+          defined?(LazyTenant),
+          autoload?(:LazyTenant)
+        ]
+      }.from(['constant', "#{dir}/lazy_tenant"])
+
+      expect(klass.reflections).to have_key('lazy_tenant')
+    end
+  end
+
   describe 'Tenant model with a nonstandard class name' do
     let(:account_klass) do
       Class.new(ActiveRecord::Base) do
