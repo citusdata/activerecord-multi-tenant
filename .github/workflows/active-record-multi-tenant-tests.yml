@@ -1,4 +1,4 @@
-name: CI
+name: Active Record Multi-Tenant Tests
 
 on:
   push:
@@ -24,6 +24,9 @@ jobs:
           - active_record_6.0
           - active_record_6.1
           - active_record_7.0
+        citus_version:
+          - '10'
+          - '11'
         prepared_statements: [true, false]
         exclude:
           # activesupport-7.0.0 requires ruby version >= 2.7.0
@@ -31,10 +34,11 @@ jobs:
             gemfile: 'rails_7.0'
           - ruby: '2.6'
             gemfile: 'active_record_7.0'
-    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }} / Citus ${{ matrix.citus_version }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
        PREPARED_STATEMENTS: ${{ matrix.prepared_statements && '1' }}
+       CITUS_VERSION: ${{ matrix.citus_version }}
     steps:
       - uses: actions/checkout@v2
       - run: |
