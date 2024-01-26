@@ -9,7 +9,7 @@ module Arel
 
       tenant_key = MultiTenant.partition_key(MultiTenant.current_tenant_class)
       tenant_id = MultiTenant.current_tenant_id
-      arel = eager_loading? ? apply_join_dependency.arel : build_arel
+      arel = eager_loading? ? apply_join_dependency.arel : build_arel(*[])
       arel.source.left = table
 
       if tenant_id && klass.column_names.include?(tenant_key)

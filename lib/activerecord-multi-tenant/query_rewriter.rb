@@ -254,8 +254,9 @@ Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
 require 'active_record/relation'
 module ActiveRecord
   module QueryMethods
-    def build_arel(*)
-      arel = super
+    alias :build_arel_orig :build_arel
+    def build_arel(*args)
+      arel = build_arel_orig(*args)
 
       if !MultiTenant.with_write_only_mode_enabled?
         visitor = MultiTenant::ArelTenantVisitor.new(arel)
