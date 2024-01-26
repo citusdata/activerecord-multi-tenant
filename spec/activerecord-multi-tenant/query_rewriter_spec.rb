@@ -57,13 +57,16 @@ describe "Query Rewriter" do
 
     it "delete_all the records" do
       expected_query = <<-SQL.strip
-        DELETE FROM "projects" WHERE "projects"."id" IN
-          (SELECT "projects"."id" FROM "projects"
-              INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
-                                  and "managers"."account_id" = :account_id
-              WHERE "projects"."account_id" = :account_id
-                                  )
-                                  AND "projects"."account_id" = :account_id
+        DELETE
+        FROM "projects"
+        WHERE "projects"."id"
+        IN (SELECT "projects"."id"
+        FROM "projects"
+        INNER JOIN "managers"
+        ON "managers"."project_id" = "projects"."id"
+        AND "managers"."account_id" = 1
+        WHERE "projects"."account_id" = 1)
+        AND "projects"."account_id" = 1
       SQL
 
       expect do
