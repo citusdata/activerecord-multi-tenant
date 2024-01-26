@@ -56,7 +56,7 @@ describe "Query Rewriter" do
     end
 
     it "delete_all the records" do
-      expected_query = <<-SQL.strip
+      base_query = <<-SQL.strip
         DELETE
         FROM "projects"
         WHERE "projects"."id"
@@ -66,7 +66,7 @@ describe "Query Rewriter" do
         ON "managers"."project_id" = "projects"."id"
         AND "managers"."account_id" = 1
         WHERE "projects"."account_id" = 1)
-        AND "projects"."account_id" = 1
+        AND "projects"."account_id" = :account_id
       SQL
 
       expect do
@@ -79,7 +79,39 @@ describe "Query Rewriter" do
         next unless actual_query.include?('DELETE FROM ')
 
         query = actual_query.gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
-        expect(query).to eq(expected_query.gsub(':account_id', account.id.to_s))
+        expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ")
+        expect(query).to eq(expected_query)
+      end
+    end
+
+    context "when tenant_id is ID" do 
+      it "delete_all the records" do
+        base_query = <<-SQL.strip
+          DELETE
+          FROM "projects"
+          WHERE "projects"."id"
+          IN (SELECT "projects"."id"
+          FROM "projects"
+          INNER JOIN "managers"
+          ON "managers"."project_id" = "projects"."id"
+          AND "managers"."account_id" = 1
+          WHERE "projects"."account_id" = 1)
+          AND "projects"."account_id" = :account_id
+        SQL
+  
+        expect do
+          MultiTenant.with(account.id) do
+            Project.joins(:manager).delete_all
+          end
+        end.to change { Project.count }.from(3).to(1)
+  
+        @queries.each do |actual_query|
+          next unless actual_query.include?('DELETE FROM ')
+  
+          query = actual_query.gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
+          expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ")
+          expect(query).to eq(expected_query)
+        end
       end
     end
 
