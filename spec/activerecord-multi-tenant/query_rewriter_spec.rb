@@ -75,7 +75,8 @@ describe "Query Rewriter" do
       @queries.each do |actual_query|
         next unless actual_query.include?('DELETE FROM ')
 
-        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+        query = actual_query.gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
+        expect(query).to eq(expected_query.gsub(':account_id', account.id.to_s))
       end
     end
 
