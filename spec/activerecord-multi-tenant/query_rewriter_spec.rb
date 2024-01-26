@@ -79,7 +79,7 @@ describe "Query Rewriter" do
         next unless actual_query.include?('DELETE FROM ')
 
         query = actual_query.gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
-        expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ")
+        expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
         expect(query).to eq(expected_query)
       end
     end
@@ -100,6 +100,7 @@ describe "Query Rewriter" do
         SQL
   
         expect do
+          MultiTenant.default_tenant_class = Account
           MultiTenant.with(account.id) do
             Project.joins(:manager).delete_all
           end
@@ -109,7 +110,7 @@ describe "Query Rewriter" do
           next unless actual_query.include?('DELETE FROM ')
   
           query = actual_query.gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
-          expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ")
+          expected_query = base_query.gsub(':account_id', account.id.to_s).gsub(/\s+/m, " ").gsub(/\s([A-Z]+\s)/, "\n\\1").strip
           expect(query).to eq(expected_query)
         end
       end
