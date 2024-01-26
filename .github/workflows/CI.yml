@@ -16,9 +16,8 @@ jobs:
           - '2.7'
         gemfile:
           - rails_6.1
+          - active_record_6.1
         prepared_statements: [true, false]
-        exclude:
-          # activesupport-7.0.0 requires ruby version >= 2.7.0
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
     env:
        BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
