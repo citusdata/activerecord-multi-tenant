@@ -4,8 +4,8 @@ module Arel
   module ActiveRecordRelationExtension
     # Overrides the delete_all method to include tenant scoping
     def delete_all
-      # Call the original delete_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      # Call the original delete_all method if the current tenant is identified by an ID and class is nil
+      return super if MultiTenant.current_tenant_is_id? && MultiTenant.current_tenant_class.nil?
 
       tenant_key = MultiTenant.partition_key(MultiTenant.current_tenant_class)
       tenant_id = MultiTenant.current_tenant_id
