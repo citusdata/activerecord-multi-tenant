@@ -67,6 +67,31 @@ describe 'Query Rewriter' do
       end
     end
 
+    it 'when tenant_id is ID' do
+      expected_query = <<-SQL.strip
+          UPDATE "projects" SET "name" = 'New Name' WHERE "projects"."id" IN
+            (SELECT "projects"."id" FROM "projects"
+                INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+                                    and "managers"."account_id" = :account_id
+                WHERE "projects"."account_id" = :account_id
+                                    )
+                                    AND "projects"."account_id" = :account_id
+      SQL
+
+      expect do
+        MultiTenant.default_tenant_class = Account
+        MultiTenant.with(account.id) do
+          Project.joins(:manager).update_all(name: 'New Name')
+        end
+      end.to change { project.reload.name }.from('Project 1').to('New Name')
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+      end
+    end
+
     it 'updates a limited number of records with expected query' do
       # create 2 more projects
       Project.create(name: 'project2', account: account)
@@ -137,6 +162,31 @@ describe 'Query Rewriter' do
 
       expect do
         MultiTenant.with(account) do
+          Project.joins(:manager).delete_all
+        end
+      end.to change { Project.count }.from(3).to(1)
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('DELETE FROM ')
+
+        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+      end
+    end
+
+    it 'when tenant_id is ID' do
+      expected_query = <<-SQL.strip
+          DELETE FROM "projects" WHERE "projects"."id" IN
+            (SELECT "projects"."id" FROM "projects"
+                INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
+                                    and "managers"."account_id" = :account_id
+                WHERE "projects"."account_id" = :account_id
+                                    )
+                                    AND "projects"."account_id" = :account_id
+      SQL
+
+      expect do
+        MultiTenant.default_tenant_class = Account
+        MultiTenant.with(account.id) do
           Project.joins(:manager).delete_all
         end
       end.to change { Project.count }.from(3).to(1)
