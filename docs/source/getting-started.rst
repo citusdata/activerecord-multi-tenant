@@ -32,6 +32,6 @@ Dependencies
 ``activerecord-multi-tenant`` requires:
 
 - Ruby version 3.0.0 or later
-- Rails version 6.0.0 or later
+- Rails version 6.1.0 or later
 
 Please ensure that your application meets these requirements before installing the gem.

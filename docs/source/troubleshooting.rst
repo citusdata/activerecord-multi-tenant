@@ -31,7 +31,7 @@ FAQs and Known Limitations
 
 **Q: Does ``activerecord-multi-tenant`` support Rails version 5.X?**
 
-**A:** ``activerecord-multi-tenant`` supports Rails 6.0.0 and later. For older versions of Rails, please use the appropriate version of the gem.
+**A:** ``activerecord-multi-tenant`` supports Rails 6.1.0 and later. For older versions of Rails, please use the appropriate version of the gem.
 
 
 
