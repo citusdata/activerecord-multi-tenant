@@ -375,11 +375,20 @@ require 'active_record/relation'
 ActiveRecord::QueryMethods.prepend(MultiTenant::QueryMethodsExtensions)
 
 module MultiTenantFindBy
-  def cached_find_by_statement(key, &block)
-    return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+  if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+    def cached_find_by_statement(connection, key, &block)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
 
-    key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
-    super(key, &block)
+      key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
+      super(connection, key, &block)
+    end
+  else
+    def cached_find_by_statement(key, &block)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+
+      key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
+      super(key, &block)
+    end
   end
 end
 
