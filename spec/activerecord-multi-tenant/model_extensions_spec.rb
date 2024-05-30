@@ -132,6 +132,17 @@ describe MultiTenant do
   end
 
   describe 'inspect method filters senstive column values' do
+    if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+      # related: https://github.com/rails/rails/pull/49765
+      around do |example|
+        prev = Account.attributes_for_inspect
+        Account.attributes_for_inspect = :all
+        example.run
+      ensure
+        Account.attributes_for_inspect = prev
+      end
+    end
+
     it 'filters senstive value' do
       account = Account.new(name: 'foo', password: 'baz')
       expect(account.inspect).to eq '#<Account id: nil, name: nil, subdomain: nil, domain: nil, password: [FILTERED]>'
