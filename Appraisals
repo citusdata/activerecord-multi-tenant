@@ -20,6 +20,10 @@ appraise 'rails-7.2' do
   gem 'rails', '~> 7.2.0.beta1'
 end
 
+appraise 'rails-8.0' do
+  gem 'rails', '~> 8.0.0.alpha'
+end
+
 appraise 'active-record-6.0' do
   gem 'activerecord', '~> 6.0.3'
 end
@@ -38,4 +42,8 @@ end
 
 appraise 'active-record-7.2' do
   gem 'activerecord', '~> 7.2.0.beta1'
+end
+
+appraise 'active-record-8.0' do
+  gem 'activerecord', '~> 8.0.0.alpha'
 end
