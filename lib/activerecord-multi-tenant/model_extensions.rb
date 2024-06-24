@@ -44,6 +44,10 @@ module MultiTenant
 
           # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
           def primary_key
+            # If receiver is an abstract class, it doesn't have a table_name
+            # In this case, we don't care about the primary key, so delegate to super
+            return super unless table_name
+
             if defined?(PRIMARY_KEY_NOT_SET) ? !PRIMARY_KEY_NOT_SET.equal?(@primary_key) : @primary_key
               return @primary_key
             end
@@ -52,8 +56,7 @@ module MultiTenant
 
             @primary_key = if primary_object_keys.size == 1
                              primary_object_keys.first
-                           elsif table_name &&
-                                 connection.schema_cache.columns_hash(table_name).include?(DEFAULT_ID_FIELD)
+                           elsif connection.schema_cache.columns_hash(table_name).include?(DEFAULT_ID_FIELD)
                              DEFAULT_ID_FIELD
                            end
           end
