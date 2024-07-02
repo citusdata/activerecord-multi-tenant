@@ -62,6 +62,19 @@ describe MultiTenant, 'Record finding' do
     end
   end
 
+  it 'can search for tenant object using subquery with Arel' do
+    account = Account.create! name: 'test'
+    project = account.projects.create! name: 'test'
+
+    MultiTenant.with(account) do
+      project_table = Project.arel_table
+      subquery = project_table.project(project_table[:id])
+      query = Project.where(Arel::Nodes::InfixOperation.new('IN', project_table['id'], subquery))
+
+      expect(Project.where(id: query).to_a.first).to eq project
+    end
+  end
+
   context 'model with has_many relation through multi-tenant model' do
     let(:tenant1) { Account.create! name: 'Tenant 1' }
     let(:project1) { tenant1.projects.create! }
