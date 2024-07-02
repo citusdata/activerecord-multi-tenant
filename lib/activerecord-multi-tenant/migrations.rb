@@ -31,7 +31,7 @@ module MultiTenant
     def undistribute_table(table_name)
       return unless citus_version.present?
 
-      execute "SELECT undistribute_table($$#{table_name}$$))"
+      execute "SELECT undistribute_table($$#{table_name}$$)"
     end
 
     def rebalance_table_shards
