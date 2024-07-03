@@ -12,7 +12,7 @@ module ActiveRecord
         # rubocop:enable Naming/PredicateName
         has_and_belongs_to_many_without_tenant(name, scope, **options, &extension)
 
-        middle_reflection = _reflections[name.to_s].through_reflection
+        middle_reflection = _reflect_on_association(name.to_s).through_reflection
         join_model = middle_reflection.klass
 
         # get tenant_enabled from options and if it is not set, set it to false

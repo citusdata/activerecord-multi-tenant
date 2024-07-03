@@ -37,7 +37,14 @@ module Arel
       tenant_id = MultiTenant.current_tenant_id
 
       # Build an Arel query
-      arel = eager_loading? ? apply_join_dependency.arel : build_arel
+      arel = if eager_loading?
+               apply_join_dependency.arel
+             elsif ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+               build_arel(klass.connection)
+             else
+               build_arel
+             end
+
       arel.source.left = table
 
       # If the tenant ID is present and the tenant key is a column in the model,

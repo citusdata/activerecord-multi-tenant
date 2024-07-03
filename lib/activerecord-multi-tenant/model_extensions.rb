@@ -42,20 +42,16 @@ module MultiTenant
                                         .try(:instance_variable_get, :@partition_key)
           end
 
-          # Avoid primary_key errors when using composite primary keys (e.g. id, tenant_id)
-          def primary_key
-            if defined?(PRIMARY_KEY_NOT_SET) ? !PRIMARY_KEY_NOT_SET.equal?(@primary_key) : @primary_key
-              return @primary_key
-            end
-
+          # FIXME: To maintain compatibility with existing behavior, pk returns a single value rather than an array.
+          # However, originally Rails 7.2 is working on composite primarykey support, which will return an array. Eventually, we may be better to leave this to Rails' behavior.
+          def reset_primary_key
             primary_object_keys = Array.wrap(connection.schema_cache.primary_keys(table_name)) - [partition_key]
 
-            @primary_key = if primary_object_keys.size == 1
-                             primary_object_keys.first
-                           elsif table_name &&
-                                 connection.schema_cache.columns_hash(table_name).include?(DEFAULT_ID_FIELD)
-                             DEFAULT_ID_FIELD
-                           end
+            self.primary_key = if primary_object_keys.size == 1
+                                 primary_object_keys.first
+                               elsif table_name && connection.schema_cache.columns_hash(table_name).include?(DEFAULT_ID_FIELD)
+                                 DEFAULT_ID_FIELD
+                               end
           end
 
           def inherited(subclass)
