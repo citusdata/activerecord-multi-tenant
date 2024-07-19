@@ -18,7 +18,7 @@ jobs:
         with:
           ruby-version: 3.2
           bundler-cache: true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Rubocop static code analysis
         run: |
           gem install rubocop
@@ -29,7 +29,7 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: 3.9
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install python dependencies
       run: |
         pip install -r docs/requirements.txt
@@ -66,7 +66,7 @@ jobs:
        APPRAISAL: ${{ matrix.appraisal }}
        CITUS_VERSION: ${{ matrix.citus_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Start Citus Database environment
         run: docker-compose up -d
