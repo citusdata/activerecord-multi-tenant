@@ -19,6 +19,9 @@ Lint/ConstantDefinitionInBlock:
 Lint/EmptyBlock:
   Enabled: false
 
+Lint/ShadowedArgument:
+  IgnoreImplicitReferences: true
+
 Style/ClassAndModuleChildren:
   Enabled: false
 

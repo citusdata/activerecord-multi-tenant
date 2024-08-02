@@ -201,7 +201,7 @@ module MultiTenant
         return true if through_klass.respond_to?(:scoped_by_tenant?) && through_klass.scoped_by_tenant?
       end
 
-      super(*scope)
+      super
     end
   end
 end
