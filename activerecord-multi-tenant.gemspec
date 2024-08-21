@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/citusdata/activerecord-multi-tenant'
   spec.license = 'MIT'
 
-  spec.add_dependency 'rails', '>= 6'
+  spec.add_dependency 'rails', '>= 6.1'
 
   spec.add_development_dependency 'anbt-sql-formatter'
   spec.add_development_dependency 'codecov'
