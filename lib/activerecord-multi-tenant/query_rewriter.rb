@@ -379,15 +379,13 @@ module MultiTenantFindBy
     def cached_find_by_statement(connection, key, &block)
       return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
 
-      key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
-      super(connection, key, &block)
+      super(connection, Array.wrap(key) + [MultiTenant.current_tenant_id.to_s], &block)
     end
   else
     def cached_find_by_statement(key, &block)
       return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
 
-      key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
-      super(key, &block)
+      super(Array.wrap(key) + [MultiTenant.current_tenant_id.to_s], &block)
     end
   end
 end
