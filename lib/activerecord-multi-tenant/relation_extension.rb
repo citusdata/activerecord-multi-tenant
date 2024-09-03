@@ -68,4 +68,4 @@ module Arel
 end
 
 # Patch ActiveRecord::Relation with the extension module
-ActiveRecord::Relation.prepend(Arel::ActiveRecordRelationExtension)
+# ActiveRecord::Relation.prepend(Arel::ActiveRecordRelationExtension)
