@@ -93,6 +93,7 @@ Once you are ready to enforce tenancy, make your tenant_id column NOT NULL and s
 * **What if my tenant model is not defined in my application?**
 
   The tenant model does not have to be defined. Use the gem as if the model was present. `MultiTenant.with` accepts either a tenant id or model instance.
+  However, you should pass `skip_reflection: true` when calling `multi_tenant()` to avoid generating a relation.
 
 ## Credits
 

@@ -65,7 +65,7 @@ module MultiTenant
         partition_key = @partition_key
 
         # Create an implicit belongs_to association only if tenant class exists
-        if MultiTenant.tenant_klass_defined?(tenant_name, options)
+        unless options[:skip_reflection]
           belongs_to tenant_name, **options.slice(:class_name, :inverse_of, :optional)
                                            .merge(foreign_key: options[:partition_key])
         end
@@ -101,7 +101,7 @@ module MultiTenant
             tenant_id
           end
 
-          if MultiTenant.tenant_klass_defined?(tenant_name, options)
+          unless options[:skip_reflection]
             define_method "#{tenant_name}=" do |model|
               super(model)
               if send("#{partition_key}_changed?") && persisted? && !send("#{partition_key}_was").nil?
