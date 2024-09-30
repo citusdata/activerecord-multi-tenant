@@ -21,7 +21,7 @@ module Arel
 
       stmt = Arel::UpdateManager.new
       stmt.table(table)
-      stmt.set Arel.sql(@klass.send(:sanitize_sql_for_assignment, updates))
+      stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
       stmt.wheres = [generate_in_condition_subquery]
 
       klass.connection.update(stmt, "#{klass} Update All").tap { reset }
@@ -39,7 +39,7 @@ module Arel
       # Build an Arel query
       arel = if eager_loading?
                apply_join_dependency.arel
-             elsif ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+             elsif ActiveRecord.gem_version >= Gem::Version.create('7.2.0')
                build_arel(klass.connection)
              else
                build_arel
