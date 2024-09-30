@@ -132,7 +132,7 @@ describe MultiTenant do
   end
 
   describe 'inspect method filters senstive column values' do
-    if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+    if ActiveRecord.gem_version >= Gem::Version.create('7.2.0')
       # related: https://github.com/rails/rails/pull/49765
       around do |example|
         prev = Account.attributes_for_inspect

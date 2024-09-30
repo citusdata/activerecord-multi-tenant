@@ -54,11 +54,13 @@ jobs:
           - rails-7.0
           - rails-7.1
           - rails-7.2
+          - rails-8.0
           - active-record-6.0
           - active-record-6.1
           - active-record-7.0
           - active-record-7.1
           - active-record-7.2
+          - active-record-8.0
         citus_version:
           - '10'
           - '11'

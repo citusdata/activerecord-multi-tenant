@@ -375,7 +375,7 @@ require 'active_record/relation'
 ActiveRecord::QueryMethods.prepend(MultiTenant::QueryMethodsExtensions)
 
 module MultiTenantFindBy
-  if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+  if ActiveRecord.gem_version >= Gem::Version.create('7.2.0')
     def cached_find_by_statement(connection, key, &block)
       return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
 
