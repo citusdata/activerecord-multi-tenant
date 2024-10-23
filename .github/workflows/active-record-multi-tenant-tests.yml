@@ -64,7 +64,7 @@ jobs:
           - '11'
           - '12'
 
-    name: Ruby ${{ matrix.ruby }}/${{ matrix.gemfile }} / Citus ${{ matrix.citus_version }}
+    name: Ruby ${{ matrix.ruby }}/${{ matrix.appraisal }} / Citus ${{ matrix.citus_version }}
     env:
        APPRAISAL: ${{ matrix.appraisal }}
        CITUS_VERSION: ${{ matrix.citus_version }}
