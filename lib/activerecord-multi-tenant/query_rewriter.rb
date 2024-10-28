@@ -80,7 +80,7 @@ module MultiTenant
     def visit_Arel_Attributes_Attribute(*args)
       return if @current_context.nil?
 
-      super(*args)
+      super
     end
 
     def visit_Arel_Nodes_Equality(obj, *args)
@@ -91,7 +91,7 @@ module MultiTenant
           @current_context.visited_handled_relation(obj.left.relation)
         end
       end
-      super(obj, *args)
+      super
     end
 
     def visit_MultiTenant_TenantEnforcementClause(obj, *)
@@ -244,7 +244,7 @@ module MultiTenant
 
   module DatabaseStatements
     def join_to_update(update, *args)
-      update = super(update, *args)
+      update = super
       model = MultiTenant.multi_tenant_model_for_table(MultiTenant::TableNode.table_name(update.ast.relation))
       if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         update.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
@@ -253,7 +253,7 @@ module MultiTenant
     end
 
     def join_to_delete(delete, *args)
-      delete = super(delete, *args)
+      delete = super
       model = MultiTenant.multi_tenant_model_for_table(MultiTenant::TableNode.table_name(delete.ast.left))
       if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         delete.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
@@ -266,7 +266,7 @@ module MultiTenant
       if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
-      super(arel, name, binds)
+      super
     end
 
     def delete(arel, name = nil, binds = [])
@@ -274,7 +274,7 @@ module MultiTenant
       if model.present? && !MultiTenant.with_write_only_mode_enabled? && MultiTenant.current_tenant_id.present?
         arel.where(MultiTenant::TenantEnforcementClause.new(model.arel_table[model.partition_key]))
       end
-      super(arel, name, binds)
+      super
     end
   end
 end
@@ -375,11 +375,18 @@ require 'active_record/relation'
 ActiveRecord::QueryMethods.prepend(MultiTenant::QueryMethodsExtensions)
 
 module MultiTenantFindBy
-  def cached_find_by_statement(key, &block)
-    return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+  if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 2
+    def cached_find_by_statement(connection, key, &block)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
 
-    key = Array.wrap(key) + [MultiTenant.current_tenant_id.to_s]
-    super(key, &block)
+      super(connection, Array.wrap(key) + [MultiTenant.current_tenant_id.to_s], &block)
+    end
+  else
+    def cached_find_by_statement(key, &block)
+      return super unless respond_to?(:scoped_by_tenant?) && scoped_by_tenant?
+
+      super(Array.wrap(key) + [MultiTenant.current_tenant_id.to_s], &block)
+    end
   end
 end
 
