@@ -69,13 +69,13 @@ describe 'Query Rewriter' do
 
     it 'when tenant_id is ID' do
       expected_query = <<-SQL.strip
-          UPDATE "projects" SET "name" = 'New Name' WHERE "projects"."id" IN
+          UPDATE "projects" SET "name" = $1 WHERE "projects"."id" IN
             (SELECT "projects"."id" FROM "projects"
                 INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
                                     and "managers"."account_id" = :account_id
                 WHERE "projects"."account_id" = :account_id
-                                    )
                                     AND "projects"."account_id" = :account_id
+                                    )
       SQL
 
       expect do
@@ -180,8 +180,8 @@ describe 'Query Rewriter' do
                 INNER JOIN "managers" ON "managers"."project_id" = "projects"."id"
                                     and "managers"."account_id" = :account_id
                 WHERE "projects"."account_id" = :account_id
-                                    )
                                     AND "projects"."account_id" = :account_id
+                                    )
       SQL
 
       expect do
