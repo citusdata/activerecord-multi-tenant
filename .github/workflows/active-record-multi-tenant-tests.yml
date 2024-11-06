@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: ruby
           bundler-cache: true
       - uses: actions/checkout@v4
       - name: Rubocop static code analysis
@@ -49,24 +49,24 @@ jobs:
           - '3.2'
           - '3.3'
         appraisal:
-          - rails-6.0
-          - rails-6.1
-          - rails-7.0
-          - rails-7.1
-          - rails-7.2
-          - active-record-6.0
-          - active-record-6.1
-          - active-record-7.0
-          - active-record-7.1
-          - active-record-7.2
+          - rails_6.0
+          - rails_6.1
+          - rails_7.0
+          - rails_7.1
+          - rails_7.2
+          - active_record_6.0
+          - active_record_6.1
+          - active_record_7.0
+          - active_record_7.1
+          - active_record_7.2
         citus_version:
           - '10'
           - '11'
           - '12'
 
-    name: Ruby ${{ matrix.ruby }}/${{ matrix.gemfile }} / Citus ${{ matrix.citus_version }}
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.appraisal }} / Citus ${{ matrix.citus_version }}
     env:
-       APPRAISAL: ${{ matrix.appraisal }}
+       BUNDLE_GEMFILE: gemfiles/${{ matrix.appraisal }}.gemfile
        CITUS_VERSION: ${{ matrix.citus_version }}
     steps:
       - uses: actions/checkout@v4
