@@ -165,6 +165,10 @@ module MultiTenant
       visit obj.havings
     end
 
+    def visit_Arel_SelectManager(obj)
+      visit obj.ast
+    end
+
     def visit_Arel_Nodes_SelectStatement(obj)
       visit obj.cores
       visit obj.orders
