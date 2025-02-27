@@ -221,6 +221,38 @@ describe 'Query Rewriter' do
     end
   end
 
+  context 'when using non-multi-tenant model' do
+    let!(:account1) { Account.create!(name: 'Test Account') }
+    let!(:account2) { Account.create!(name: 'Test Account2') }
+    let!(:unscoped1) { UnscopedModelWithAccount.create!(name: 'Model 1', account: account1) }
+    let!(:unscoped2) { UnscopedModelWithAccount.create!(name: 'Model 2', account: account2) }
+
+    it 'updates records without tenant condition' do
+      expect do
+        MultiTenant.with(account1) do
+          UnscopedModelWithAccount.update_all(name: 'Updated Name')
+        end
+      end.to change { unscoped1.reload.name }.from('Model 1').to('Updated Name')
+                                             .and change { unscoped2.reload.name }.from('Model 2').to('Updated Name')
+
+      update_query = @queries.find { |q| q.include?('UPDATE "unscoped_model_with_accounts"') }
+      expect(update_query).to be_present
+      expect(update_query).not_to include('account_id')
+    end
+
+    it 'deletes records without tenant condition' do
+      expect do
+        MultiTenant.with(account1) do
+          UnscopedModelWithAccount.delete_all
+        end
+      end.to change { UnscopedModelWithAccount.count }.from(2).to(0)
+
+      delete_query = @queries.find { |q| q.include?('DELETE FROM "unscoped_model_with_accounts"') }
+      expect(delete_query).to be_present
+      expect(delete_query).not_to include('account_id')
+    end
+  end
+
   context 'when update without arel' do
     it 'can call method' do
       expect do

@@ -4,8 +4,10 @@ module Arel
   module ActiveRecordRelationExtension
     # Overrides the delete_all method to include tenant scoping
     def delete_all
+      model = MultiTenant.multi_tenant_model_for_table(table_name)
+
       # Call the original delete_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
 
       stmt = Arel::DeleteManager.new.from(table)
       stmt.wheres = [generate_in_condition_subquery]
@@ -16,8 +18,10 @@ module Arel
 
     # Overrides the update_all method to include tenant scoping
     def update_all(updates)
+      model = MultiTenant.multi_tenant_model_for_table(table_name)
+
       # Call the original update_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
 
       stmt = Arel::UpdateManager.new
       stmt.table(table)

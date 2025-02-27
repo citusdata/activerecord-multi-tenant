@@ -63,6 +63,11 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :name, :string
   end
 
+  create_table :unscoped_model_with_accounts, force: true do |t|
+    t.references :account, :integer
+    t.column :name, :string
+  end
+
   create_table :aliased_tasks, force: true, partition_key: :account_id do |t|
     t.column :account_id, :integer
     t.column :name, :string
@@ -206,6 +211,10 @@ end
 
 class UnscopedModel < ActiveRecord::Base
   validates_uniqueness_of :name
+end
+
+class UnscopedModelWithAccount < ActiveRecord::Base
+  belongs_to :account
 end
 
 class AliasedTask < ActiveRecord::Base
