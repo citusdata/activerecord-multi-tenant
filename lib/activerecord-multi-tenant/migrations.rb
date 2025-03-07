@@ -82,14 +82,12 @@ module MultiTenant
 end
 ActiveRecord::ConnectionAdapters::SchemaStatements.prepend(MultiTenant::SchemaStatementsExtensions)
 
-module ActiveRecord
-  class SchemaDumper
+module MultiTenant
+  module SchemaDumperExtensions
     private
 
-    alias initialize_without_citus initialize
-
     def initialize(connection, options = {})
-      initialize_without_citus(connection, options)
+      super
 
       citus_version =
         begin
@@ -114,10 +112,8 @@ module ActiveRecord
     end
 
     # Support for create_distributed_table & create_reference_table
-    alias table_without_citus table
-
     def table(table, stream)
-      table_without_citus(table, stream)
+      super
       table_name = remove_prefix_and_suffix(table)
       distribution_column = @distribution_columns[table_name]
       if distribution_column
@@ -128,5 +124,11 @@ module ActiveRecord
         stream.puts
       end
     end
+  end
+end
+
+module ActiveRecord
+  class SchemaDumper
+    prepend MultiTenant::SchemaDumperExtensions
   end
 end
