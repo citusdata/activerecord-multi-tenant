@@ -63,10 +63,21 @@ module Arel
       # Clone the query, clear its projections, and set its projection to the primary key of the table
       subquery = arel.clone
       subquery.projections.clear
-      subquery = subquery.project(table[primary_key])
 
-      # Create an IN condition node with the primary key of the table and the subquery
-      Arel::Nodes::In.new(table[primary_key], subquery.ast)
+      if primary_key.is_a?(Array)
+        # For composite primary keys, project all primary key columns
+        primary_key_columns = primary_key.map { |pk| table[pk] }
+        subquery = subquery.project(*primary_key_columns)
+
+        # Create IN condition using composite primary key columns
+        Arel::Nodes::In.new(
+          Arel::Nodes::Grouping.new(primary_key_columns),
+          subquery.ast
+        )
+      else
+        subquery = subquery.project(table[primary_key])
+        Arel::Nodes::In.new(table[primary_key], subquery.ast)
+      end
     end
   end
 end
