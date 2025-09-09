@@ -74,7 +74,6 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
     t.column :project_alias_id, :integer
   end
 
-  # Add a composite primary key table for testing
   create_table :composite_key_models, force: true, partition_key: :account_id, primary_key: [:account_id, :entity_id] do |t|
     t.column :account_id, :integer
     t.column :entity_id, :integer

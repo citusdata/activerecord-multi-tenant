@@ -72,7 +72,8 @@ module MultiTenant
   module SchemaStatementsExtensions
     def create_table(table_name, options = {}, &block)
       ret = super(table_name, **options.except(:partition_key), &block)
-      if options[:id] != false && options[:partition_key] && options[:partition_key].to_s != 'id'
+      # If an explicit primary_key is set, it is assumed that the user has set the correct constraint themselves.
+      if options[:id] != false && options[:partition_key] && options[:partition_key].to_s != 'id' && !options[:primary_key]
         execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{table_name}_pkey"
         execute "ALTER TABLE #{table_name} ADD PRIMARY KEY(\"#{options[:partition_key]}\", id)"
       end
