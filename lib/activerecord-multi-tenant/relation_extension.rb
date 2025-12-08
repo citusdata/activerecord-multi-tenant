@@ -19,9 +19,21 @@ module Arel
       # Call the original update_all method if the current tenant is identified by an ID
       return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
 
+      if updates.is_a?(Hash)
+        if klass.locking_enabled? &&
+           !updates.key?(klass.locking_column) &&
+           !updates.key?(klass.locking_column.to_sym)
+          attr = table[klass.locking_column]
+          updates[attr.name] = _increment_attribute(attr)
+        end
+        values = _substitute_values(updates)
+      else
+        values = Arel.sql(klass.sanitize_sql_for_assignment(updates, table.name))
+      end
+
       stmt = Arel::UpdateManager.new
       stmt.table(table)
-      stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
+      stmt.set values
       stmt.wheres = [generate_in_condition_subquery]
 
       klass.connection.update(stmt, "#{klass} Update All").tap { reset }
