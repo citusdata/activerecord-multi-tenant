@@ -5,7 +5,7 @@ module Arel
     # Overrides the delete_all method to include tenant scoping
     def delete_all
       # Call the original delete_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil? || primary_key.nil?
 
       stmt = Arel::DeleteManager.new.from(table)
       stmt.wheres = [generate_in_condition_subquery]
@@ -21,7 +21,23 @@ module Arel
 
       stmt = Arel::UpdateManager.new
       stmt.table(table)
-      stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
+
+      # Handle updates differently based on whether it's a hash with Arel nodes or regular values
+      if updates.is_a?(Hash) && updates.values.any? { |value| value.is_a?(Arel::Nodes::Node) }
+        # For hash with Arel nodes, build assignments directly
+        assignments = updates.map do |column, value|
+          if value.is_a?(Arel::Nodes::Node)
+            [table[column], value]
+          else
+            [table[column], Arel::Nodes.build_quoted(value, table[column])]
+          end
+        end
+        stmt.set assignments
+      else
+        # For regular updates, use sanitize_sql_for_assignment
+        stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
+      end
+
       stmt.wheres = [generate_in_condition_subquery]
 
       klass.connection.update(stmt, "#{klass} Update All").tap { reset }
