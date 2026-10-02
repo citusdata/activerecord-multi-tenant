@@ -3,6 +3,7 @@
 # Run RuboCop on all Ruby files, except those in `vendor` and `node_modules` directories
 AllCops:
   Exclude:
+    - 'gemfiles/**/*'
     - 'vendor/**/*'
     - 'node_modules/**/*'
     - 'Vagrantfile'

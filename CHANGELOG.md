@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+* Adds support for Rails 7.2 (#239), 8.0 (#260) and 8.1
+* Adds Ruby 3.4 to the test matrix, and makes CI actually install each appraisal gemfile (#264)
+* Fixes `update_all` writing `Arel.sql(...)` values as literal strings inside `MultiTenant.with` (#278)
+* Fixes `increment_counter`, `update_counters`, `increment!` and `decrement!` setting the column to `NULL` inside `MultiTenant.with` (#279, #282)
+* Bumps the optimistic locking column in tenant-scoped `update_all`, as Active Record does (#282)
+* Fixes `update_all` / `delete_all` inside `MultiTenant.with` raising on Active Record 6.0 and 8.1
+* Fixes joined `update_all` on Rails 8.1 failing on Citus with "complex joins are only supported when all distributed tables are co-located"
+* Fixes `NoMethodError: undefined method 'alias'` for Arel functions in conditions on Rails 8.1 (#284)
+* Fixes `TypeError: Cannot visit Arel::SelectManager` for Arel subqueries in conditions (#236)
+* Fixes `SystemStackError` in the schema dumper when another gem (e.g. strong_migrations) prepends to `ActiveRecord::SchemaDumper` (#271, also proposed in #245)
+* Fixes `Model.limit(n).delete_all` and `Model.limit(n).update_all` generating an incorrect query (#200)
+* Fixes tenant scoping for `update_all` (#223)
+* Fixes a `SyntaxError` in `undistribute_table` (#226)
+* Fixes errors when `table_name` is nil (#218)
+* Uses `prepend` instead of `alias` to patch Active Record (#216)
+
 ## 2.4.0      2023-09-22
 * Adds citus 12 to test matrix (#210)
 * Adds Support for rails 7.1 (#208)

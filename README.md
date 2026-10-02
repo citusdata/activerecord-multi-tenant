@@ -17,7 +17,10 @@ gem 'activerecord-multi-tenant'
 
 ## Supported Rails versions
 
-All Ruby on Rails versions starting with 6.0 or newer (up to 7.0) are supported.
+All Ruby on Rails versions starting with 6.0 or newer (up to 8.1) are supported, on
+Ruby 3.0 or newer. CI runs every combination that Rails itself supports
+(Rails 8.x needs Ruby 3.2+, Rails 7.2 needs Ruby 3.1+, Rails 6.x does not run on
+Ruby 3.4) against Citus 10, 11 and 12.
 
 This gem only supports ActiveRecord (the Rails default ORM), and not alternative ORMs like Sequel.
 

@@ -4,8 +4,10 @@ module Arel
   module ActiveRecordRelationExtension
     # Overrides the delete_all method to include tenant scoping
     def delete_all
+      model = MultiTenant.multi_tenant_model_for_table(table_name)
+
       # Call the original delete_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
 
       stmt = Arel::DeleteManager.new.from(table)
       stmt.wheres = [generate_in_condition_subquery]
@@ -16,12 +18,26 @@ module Arel
 
     # Overrides the update_all method to include tenant scoping
     def update_all(updates)
+      model = MultiTenant.multi_tenant_model_for_table(table_name)
+
       # Call the original update_all method if the current tenant is identified by an ID
-      return super if MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+      return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+
+      if updates.is_a?(Hash)
+        if klass.locking_enabled? &&
+           !updates.key?(klass.locking_column) &&
+           !updates.key?(klass.locking_column.to_sym)
+          attr = table[klass.locking_column]
+          updates[attr.name] = _increment_attribute(attr)
+        end
+        values = _substitute_values(updates)
+      else
+        values = Arel.sql(klass.sanitize_sql_for_assignment(updates, table.name))
+      end
 
       stmt = Arel::UpdateManager.new
       stmt.table(table)
-      stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
+      stmt.set values
       stmt.wheres = [generate_in_condition_subquery]
 
       klass.connection.update(stmt, "#{klass} Update All").tap { reset }
@@ -36,13 +52,16 @@ module Arel
       tenant_key = MultiTenant.partition_key(MultiTenant.current_tenant_class)
       tenant_id = MultiTenant.current_tenant_id
 
-      # Build an Arel query
+      # Build an Arel query. Only Active Record 7.2 and 8.0 take the
+      # connection as the first argument of build_arel; every other version
+      # takes only aliases, which is required (without a default) in 6.0 and 8.1.
       arel = if eager_loading?
                apply_join_dependency.arel
-             elsif ActiveRecord.gem_version >= Gem::Version.create('7.2.0')
+             elsif ActiveRecord.gem_version >= Gem::Version.create('7.2.0') &&
+                   ActiveRecord.gem_version < Gem::Version.create('8.1.0')
                build_arel(klass.connection)
              else
-               build_arel
+               build_arel(nil)
              end
 
       arel.source.left = table

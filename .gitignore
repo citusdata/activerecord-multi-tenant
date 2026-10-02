@@ -10,3 +10,4 @@ Vagrantfile
 coverage/
 docs/build/
 .yardoc/
+tmp/

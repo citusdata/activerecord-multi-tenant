@@ -36,6 +36,22 @@ describe MultiTenant, 'Record finding' do
     end
   end
 
+  it 'scopes queries whose conditions contain Arel functions' do
+    first_tenant = Account.create! name: 'First Tenant'
+    second_tenant = Account.create! name: 'Second Tenant'
+    first_record = first_tenant.projects.create! name: 'Identical Name'
+    second_tenant.projects.create! name: 'Identical Name'
+
+    lower_name = Arel::Nodes::NamedFunction.new('LOWER', [Project.arel_table[:name]])
+    name_length = Arel::Nodes::NamedFunction.new('LENGTH', [Project.arel_table[:name]])
+
+    MultiTenant.with(first_tenant) do
+      expect(Project.where(lower_name.eq('identical name')).to_a).to eq([first_record])
+      expect(Project.group(:account_id).having(name_length.sum.gt(0)).count).to eq(first_tenant.id => 1)
+      expect(Project.group(:account_id).having(Arel.star.count.gt(0)).count).to eq(first_tenant.id => 1)
+    end
+  end
+
   it 'can use find accurately' do
     first_tenant = Account.create! name: 'First Tenant'
     second_tenant = Account.create! name: 'Second Tenant'
@@ -59,6 +75,19 @@ describe MultiTenant, 'Record finding' do
       expect(first_found).to eq(first_record)
       second_found = Project.find(second_record.id)
       expect(second_found).to eq(second_record)
+    end
+  end
+
+  it 'can search for tenant object using subquery with Arel' do
+    account = Account.create! name: 'test'
+    project = account.projects.create! name: 'test'
+
+    MultiTenant.with(account) do
+      project_table = Project.arel_table
+      subquery = project_table.project(project_table[:id])
+      query = Project.where(Arel::Nodes::InfixOperation.new('IN', project_table['id'], subquery))
+
+      expect(Project.where(id: query).to_a.first).to eq project
     end
   end
 

@@ -108,6 +108,13 @@ module MultiTenant
 
     alias visit_Arel_Nodes_TableAlias visit_Arel_Table
 
+    # A SelectManager can appear inside a condition, e.g. as the right-hand
+    # side of an IN. Neither Arel's DepthFirst (Rails 6.0) nor the gem's copy
+    # of it (Rails 6.1+) knows how to visit one, so descend into its AST here.
+    def visit_Arel_SelectManager(obj, *)
+      visit obj.ast
+    end
+
     def visit_Arel_Nodes_SelectCore(obj, *_args)
       nest_context(obj) do
         @current_context.discover_relations do
@@ -283,6 +290,35 @@ require 'active_record/connection_adapters/abstract_adapter'
 ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(MultiTenant::DatabaseStatements)
 
 Arel::Visitors::ToSql.include(MultiTenant::TenantValueVisitor)
+
+module MultiTenant
+  # Rails 8.1 compiles update_all on a joined relation for PostgreSQL as
+  #
+  #   UPDATE t AS __active_record_update_alias SET ...
+  #   FROM t INNER JOIN ... WHERE t.id = __active_record_update_alias.id
+  #
+  # Citus only plans that self-join when it is also on the distribution
+  # column, so for multi-tenant tables add the partition key to it. This also
+  # keeps the rows being updated inside the tenant. Older Rails versions use
+  # an IN (subquery) here and never build the alias, so this is a no-op there.
+  module UpdateJoinPartitionKey
+    private
+
+    def prepare_update_statement(statement)
+      stmt = super
+      return stmt unless stmt.relation.respond_to?(:left) && stmt.relation.left.is_a?(Arel::Nodes::TableAlias)
+
+      table = statement.relation.left
+      model = MultiTenant.multi_tenant_model_for_table(MultiTenant::TableNode.table_name(table))
+      return stmt if model.nil? || model.partition_key.blank? || model.partition_key.to_s == model.primary_key.to_s
+
+      stmt.wheres << stmt.relation.left[model.partition_key].eq(table[model.partition_key])
+      stmt
+    end
+  end
+end
+
+Arel::Visitors::PostgreSQL.prepend(MultiTenant::UpdateJoinPartitionKey)
 
 module MultiTenant
   module QueryMethodsExtensions

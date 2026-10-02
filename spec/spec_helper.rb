@@ -12,8 +12,12 @@ if ENV['CI'] == 'true'
     add_filter '/spec/' # Exclude spec directory from coverage
     add_filter '/config/' # Exclude config directory from coverage
 
-    # Add any additional filters or exclusions if needed
-    # add_filter '/other_directory/'
+    # Active Record 6.0 still ships Arel::Visitors::DepthFirst, so the gem's
+    # own copy is never loaded there and would count as 180 uncovered lines.
+    add_filter do |source_file|
+      source_file.filename.end_with?('/arel_visitors_depth_first.rb') &&
+        Arel::Visitors.const_defined?(:DepthFirst)
+    end
 
     add_group 'Lib', '/lib' # Include the lib directory for coverage
     puts "Tracked files: #{SimpleCov.tracked_files}"
@@ -24,6 +28,9 @@ if ENV['CI'] == 'true'
   SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 end
 
+# Rails 6.0 and 6.1 reference ::Logger without requiring it, which raises a
+# NameError since concurrent-ruby 1.3.5 stopped loading logger for them.
+require 'logger'
 require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'rspec/rails'

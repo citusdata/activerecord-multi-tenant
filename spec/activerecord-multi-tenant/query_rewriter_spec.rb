@@ -29,6 +29,26 @@ describe 'Query Rewriter' do
       end.to change { project.reload.name }.from('Project 1').to('New Name')
     end
 
+    it 'updates the records when the current tenant is an id' do
+      expect do
+        MultiTenant.with(account.id) do
+          Project.joins(:manager).update_all(name: 'New Name')
+        end
+      end.to change { project.reload.name }.from('Project 1').to('New Name')
+    end
+
+    it 'treats Arel.sql values as SQL expressions inside a tenant' do
+      other_account = Account.create!(name: 'Other Account')
+      other_project = Project.create!(name: 'Project 2', account: other_account)
+
+      MultiTenant.with(account) do
+        Project.update_all(name: Arel.sql('UPPER(name)'))
+      end
+
+      expect(project.reload.name).to eq('PROJECT 1')
+      expect(other_project.reload.name).to eq('Project 2')
+    end
+
     it 'update the record' do
       expect do
         MultiTenant.with(account) do
@@ -62,6 +82,9 @@ describe 'Query Rewriter' do
 
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'New Name'")
 
         expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
       end
@@ -98,6 +121,9 @@ describe 'Query Rewriter' do
 
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'#{new_name}'").gsub('$2', limit.to_s)
 
         expect(format_sql(actual_query.gsub('$1',
                                             limit.to_s)).strip).to eq(format_sql(expected_query).strip)
@@ -221,11 +247,65 @@ describe 'Query Rewriter' do
     end
   end
 
+  context 'when using non-multi-tenant model' do
+    let!(:account1) { Account.create!(name: 'Test Account') }
+    let!(:account2) { Account.create!(name: 'Test Account2') }
+    let!(:unscoped1) { UnscopedModelWithAccount.create!(name: 'Model 1', account: account1) }
+    let!(:unscoped2) { UnscopedModelWithAccount.create!(name: 'Model 2', account: account2) }
+
+    it 'updates records without tenant condition' do
+      expect do
+        MultiTenant.with(account1) do
+          UnscopedModelWithAccount.update_all(name: 'Updated Name')
+        end
+      end.to change { unscoped1.reload.name }.from('Model 1').to('Updated Name')
+                                             .and change { unscoped2.reload.name }.from('Model 2').to('Updated Name')
+
+      update_query = @queries.find { |q| q.include?('UPDATE "unscoped_model_with_accounts"') }
+      expect(update_query).to be_present
+      expect(update_query).not_to include('account_id')
+    end
+
+    it 'deletes records without tenant condition' do
+      expect do
+        MultiTenant.with(account1) do
+          UnscopedModelWithAccount.delete_all
+        end
+      end.to change { UnscopedModelWithAccount.count }.from(2).to(0)
+
+      delete_query = @queries.find { |q| q.include?('DELETE FROM "unscoped_model_with_accounts"') }
+      expect(delete_query).to be_present
+      expect(delete_query).not_to include('account_id')
+    end
+  end
+
   context 'when update without arel' do
     it 'can call method' do
       expect do
         ActiveRecord::Base.connection.update('SELECT 1')
       end.not_to raise_error
+    end
+  end
+
+  context 'when updating counters' do
+    let!(:account) { Account.create!(name: 'Test Account') }
+    let!(:comment) { Comment.create!(account_id: account.id, commentable_id: 1, commentable_type: 'Post') }
+
+    it 'increments the counter with increment_counter inside a tenant' do
+      MultiTenant.with(account) do
+        Comment.increment_counter(:replies_count, comment.id)
+      end
+
+      expect(comment.reload.replies_count).to eq(1)
+    end
+
+    it 'applies update_counters inside a tenant' do
+      MultiTenant.with(account) do
+        Comment.update_counters(comment.id, replies_count: 3)
+        Comment.update_counters(comment.id, replies_count: -1)
+      end
+
+      expect(comment.reload.replies_count).to eq(2)
     end
   end
 
@@ -243,6 +323,56 @@ describe 'Query Rewriter' do
           Page.joins(:domain).pluck(:id)
         end
       ).to eq([page_in_alive_domain.id])
+    end
+  end
+
+  context 'when updating locked column in comments' do
+    let!(:account) { Account.create!(name: 'Test Account') }
+    let!(:comment1) { Comment.create!(account_id: account.id, commentable_id: 1, commentable_type: 'Post') }
+    let!(:comment2) { Comment.create!(account_id: account.id, commentable_id: 2, commentable_type: 'Post') }
+
+    it 'updates the locked column for all records' do
+      expect do
+        Comment.update_all(locked: 1)
+      end.to change { Comment.where(locked: 1).count }.from(0).to(2)
+    end
+
+    it 'update_all the records with expected query' do
+      expected_query = <<-SQL.strip
+        UPDATE "comments" SET "locked" = 1 WHERE "comments"."id" IN
+          (SELECT "comments"."id" FROM "comments"
+              WHERE "comments"."account_id" = :account_id
+          )
+          AND "comments"."account_id" = :account_id
+      SQL
+
+      expect do
+        MultiTenant.with(account) do
+          Comment.update_all(locked: 1)
+        end
+      end.to change { Comment.where(locked: 1).count }.from(0).to(2)
+
+      @queries.each do |actual_query|
+        next unless actual_query.include?('UPDATE "comments" SET "locked"')
+
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', '1')
+
+        expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
+      end
+    end
+  end
+
+  context 'when using decrement or increment' do
+    let!(:account) { Account.create!(name: 'Test Account') }
+    let!(:comment) { Comment.create!(account_id: account.id, commentable_id: 1, commentable_type: 'Post', locked: 1) }
+
+    it 'increments and decrements the column `locked`' do
+      expect do
+        comment.increment!(:locked)
+        comment.increment!(:locked)
+        comment.decrement!(:locked)
+      end.to change { comment.reload.locked }.from(1).to(2)
     end
   end
 end
