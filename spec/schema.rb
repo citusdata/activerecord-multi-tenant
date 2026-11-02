@@ -162,6 +162,7 @@ class Project < ActiveRecord::Base
   multi_tenant :account
   has_one :manager
   has_many :tasks
+  has_many :completed_tasks, -> { where(completed: true) }, class_name: 'Task'
   has_many :sub_tasks, through: :tasks
 
   has_many :project_categories
@@ -182,6 +183,7 @@ class Task < ActiveRecord::Base
   multi_tenant :account
   belongs_to :project
   has_many :sub_tasks
+  has_many :comments, as: :commentable
   has_and_belongs_to_many :managers, tenant_column: :account_id, tenant_enabled: true
 
   validates_uniqueness_of :name

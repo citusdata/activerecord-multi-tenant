@@ -350,23 +350,38 @@ module MultiTenant
     private
 
     def relations_from_node_join(node_join)
-      if node_join.right.expr.is_a?(Arel::Nodes::Equality)
-        return node_join.right.expr.right.relation, node_join.right.expr.left.relation
+      predicates = multi_tenant_join_predicates(node_join.right.expr)
+      return nil, nil if predicates.any? { |predicate| multi_tenant_enforcement_clause?(predicate) }
+
+      equality = predicates.find { |predicate| multi_tenant_column_equality?(predicate) }
+      return nil, nil unless equality
+
+      [equality.right.relation, equality.left.relation]
+    end
+
+    def multi_tenant_join_predicates(node)
+      case node
+      when Arel::Nodes::And then node.children.flat_map { |child| multi_tenant_join_predicates(child) }
+      when Arel::Nodes::Grouping then multi_tenant_join_predicates(node.expr)
+      else [node]
       end
+    end
 
-      children = [node_join.right.expr.children].flatten
+    def multi_tenant_enforcement_clause?(predicate)
+      predicate.is_a?(MultiTenant::TenantEnforcementClause) ||
+        predicate.is_a?(MultiTenant::TenantJoinEnforcementClause)
+    end
 
-      tenant_applied = children.any? do |c|
-        c.is_a?(MultiTenant::TenantEnforcementClause) || c.is_a?(MultiTenant::TenantJoinEnforcementClause)
-      end
-      return nil, nil if tenant_applied || children.empty?
+    def multi_tenant_column_equality?(predicate)
+      predicate.is_a?(Arel::Nodes::Equality) &&
+        multi_tenant_attribute?(predicate.left) &&
+        multi_tenant_attribute?(predicate.right) &&
+        !MultiTenant::Table.new(predicate.left.relation).eql?(MultiTenant::Table.new(predicate.right.relation))
+    end
 
-      child = children.first.respond_to?(:children) ? children.first.children.first : children.first
-      if child.right.respond_to?(:relation) && child.left.respond_to?(:relation)
-        return child.right.relation, child.left.relation
-      end
-
-      [nil, nil]
+    def multi_tenant_attribute?(node)
+      node.is_a?(Arel::Attributes::Attribute) &&
+        MultiTenant.multi_tenant_model_for_table(MultiTenant::TableNode.table_name(node.relation)).present?
     end
   end
 end

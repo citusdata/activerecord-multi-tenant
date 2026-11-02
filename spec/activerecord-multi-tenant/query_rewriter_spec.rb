@@ -245,4 +245,38 @@ describe 'Query Rewriter' do
       ).to eq([page_in_alive_domain.id])
     end
   end
+
+  context 'when joining without a tenant' do
+    let!(:account) { Account.create!(name: 'Test Account') }
+    let!(:project) { Project.create!(name: 'Project', account: account) }
+
+    it 'ties the tables of a join into a model with a default scope' do
+      domain = Domain.create!(name: 'alive', account: account)
+      page = Page.create!(name: 'alive', account: account, domain: domain)
+
+      MultiTenant.without do
+        expect(Page.joins(:domain).to_sql).to include('"pages"."account_id" = "domains"."account_id"')
+        expect(Page.joins(:domain).pluck(:id)).to eq([page.id])
+      end
+    end
+
+    it 'ties the tables of a polymorphic join' do
+      task = Task.create!(name: 'Commented task', account: account, project: project)
+      Comment.create!(account: account, commentable: task)
+
+      MultiTenant.without do
+        expect(Task.joins(:comments).to_sql).to include('"tasks"."account_id" = "comments"."account_id"')
+        expect(Task.joins(:comments).pluck(:id)).to eq([task.id])
+      end
+    end
+
+    it 'ties the tables of a join through a scoped association' do
+      Task.create!(name: 'Completed task', account: account, project: project, completed: true)
+
+      MultiTenant.without do
+        expect(Project.joins(:completed_tasks).to_sql).to include('"projects"."account_id" = "tasks"."account_id"')
+        expect(Project.joins(:completed_tasks).pluck(:id)).to eq([project.id])
+      end
+    end
+  end
 end
